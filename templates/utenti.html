@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block body %}
+  <ul class=entries>
+  {% for utente in utenti %}
+    <li><h2>{{ utente.username }}</h2>{{ utente.nome|safe }}
+  {% else %}
+    <li><em>Nessun utente.</em>
+  {% endfor %}
+  </ul>
+  
+  <ul>
+  {% for azienda in aziende %}
+    <li><h2>{{ azienda.ragione_sociale }}</h2>{{ azienda.descrizione|safe }}
+  {% else %}
+    <li><em>Nessuna azienda.</em>
+  {% endfor %}
+  </ul>
+  
+{% endblock %}

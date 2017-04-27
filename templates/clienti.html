@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+{% block body %}
+  <p>Pagina {{ page+1 }}</p>
+  {% if page > 0 %}
+    <a href="{{url_for('clienti', page=page-1) }}">prev</a>|
+  {% endif %}
+  <a href="{{url_for('clienti', page=page+1) }}">next</a><br />
+  <table border=1>
+    <tr>
+      <th>codice</th>
+      <th>rag. sociale</th>
+      <th>indirizzo</th>
+      <th>cap</th>
+      <th>citta</th>
+      <th>prov</th>
+      <th>p. iva</th>
+      <th>codice fisc.</th>
+      <th>telefono</th>
+      <th>email</th>
+    </tr>
+  {% for cliente in clienti %}
+    <tr>
+    <td><a href="{{ url_for('cliente', codice=cliente.codice) }}">{{cliente.codice}}</a></td>
+    <td>{{ cliente.ragione_sociale }}</td>
+    <td>{{ cliente.indirizzo }}</td>
+    <td>{{ cliente.cap }}</td>
+    <td>{{ cliente.citta }}</td>
+    <td>{{ cliente.provincia }}</td>
+    <td>{{ cliente.p_iva }}</td>
+    <td>{{ cliente.cod_fiscale }}</td>
+    <td>{{ cliente.telefono }}</td>
+    <td>{{ cliente.email }}</td>
+    </tr>
+  {% else %}
+    <li><em>Nessun cliente.</em>
+  {% endfor %}
+  </table>
+  
+{% endblock %}

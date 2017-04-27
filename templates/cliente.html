@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h4>{{ cliente.ragione_sociale }}</h4>
+  <form>
+    <input type="text" value="{{ cliente.codice }}" /><br />
+    <input type="text" value="{{ cliente.ragione_sociale }}" /><br />
+    <input type="text" value="{{ cliente.indirizzo|safe }}" /><br />
+    <input type="text" value="{{ cliente.cap }}" /><br />
+    <input type="text" value="{{ cliente.citta }}" /><br />
+    <input type="text" value="{{ cliente.provincia }}" /><br />
+    <input type="text" value="{{ cliente.p_iva }}" /><br />
+    <input type="text" value="{{ cliente.cod_fiscale }}" /><br />
+    <input type="text" value="{{ cliente.telefono }}" /><br />
+    <input type="text" value="{{ cliente.email }}" /><br />
+    <input type="submit" />
+  </form>
+{% endblock %}
