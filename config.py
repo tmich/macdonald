@@ -2,6 +2,7 @@
 
 class Config(object):
   DEBUG = False
+  SECRET_KEY = 'u,fdP%6;[T$nXDd)qhpVM-TyQ,yZu8#]u:eYd~~eu7g`5tf'
   
 class ProductionConfig(Config):
   pass

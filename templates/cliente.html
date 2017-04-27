@@ -1,17 +1,25 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h4>{{ cliente.ragione_sociale }}</h4>
-  <form>
-    <input type="text" value="{{ cliente.codice }}" /><br />
-    <input type="text" value="{{ cliente.ragione_sociale }}" /><br />
-    <input type="text" value="{{ cliente.indirizzo|safe }}" /><br />
-    <input type="text" value="{{ cliente.cap }}" /><br />
-    <input type="text" value="{{ cliente.citta }}" /><br />
-    <input type="text" value="{{ cliente.provincia }}" /><br />
-    <input type="text" value="{{ cliente.p_iva }}" /><br />
-    <input type="text" value="{{ cliente.cod_fiscale }}" /><br />
-    <input type="text" value="{{ cliente.telefono }}" /><br />
-    <input type="text" value="{{ cliente.email }}" /><br />
-    <input type="submit" />
+  <h4>
+  {%  if cliente != None %}
+    {{ cliente.ragione_sociale }}
+  {% else %}
+    Nuovo cliente
+  {% endif %}
+  </h4>
+  <form method="POST">
+    {%  if cliente != None %}
+      <input type="text" name="codice" value="{{ cliente.codice }}" readonly="readonly" /><br />
+    {%  endif %}
+    <label for="ragione_sociale">ragione sociale:</label><input type="text" name="ragione_sociale" value="{{ cliente.ragione_sociale if cliente != None else '' }}" /><br />
+    <label for="indirizzo">indirizzo:</label><input type="text" name="indirizzo" value="{{ cliente.indirizzo if cliente != None else '' }}" /><br />
+    <label for="cap">cap:</label><input type="text" name="cap" value="{{ cliente.cap if cliente != None else '' }}" /><br />
+    <label for="citta">citta:</label><input type="text" name="citta" value="{{ cliente.citta if cliente != None else '' }}" /><br />
+    <label for="provincia">provincia:</label><input type="text" name="provincia" value="{{ cliente.provincia if cliente != None else '' }}" /><br />
+    <label for="p_iva">partita iva:</label><input type="text" name="p_iva" value="{{ cliente.p_iva if cliente != None else '' }}" /><br />
+    <label for="cod_fiscale">codice fiscale:</label><input type="text" name="cod_fiscale" value="{{ cliente.cod_fiscale if cliente != None else '' }}" /><br />
+    <label for="telefono">telefono:</label><input type="text" name="telefono" value="{{ cliente.telefono if cliente != None else '' }}" /><br />
+    <label for="email">email:</label><input type="text" name="email" value="{{ cliente.email if cliente != None else '' }}" /><br />
+    <input type="submit" value="Salva" />
   </form>
 {% endblock %}

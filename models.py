@@ -1,8 +1,34 @@
 # models.py
 
+class Login(object):
+  def __init__(self, db):
+    self.db = db
+    
+  def login(self, username, password):
+    return self.db.get_utente_by_username_and_password(username, password)
+
 class Db(object):
   def __init__(self, mysql):
     self.mysql = mysql
+  
+  def get_utente_by_id(self, user_id):
+    cur = self.mysql.connection.cursor()
+    sql='''select `id`, `nome`, `username`, `profilo`, `attivo` from `utenti` where `id`=1'''#.format(user_id)
+    cur.execute(sql)
+    rv = cur.fetchone()
+    if rv != None:
+      u = Utente(rv[0], rv[1], rv[2], rv[3], rv[4])
+      return u
+    return None
+  
+  def get_utente(self, username, password):
+    cur = self.mysql.connection.cursor()
+    cur.execute('''select id, nome, username, profilo, attivo from `utenti` where username='{}' and password='{}' '''.format(username, password))
+    rv = cur.fetchone()
+    if rv != None:
+      u = Utente(rv[0], rv[1], rv[2], rv[3], rv[4])
+      return u
+    return None
     
   def get_utenti(self):
     utenti = []
@@ -23,7 +49,7 @@ class Db(object):
   def get_clienti(self,offset=0,count=50):
     clienti = []
     cur = self.mysql.connection.cursor()
-    cur.execute('''select cod, RagSoc, Ind, cap, citta, piva, cfisc, old_cod, tel, email from clienti limit {}, {}'''.format(offset, count))
+    cur.execute('''select cod, RagSoc, Ind, cap, citta, piva, cfisc, old_cod, tel, email from clienti order by RagSoc limit {}, {}'''.format(offset, count))
     for c in cur.fetchall():
       clienti.append(Cliente(c[0],c[1],c[2],c[3],c[4],c[5],c[6],c[7],c[8],c[9]))  
     return clienti
@@ -34,6 +60,15 @@ class Db(object):
     c = cur.fetchone()
     return Cliente(c[0],c[1],c[2],c[3],c[4],c[5],c[6],c[7],c[8],c[9])
 
+  def crea_cliente(self, ragione_sociale, indirizzo, cap, citta, p_iva, cod_fiscale, telefono, e_mail):
+    conn = self.mysql.connection
+    cur = conn.cursor()
+    cur.execute('select max(cod) from clienti')
+    last_id = cur.fetchone()[0]
+    sql = '''insert into clienti (cod, RagSoc, Ind, cap, citta, piva, cfisc, tel, email) values ({}, '{}','{}','{}','{}','{}','{}','{}','{}') '''.format(last_id + 1,ragione_sociale, indirizzo, cap, citta, p_iva, cod_fiscale, telefono, e_mail)
+    rows = cur.execute(sql)
+    conn.commit()
+    return rows
 
 class Utente(object):
   def __init__(self, id, nome, username, profilo, attivo):
@@ -41,11 +76,15 @@ class Utente(object):
     self.nome = nome
     self.username = username
     self.profilo = profilo
-    self.attivo = attivo
+    self.is_active = attivo
+    self.is_authenticated = False
+    self.is_anonymous = False
     
   def __repr__(self):
     return self.username
   
+  def get_id(self):
+    return unicode(id)
   
 class Azienda(object):
   def __init__(self, id, Ragione_Sociale, Descr, PI, CF, Indirizzo, Citta, CAP, Provincia, Telefono, MF, Fax, E_mail):
