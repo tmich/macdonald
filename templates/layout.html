@@ -1,27 +1,101 @@
 <!doctype html>
 <html lang="it">
 <head>
-  <title>MacDonald</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link rel="icon" href="favicon.ico">
+  <!-- Bootstrap core CSS -->
   <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
-  <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="http://getbootstrap.com/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <!--<link href="dashboard.css" rel="stylesheet">-->
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='mystyle.css') }}">
+  <title>MacDonald</title>
+  
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
 </head>
 <body>
-<div class=page>
-  <h1>MacDonald</h1>
-  <div class=metanav>
-  {% if current_user.is_authenticated %}
-    Ciao {{ current_user.name }}!
-    <a href="{{ url_for('clienti') }}">anagrafica clienti</a>
-    <a href="{{ url_for('logout') }}">log out</a>
-  {% else %}
-    <a href="{{ url_for('login') }}">log in</a>
-  {% endif %}
+
+  <nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
+      <div class="navbar-header">
+	<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+	  <span class="sr-only">Toggle navigation</span>
+	  <span class="icon-bar"></span>
+	  <span class="icon-bar"></span>
+	  <span class="icon-bar"></span>
+	</button>
+	<a class="navbar-brand" href="#">MacDonald</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+	{% if utente %}
+	  {% if utente.id == 0 %}
+	    <form class="navbar-form navbar-right" method="POST" action="{{ url_for('login') }}">
+	      <div class="form-group">
+		<input type="text" placeholder="nome utente" name="username" class="form-control">
+	      </div>
+	      <div class="form-group">
+		<input type="password" placeholder="password" name="password" class="form-control">
+	      </div>
+	      <button type="submit" class="btn btn-success">Sign in</button>
+	    </form>  
+	  {% else %}
+	    <ul class="nav navbar-nav navbar-right">
+	      <li><a href="#">Settings</a></li>
+	      <li><a href="#">Profile</a></li>
+	      <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span> Esci ({{ utente.nome }})</a></li>
+	    </ul>
+	  {% endif %}
+	{% endif %}
+      </div><!--/.navbar-collapse -->
+    </div>
+  </nav>
+  
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-3 col-md-2 sidebar">
+      {% if utente %}
+	{% if utente.id != 0 %}
+	  <ul class="nav nav-sidebar">
+	    <!--<li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>-->
+	    <li><a href="{{ url_for('clienti') }}">Clienti</a></li>
+	    <li><a href="#">Reports</a></li>
+	    <li><a href="#">Analytics</a></li>
+	    <li><a href="#">Export</a></li>
+	  </ul>
+	{% endif %}
+      {% endif %}
+      </div>  
+      
+      <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	{% for message in get_flashed_messages() %}
+	  <div class="alert alert-info">
+	    <strong>{{ message }}</strong>
+	  </div>
+	{% endfor %}  
+	{% block body %}{% endblock %}
+      </div>
+    </div>
   </div>
-  {% for message in get_flashed_messages() %}
-    <div class=flash>{{ message }}</div>
-  {% endfor %}
-  {% block body %}{% endblock %}
-</div>
+  
+  <!-- Bootstrap core JavaScript
+  ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script>window.jQuery || document.write('<script src="http://getbootstrap.com/assets/js/vendor/jquery.min.js"><\/script>')</script>
+  <script src="http://getbootstrap.com/dist/js/bootstrap.min.js" ></script>
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <script src="http://getbootstrap.com/assets/js/ie10-viewport-bug-workaround.js"></script>
 </body>
 </html>

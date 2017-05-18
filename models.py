@@ -69,6 +69,14 @@ class Db(object):
     rows = cur.execute(sql)
     conn.commit()
     return rows
+  
+  def modifica_cliente(self, codice, ragione_sociale, indirizzo, cap, citta, p_iva, cod_fiscale, telefono, e_mail):
+    conn = self.mysql.connection
+    cur = conn.cursor()
+    sql = '''update clienti set RagSoc='{}', Ind='{}', cap='{}', citta='{}', piva='{}', cfisc='{}', tel='{}', email='{}' where cod={}'''.format(ragione_sociale, indirizzo, cap, citta, p_iva, cod_fiscale, telefono, e_mail, codice)
+    rows = cur.execute(sql)
+    conn.commit()
+    return rows
 
 class Utente(object):
   def __init__(self, id, nome, username, profilo, attivo):

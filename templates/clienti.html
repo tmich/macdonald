@@ -1,41 +1,46 @@
 {% extends "layout.html" %}
 {% block body %}
-  <p>Pagina {{ page+1 }}</p>
-  {% if page > 0 %}
-    <a href="{{url_for('clienti', page=page-1) }}">prev</a>|
-  {% endif %}
-  <a href="{{url_for('clienti', page=page+1) }}">next</a><br />
-  <table border=1>
-    <tr>
-      <th>&nbsp;</th>
-      <th>codice</th>
-      <th>rag. sociale</th>
-      <th>indirizzo</th>
-      <th>cap</th>
-      <th>citta</th>
-      <th>prov</th>
-      <th>p. iva</th>
-      <th>codice fisc.</th>
-      <th>telefono</th>
-      <th>email</th>
-    </tr>
-  {% for cliente in clienti %}
-    <tr>
-    <td><a href="{{ url_for('cliente', codice=cliente.codice) }}">mod</a></td>
-    <td>{{cliente.codice}}</td>
-    <td>{{ cliente.ragione_sociale }}</td>
-    <td>{{ cliente.indirizzo }}</td>
-    <td>{{ cliente.cap }}</td>
-    <td>{{ cliente.citta }}</td>
-    <td>{{ cliente.provincia }}</td>
-    <td>{{ cliente.p_iva }}</td>
-    <td>{{ cliente.cod_fiscale }}</td>
-    <td>{{ cliente.telefono }}</td>
-    <td>{{ cliente.email }}</td>
-    </tr>
-  {% else %}
-    <li><em>Nessun cliente.</em>
-  {% endfor %}
+  <h1 class="page-header">Clienti</h1>
+  <ul class="pager">
+    {% if page > 0 %}
+    <li><a href="{{url_for('clienti', page=page-1) }}">Pag. precedente</a></li>
+    {% endif %}
+    <li><a href="{{url_for('clienti', page=page+1) }}">Pag. successiva</a></li>
+  </ul>
+  <p align="center">Pagina {{ page+1 }}</p>
+  <div class="table-responsive">
+    <p><a href="{{ url_for('nuovo_cliente') }}" type="button" class="btn btn-success btn-sm">Nuovo cliente</a></p>
+    <table class="table table-striped">
+      <tr>
+	<th>&nbsp;</th>
+	<!--<th>codice</th>-->
+	<th>rag. sociale</th>
+	<th>indirizzo</th>
+	<th>cap</th>
+	<th>citta</th>
+	<!--<th>prov</th>
+	<th>p. iva</th>
+	<th>codice fisc.</th>
+	<th>telefono</th>
+	<th>email</th>-->
+      </tr>
+      {% for cliente in clienti %}
+	<tr>
+	<td><a href="{{ url_for('cliente', codice=cliente.codice) }}" type="button" class="btn btn-default btn-sm">Modifica</a></td>
+	<!--<td>{{cliente.codice}}</td>-->
+	<td>{{ cliente.ragione_sociale }}</td>
+	<td>{{ cliente.indirizzo }}</td>
+	<td>{{ cliente.cap }}</td>
+	<td>{{ cliente.citta }}</td>
+	<!--<td>{{ cliente.provincia }}</td>
+	<td>{{ cliente.p_iva }}</td>
+	<td>{{ cliente.cod_fiscale }}</td>
+	<td>{{ cliente.telefono }}</td>
+	<td>{{ cliente.email }}</td>-->
+	</tr>
+      {% else %}
+	<li><em>Nessun cliente.</em>
+      {% endfor %}
   </table>
   
 {% endblock %}
