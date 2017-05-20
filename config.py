@@ -9,7 +9,8 @@ class ProductionConfig(Config):
 
 class DevelopmentConfig(Config):
   DEBUG = True
-  MYSQL_USER = 'aldo'
-  MYSQL_PASSWORD = 'aldo.2017'
-  MYSQL_DB = 'macdonald'
-  MYSQL_HOST = 'localhost'
+  SQLALCHEMY_DATABASE_URI = 'mysql://aldo:aldo.2017@localhost/macdonald'
+  #MYSQL_USER = 'aldo'
+  #MYSQL_PASSWORD = 'aldo.2017'
+  #MYSQL_DB = 'macdonald'
+  #MYSQL_HOST = 'localhost'

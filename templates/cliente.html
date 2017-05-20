@@ -1,28 +1,28 @@
 {% extends "layout.html" %}
 {% block body %}
   <h4>
-  
+
   </h4>
     <div class="panel-group">
       <div class="panel panel-primary">
 	<div class="panel-heading">
 	{%  if cliente != None %}
-	  {{ cliente.ragione_sociale }}
+	  {{ cliente.ragsoc }}
 	{% else %}
 	  Nuovo cliente
 	{% endif %}
 	</div>
 	<div class="panel-body">
-	  <form method="POST" action="{{ url_for('salva_cliente') }}">
+	  <form method="POST" action="{%  if cliente == None %}{{ url_for('nuovo_cliente') }}{% else %}{{ url_for('salva_cliente') }}{%  endif %}">
 	    {%  if cliente != None %}
 	    <div class="form-group">
 	      <label for="codice">codice:</label>
-	      <input type="text" class="form-control" name="codice" value="{{ cliente.codice }}" readonly="readonly" />
+	      <input type="text" class="form-control" name="id" value="{{ cliente.id }}" readonly="readonly" />
 	    </div>
 	    {%  endif %}
 	    <div class="form-group">
 	      <label for="ragione_sociale">Nominativo/ragione sociale</label>
-	      <input type="text" class="form-control" name="ragione_sociale" value="{{ cliente.ragione_sociale if cliente != None else '' }}" />
+	      <input type="text" class="form-control" name="ragione_sociale" value="{{ cliente.ragsoc if cliente != None else '' }}" />
 	    </div>
 	    <div class="form-group">
 	      <label for="indirizzo">Indirizzo</label>

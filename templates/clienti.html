@@ -8,6 +8,14 @@
     <li><a href="{{url_for('clienti', page=page+1) }}">Pag. successiva</a></li>
   </ul>
   <p align="center">Pagina {{ page+1 }}</p>
+  <p>
+    <form method="POST" action="{{ url_for('cerca_cliente') }}">
+      <label for="nominativo">Cerca per nominativo:</label>&nbsp;
+      <input type="text" name="query" value="" />&nbsp;
+      <input type="submit" class="btn btn-primary btn-md" value="Cerca" />
+    </form>
+  </p>
+  <br />
   <div class="table-responsive">
     <p><a href="{{ url_for('nuovo_cliente') }}" type="button" class="btn btn-success btn-sm">Nuovo cliente</a></p>
     <table class="table table-striped">
@@ -26,9 +34,9 @@
       </tr>
       {% for cliente in clienti %}
 	<tr>
-	<td><a href="{{ url_for('cliente', codice=cliente.codice) }}" type="button" class="btn btn-default btn-sm">Modifica</a></td>
+	<td><a href="{{ url_for('cliente', id=cliente.id) }}" type="button" class="btn btn-default btn-sm">Modifica</a></td>
 	<!--<td>{{cliente.codice}}</td>-->
-	<td>{{ cliente.ragione_sociale }}</td>
+	<td>{{ cliente.ragsoc }}</td>
 	<td>{{ cliente.indirizzo }}</td>
 	<td>{{ cliente.cap }}</td>
 	<td>{{ cliente.citta }}</td>
