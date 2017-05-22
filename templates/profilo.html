@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h1 class="page-header">Profilo</h1>
+  <div>
+	<a href="#" type="button" class="btn btn-default btn-md">Cambio Password</a>
+  </div><br />
+    <div class="panel-group">
+      <div class="panel panel-primary">
+	<div class="panel-heading">
+	{{ g.user.nome }}
+	</div>
+	<div class="panel-body">
+	  <form method="POST" action="{{ url_for('profilo') }}">
+	    <div class="form-group">
+	      <label for="username">Nome Utente</label>
+	      <input type="text" class="form-control" name="username" readonly="readonly" value="{{ g.user.username }}" />
+	    </div>
+	    <div class="form-group">
+	      <label for="nome">Nome</label>
+	      <input type="text" class="form-control" name="nome" value="{{ g.user.nome }}" />
+	    </div>
+	    <div class="form-group">
+	      <label for="email">Email</label>
+	      <input type="email" class="form-control" name="email" value="{{ g.user.email }}" />
+	    </div>
+	    <a href="{{ url_for('main') }}" type="button" class="btn btn-default btn-md">&laquo; Indietro</a>
+		<input type="submit" class="btn btn-success btn-md" value="Salva" />
+	  </form>
+	</div>
+      </div>
+    </div>
+{% endblock %}

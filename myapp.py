@@ -2,6 +2,7 @@ import os, config, json
 from functools import wraps
 from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash
 from flask_sqlalchemy import SQLAlchemy
+from decimal import Decimal
 
 app = Flask(__name__)
 app.config.from_object('config.DevelopmentConfig')
@@ -147,8 +148,59 @@ def prodotti(page=0):
 @app.route('/prodotto/<int:id>')
 @login_required
 def prodotto(id):
-  return id
+  p = Prodotto.query.get(id)
+  return render_template('prodotto.html', prodotto=p)
+  
+@app.route('/nuovo_prodotto', methods=['GET', 'POST'])
+@login_required
+def nuovo_prodotto():
+  return render_template('prodotto.html', prodotto=None)
 
+@app.route('/salva_prodotto', methods=['POST'])
+@login_required
+def salva_prodotto():
+  if request.method == 'POST':
+	f = request.form
+	id = f['id']
+	p = Prodotto.query.get(id)
+	p.codice = f['codice']
+	p.descr = f['descrizione']
+	p.aliq = f['aliquota']
+	p.prezzo = f['prezzo']
+	
+	db.session.commit()
+	flash('Articolo aggiornato')
+  return redirect(url_for('prodotti', page=0))
+	
+@app.route('/profilo', methods=['GET', 'POST'])
+@login_required
+def profilo():
+  if request.method == 'POST':
+	f = request.form
+	u = User.query.get(g.user.id)
+	u.nome = f['nome']
+	u.email = f['email']
+	db.session.commit()
+	flash('Profilo utente aggiornato')
+  return render_template('profilo.html')
+  
+@app.route('/fatture_cliente/<int:id>/<int:page>')
+@login_required
+def fatture_cliente(id, page=0):
+  pagenum = 20
+  offset = page * pagenum
+  cli = Cliente.query.get(id)
+  fatture = Fattura.query.filter_by(cliente_id=id).order_by('data desc').offset(offset).limit(pagenum)
+  return render_template('fatture_cliente.html', fatture=fatture, cliente=cli, page=page, cnt=fatture.count())
+
+@app.route('/dett_fattura/<int:id>/<int:page>')
+@login_required
+def dett_fattura(id, page=0):
+  pagenum = 20
+  offset = page * pagenum
+  f = Fattura.query.get(id)
+  return render_template('dett_fattura.html', fattura=f, voci=f.voci, tot=f.totale(), page=page)
+  
 ### Models
 
 class Anagrafica(db.Model):
@@ -212,6 +264,12 @@ class Fattura(db.Model):
     self.data = data
     self.n_scontr1 = n_scontr1
     self.canc = 0
+	
+  def totale(self):
+	tot = Decimal(0.0)
+	for v in self.voci:
+		tot += v.prezzo * v.qta
+	return tot
 
 class VoceFattura(db.Model):
   id = db.Column(db.Integer, primary_key=True)
@@ -254,4 +312,4 @@ class User(db.Model):
     
 
 if __name__ == "__main__":
-  app.run()
+  app.run(host='93.186.254.106', port=80)

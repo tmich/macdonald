@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h1 class="page-header">Fattura n. {{ fattura.num }} del {{ fattura.data }}</h1>
+  <a href="javascript:history.back();">&laquo; Torna indietro</a><br /><br />
+  <div class="table-responsive">
+	<p>Intestata a: <b>{{ fattura.cliente.ragsoc }}</b></p>
+    <table class="table table-striped">
+      <tr>
+		<th>&nbsp;</th>
+		<!--<th>codice</th>-->
+		<th>codice</th>
+		<th>descr</th>
+		<th>qta</th>
+		<th>prezzo</th>
+		<th>aliq</th>
+	  </tr>
+	  {% for v in voci %}
+	  <tr>
+		<td>&nbsp;</td>
+		<td>{{ v.codart }}</td>
+		<td>{{ v.descr }}</td>
+		<td>{{ v.qta }}</td>
+		<td>{{ v.prezzo }}</td>
+		<td>{{ v.aliq }}</td>
+	  </tr>
+	  {% endfor %}
+	  <tr>
+		<th colspan="4" style="text-align: right;">Totale</th>
+		<th>{{ tot }}</th>
+		<th>&nbsp;</th>
+	  </tr>
+	  </table>
+  </div>
+{% endblock %}

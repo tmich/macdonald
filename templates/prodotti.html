@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h1 class="page-header">Prodotti</h1>
+  <h1 class="page-header">Articoli</h1>
   <ul class="pager">
     {% if page > 0 %}
     <li><a href="{{url_for('prodotti', page=page-1) }}">Pag. precedente</a></li>
@@ -10,22 +10,22 @@
   <p align="center">Pagina {{ page+1 }}</p>
   <br />
   <div class="table-responsive">
-    <p><a href="#" type="button" class="btn btn-success btn-sm">Nuovo prodotto</a></p>
+    <p><a href="{{url_for('nuovo_prodotto') }}" type="button" class="btn btn-success btn-sm">Nuovo articolo</a></p>
     <table class="table table-striped">
       <tr>
-	<th>&nbsp;</th>
 	<th>codice</th>
 	<th>descrizione</th>
 	<th>IVA</th>
 	<th>prezzo</th>
+	<th>&nbsp;</th>
       </tr>
       {% for p in prodotti %}
 	<tr>
-	<td><a href="{{ url_for('prodotto', id=p.id) }}" type="button" class="btn btn-default btn-sm">Modifica</a></td>
 	<td>{{ p.codice }}</td>
 	<td>{{ p.descr }}</td>
 	<td>{{ p.aliq }}</td>
 	<td>{{ p.prezzo }}</td>
+	<td><a href="{{ url_for('prodotto', id=p.id) }}" type="button" class="btn btn-default btn-sm">Modifica</a></td>
 	</tr>
       {% else %}
 	<li><em>Nessun prodotto.</em>

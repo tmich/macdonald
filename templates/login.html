@@ -3,9 +3,18 @@
   {% if error != None %}
     <p>{{error}}</p>
   {% endif %}
-  <form action="{{ url_for('login') }}" method="post">
-    <label for="username">utente:</label><input type="text" id="username" name="username" /><br />
-    <label for="password">password:</label><input type="password" id="password" name="password" /><br />
-    <input type="submit" value="login" />
-  </form>
+  <div class="panel-group">
+	  <div class="panel panel-primary">
+		<div class="panel-heading">
+		Autenticazione necessaria
+		</div>
+		<div class="panel-body">
+		  <form action="{{ url_for('login') }}" method="post">
+			<div class="form-group"><label for="username">utente:</label><input type="text" class="form-control" id="username" name="username" /></div>
+			<div class="form-group"><label for="password">password:</label><input type="password" class="form-control" id="password" name="password" /></div>
+			<input type="submit" class="btn btn-success btn-md" value="Accedi" />
+		  </form>
+		</div>
+	  </div>
+  </div>
 {% endblock %}

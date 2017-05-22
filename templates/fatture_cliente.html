@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h1 class="page-header">Fatture per {{ cliente.ragsoc }}</h1>
+  <ul class="pager">
+    {% if page > 0 %}
+    <li><a href="{{url_for('fatture_cliente',id=cliente.id, page=page-1) }}">Pag. precedente</a></li>
+    {% endif %}
+    <li><a href="{{url_for('fatture_cliente',id=cliente.id, page=page+1) }}">Pag. successiva</a></li>
+  </ul>
+  <p align="center">Pagina {{ page+1 }}</p>
+  <br />
+  <a href="{{ url_for('clienti') }}">&laquo; Torna indietro</a><br /><br />
+  {% if cnt > 0 %}
+	  <div class="table-responsive">
+		<table class="table table-striped">
+			<tr>
+				<th>&nbsp;</th>
+				<th>numero</th>
+				<th>data</th>
+				<th>scontrino (1)</th>
+				<th>scontrino (2)</th>
+				<th>scontrino (3)</th>
+				<th>totale</th>
+			</tr>
+			  {% for f in fatture %}
+			<tr>
+			<td>&nbsp;</td>
+			<td><a href="{{url_for('dett_fattura',id=f.id, page=0) }}">Fatt. n. {{ f.num }}</td>
+			<td>{{ f.data }}</td>
+			<td>{{ f.n_scontr1 }}</td>
+			<td>{{ f.n_scontr2 }}</td>
+			<td>{{ f.n_scontr3 }}</td>
+			<td>{{ f.totale() }}</td>
+			</tr>
+			{% endfor %}
+		  </table>
+	  </div>
+      {% else %}
+		<em>Nessuna fattura.
+      {% endif %}
+  
+{% endblock %}

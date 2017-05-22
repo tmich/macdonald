@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h1 class="page-header">
+  {%  if prodotto != None %}Modifica articolo{% else %}Inserisci articolo{% endif %}
+  </h1>
+    <div class="panel-group">
+      <div class="panel panel-primary">
+	<div class="panel-heading">
+	{%  if prodotto != None %}
+	  {{ prodotto.descr }}
+	{% else %}
+	  Nuovo articolo
+	{% endif %}
+	</div>
+	<div class="panel-body">
+	  <form method="POST" action="{%  if prodotto == None %}{{ url_for('nuovo_prodotto') }}{% else %}{{ url_for('salva_prodotto') }}{%  endif %}">
+	    {%  if prodotto != None %}
+		<input type="hidden" name="id" value="{{ prodotto.id }}" />
+	    <div class="form-group">
+	      <label for="codice">Codice</label>
+	      <input type="text" class="form-control" name="codice" value="{{ prodotto.codice }}" />
+	    </div>
+	    {%  endif %}
+	    <div class="form-group">
+	      <label for="descrizione">Descrizione</label>
+	      <input type="text" class="form-control" name="descrizione" value="{{ prodotto.descr if prodotto != None else '' }}" />
+	    </div>
+	    <div class="form-group">
+	      <label for="aliquota">Aliquota</label>
+	      <input type="text" class="form-control" name="aliquota" value="{{ prodotto.aliq if prodotto != None else '' }}" />
+	    </div>
+	    <div class="form-group">
+	      <label for="prezzo">Prezzo</label>
+	      <input type="text" class="form-control" name="prezzo" value="{{ prodotto.prezzo if prodotto != None else '' }}" />
+	    </div>
+	    <a href="{{ url_for('prodotti') }}" type="button" class="btn btn-default btn-md">&laquo; Indietro</a>
+	    <input type="submit" class="btn btn-success btn-md" value="Salva" />
+	  </form>
+	</div>
+      </div>
+    </div>
+{% endblock %}
