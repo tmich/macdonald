@@ -16,11 +16,11 @@
 	  <form method="POST" action="{%  if prodotto == None %}{{ url_for('nuovo_prodotto') }}{% else %}{{ url_for('salva_prodotto') }}{%  endif %}">
 	    {%  if prodotto != None %}
 		<input type="hidden" name="id" value="{{ prodotto.id }}" />
+	    {%  endif %}
 	    <div class="form-group">
 	      <label for="codice">Codice</label>
 	      <input type="text" class="form-control" name="codice" value="{{ prodotto.codice }}" />
 	    </div>
-	    {%  endif %}
 	    <div class="form-group">
 	      <label for="descrizione">Descrizione</label>
 	      <input type="text" class="form-control" name="descrizione" value="{{ prodotto.descr if prodotto != None else '' }}" />

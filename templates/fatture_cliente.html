@@ -25,7 +25,7 @@
 			  {% for f in fatture %}
 			<tr>
 			<td>&nbsp;</td>
-			<td><a href="{{url_for('dett_fattura',id=f.id, page=0) }}">Fatt. n. {{ f.num }}</td>
+			<td><a href="{{url_for('dett_fattura',id=f.id) }}">Fatt. n. {{ f.num }}</td>
 			<td>{{ f.data }}</td>
 			<td>{{ f.n_scontr1 }}</td>
 			<td>{{ f.n_scontr2 }}</td>

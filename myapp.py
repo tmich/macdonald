@@ -193,13 +193,13 @@ def fatture_cliente(id, page=0):
   fatture = Fattura.query.filter_by(cliente_id=id).order_by('data desc').offset(offset).limit(pagenum)
   return render_template('fatture_cliente.html', fatture=fatture, cliente=cli, page=page, cnt=fatture.count())
 
-@app.route('/dett_fattura/<int:id>/<int:page>')
+@app.route('/dett_fattura/<int:id>')
 @login_required
 def dett_fattura(id, page=0):
   pagenum = 20
   offset = page * pagenum
   f = Fattura.query.get(id)
-  return render_template('dett_fattura.html', fattura=f, voci=f.voci, tot=f.totale(), page=page)
+  return render_template('dett_fattura.html', fattura=f, voci=f.voci, tot=f.totale())
   
 ### Models
 
@@ -265,6 +265,15 @@ class Fattura(db.Model):
     self.n_scontr1 = n_scontr1
     self.canc = 0
 	
+  @property
+  def scontrini(self):
+    lst = [self.n_scontr1]
+    if self.n_scontr2 !=0:
+      lst.append(self.n_scontr2)
+    if self.n_scontr3 !=0:
+      lst.append(self.n_scontr3)
+    return '-'.join(str(x) for x in lst)
+	
   def totale(self):
 	tot = Decimal(0.0)
 	for v in self.voci:
@@ -312,4 +321,5 @@ class User(db.Model):
     
 
 if __name__ == "__main__":
-  app.run(host='93.186.254.106', port=80)
+  #app.run(host='93.186.254.106', port=80)
+  app.run()
