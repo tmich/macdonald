@@ -8,16 +8,22 @@ app.config.from_object('config.DevelopmentConfig')
 app.static_folder = 'static' 
 db = SQLAlchemy(app)
 
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if g.user is None:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 ## Views
 
 @app.before_request
 def load_user():
   if "uid" in session:
-    user = User.query.filter_by(id=session['uid'])
+    g.user = User.query.get(session['uid'])
   else:
-    user = {'id' : 0, 'nome': 'Guest'}  # Make it better, use an anonymous User instead
-
-  g.user = user
+    g.user = None #{'id' : 0, 'nome': 'Guest'}  # Make it better, use an anonymous User instead
 
 @app.route("/")
 def main():
@@ -25,24 +31,25 @@ def main():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-  error = None
-  usr = request.form['username']
-  pwd = request.form['password']
+  error = "Per accedere alla risorsa richiesta e' necessaria l'autenticazione"
   
   if request.method == 'POST':
+    usr = str(request.form['username'])
+    pwd = str(request.form['password'])
     u = User.query.filter_by(username=usr).first()
     if u != None:
       if u.password == pwd:
+	g.user = u
 	session['logged_in'] = True
 	session['uid'] = u.id
 	return redirect(url_for('main'))
-  
-  error = 'Nome utente o password errati'
+      else:
+	error = 'Nome utente o password errati'
   return render_template('login.html', error=error)
 
 @app.route('/logout')
 def logout():
-  g.utente = None
+  g.user = None
   session['logged_in'] = False
   if 'uid' in session:
     session.pop('uid')
@@ -50,6 +57,7 @@ def logout():
 
 @app.route('/clienti', methods=['GET'])
 @app.route('/clienti/<int:page>')
+@login_required
 def clienti(page=0):
   pagenum = 20
   offset = page * pagenum
@@ -57,6 +65,7 @@ def clienti(page=0):
   return render_template('clienti.html', clienti=clienti, page=page, utente=g.user)
 
 @app.route('/cerca_cliente', methods=['POST'])
+@login_required
 def cerca_cliente(page=0):
   if request.method == 'POST':
     f = request.form
@@ -68,6 +77,7 @@ def cerca_cliente(page=0):
     return render_template('clienti.html', clienti=clienti, page=page, utente=g.user)
 
 @app.route('/salva_cliente', methods=['POST'])
+@login_required
 def salva_cliente():
   if request.method == 'POST':
     f = request.form
@@ -99,6 +109,7 @@ def salva_cliente():
     return redirect(url_for('clienti'))
 
 @app.route('/nuovo_cliente', methods=['GET', 'POST'])
+@login_required
 def nuovo_cliente():
   if request.method == 'POST':
     f = request.form
@@ -119,9 +130,24 @@ def nuovo_cliente():
   return render_template('cliente.html', cliente=None, utente=g.user)
 
 @app.route('/cliente/<int:id>')
+@login_required
 def cliente(id):
     cli = Cliente.query.get(id)
     return render_template('cliente.html', cliente=cli, utente=g.user)
+
+@app.route('/prodotti', methods=['GET'])
+@app.route('/prodotti/<int:page>')
+@login_required
+def prodotti(page=0):
+  pagenum = 20
+  offset = page * pagenum
+  prodotti = Prodotto.query.order_by('descr').offset(offset).limit(pagenum)
+  return render_template('prodotti.html', prodotti=prodotti, page=page, utente=g.user)
+
+@app.route('/prodotto/<int:id>')
+@login_required
+def prodotto(id):
+  return id
 
 ### Models
 
@@ -160,11 +186,52 @@ class Cliente(db.Model):
   
 class Prodotto(db.Model):
   id = db.Column(db.Integer, primary_key=True)
-  codice = db.Column(db.Integer)
+  codice = db.Column(db.String(80))
   descr = db.Column(db.String(120))
   aliq = db.Column(db.Integer)
   prezzo = db.Column(db.Numeric(10, 2))
+  canc = db.Column(db.Integer)
 
+  def __init__(self):
+    canc = 0
+    
+class Fattura(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  num = db.Column(db.Integer)
+  data = db.Column(db.Date)
+  n_scontr1 = db.Column(db.Integer)
+  n_scontr2 = db.Column(db.Integer)
+  n_scontr3 = db.Column(db.Integer)
+  cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'))
+  cliente = db.relationship('Cliente',
+			    backref = db.backref('fatture', lazy='dynamic'))
+  canc = db.Column(db.Integer)
+  
+  def __init__(self, cliente, data, n_scontr1):
+    self.cliente = cliente
+    self.data = data
+    self.n_scontr1 = n_scontr1
+    self.canc = 0
+
+class VoceFattura(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  seq = db.Column(db.Integer)
+  codart = db.Column(db.String(80))
+  descr = db.Column(db.String(120))
+  qta = db.Column(db.Integer)
+  prezzo = db.Column(db.Numeric(10, 2)) 
+  aliq = db.Column(db.Integer)
+  fattura_id = db.Column(db.Integer, db.ForeignKey('fattura.id'))
+  fattura = db.relationship('Fattura',
+			    backref=db.backref('voci', lazy='dynamic'))
+  canc = db.Column(db.Integer)
+  
+  def __init__(self):
+    self.canc = 0
+    
+  def __repr__(self):
+    return '%d x %r' % (self.qta, self.descr)
+    
 class User(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   username = db.Column(db.String(80), unique=True)
