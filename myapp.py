@@ -236,11 +236,10 @@ def del_fattura(idfatt):
 @app.route('/stampa_fatt/<int:idfatt>', methods=['GET'])
 def stampa_fattura(idfatt):
   fatt = db.session.query(Fattura).get(idfatt)
-  n_voci = len(fatt.voci)
-  max_voci=10
-  if(n_voci<max_voci):
-    n_voci=max_voci-n_voci
-  pdf=create_pdf(render_template('pdf.html', fattura=fatt, n_voci=n_voci))
+  min_righe=10
+  n_righe = max(len(fatt.voci), min_righe) - min(len(fatt.voci), min_righe)
+
+  pdf=create_pdf(render_template('pdf.html', fattura=fatt, n_righe=n_righe))
   response=make_response(pdf.getvalue())
   response.headers['Content-Type'] = 'application/pdf'
   response.headers['Content-Disposition'] = 'attachment; filename=fattura.pdf'

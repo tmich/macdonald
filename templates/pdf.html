@@ -104,11 +104,10 @@
 	      <td class="far">{{ tot|replace(".",",") }}</td>
 	    </tr>
 	  {% endfor %}
-	  
-	  {% for i in range(0,n_voci) %}
+	  {% for i in range(0,n_righe) %}
 	    <tr>
-	      <td class="{{ 'last' if loop.index==n_voci else '' }}">&nbsp;</td>
-	      <td class="{{ 'last' if loop.index==n_voci else '' }}">&nbsp;</td>
+	      <td>&nbsp;</td>
+	      <td>&nbsp;</td>
 	      <td>&nbsp;</td>
 	      <td>&nbsp;</td>
 	      <td>&nbsp;</td>
@@ -116,6 +115,16 @@
 	      <td class="far">&nbsp;</td>
 	    </tr>
 	  {% endfor %}
+	  
+	  <tr>
+	    <td class="last">&nbsp;</td>
+	    <td class="last">&nbsp;</td>
+	    <td>&nbsp;</td>
+	    <td>&nbsp;</td>
+	    <td>&nbsp;</td>
+	    <td>&nbsp;</td>
+	    <td class="far">&nbsp;</td>
+	  </tr>
 	  
 	  {% set impf = '%0.2f' % fattura.tot_imponibile()|float %}
 	  {% set ivaf = '%0.2f' % fattura.tot_iva()|float %}
