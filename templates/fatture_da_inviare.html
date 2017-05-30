@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h1 class="page-header">Fatture da inviare</h1>
+  <div class="table-responsive">
+    {% if cnt > 0 %}
+      <table class="table table-striped">
+	<tr>
+	  <th>Fatt. n</th>
+	  <th>Data</th>
+	  <th>Email</th>
+	</tr>
+	{% for inv in fatture_da_inviare %}
+	  <tr>
+	    <td>{{inv.fattura.num}}</td>
+	    <td>{{inv.fattura.data}}</td>
+	    <td>{{inv.email}}</td>
+	  </tr>
+	{% endfor %}
+      </table>
+      <a href="{{url_for('invia_tutte', next=url_for('fatture_da_inviare'))}}" class="btn btn-primary">Invia tutte</a>
+    {% else %}
+      <p>Nessuna fattura da inviare</p>
+    {% endif %}
+  </div>
+{% endblock %}

@@ -76,16 +76,21 @@
 	  <ul class="nav nav-sidebar">
 	  <li><a href="{{ url_for('clienti') }}">Clienti</a></li>
 	  <li><a href="{{ url_for('prodotti') }}">Articoli</a></li>
+	  <li><a href="{{ url_for('fatture_da_inviare') }}">Fatture da inviare</a></li>
 	  </ul>
 	{% endif %}
       </div>  
       
       <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-	{% for message in get_flashed_messages() %}
-	  <div class="alert alert-info">
-	    <strong>{{ message }}</strong>
-	  </div>
-	{% endfor %}  
+	{% with messages = get_flashed_messages() %}
+	  {% if messages %}
+	    <ul class=flashes>
+	    {% for message in messages %}
+	      <li>{{ message }}</li>
+	    {% endfor %}
+	    </ul>
+	  {% endif %}
+	{% endwith %}
 	{% block body %}{% endblock %}
       </div>
     </div>

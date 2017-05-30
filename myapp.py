@@ -2,6 +2,7 @@ from __future__ import print_function
 import os, config, json, datetime, flask, sys
 from functools import wraps
 from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash, make_response
+from flask_mail import Mail, Message
 from flask.json import JSONEncoder, JSONDecoder
 from flask_sqlalchemy import SQLAlchemy
 from decimal import Decimal
@@ -11,6 +12,7 @@ app = Flask(__name__)
 app.config.from_object('config.DevelopmentConfig')
 app.static_folder = 'static' 
 db = SQLAlchemy(app)
+mail_ext = Mail(app)
 
 def login_required(f):
     @wraps(f)
@@ -223,6 +225,51 @@ def nuova_fattura(idc):
   db.session.commit()
     
   return redirect(url_for('mod_fattura', idfatt=fatt.id))
+
+@login_required
+@app.route('/invio', methods=['GET'])
+def fatture_da_inviare():
+  fatture_da_inviare=db.session.query(InvioFattura).filter_by(data_invio=None).all()
+  return render_template('fatture_da_inviare.html', fatture_da_inviare=fatture_da_inviare, cnt=len(fatture_da_inviare))
+
+@login_required
+@app.route('/invia_tutte', methods=['GET'])
+def invia_tutte():
+  fatture_da_inviare=db.session.query(InvioFattura).filter_by(data_invio=None).all()
+  min_righe=10
+  dest = request.args.get('next')
+  
+  for inv in fatture_da_inviare:
+    subject = "Fattura n. %d" % inv.fattura.num
+    recipient = inv.fattura.cliente.email
+    mail_to_be_sent = Message(subject=subject, recipients=[recipient])
+    mail_to_be_sent.body = "In allegato la fattura. Saluti."  
+    n_righe = max(len(inv.fattura.voci), min_righe) - min(len(inv.fattura.voci), min_righe)
+    pdf=create_pdf(render_template('pdf.html', fattura=inv.fattura, n_righe=n_righe))
+    mail_to_be_sent.attach("Fattura.pdf", "application/pdf", pdf.getvalue())
+    try:
+      mail_ext.send(mail_to_be_sent)
+      inv.data_invio=datetime.datetime.now
+      db.session.commit()
+    except:
+      flash('Si &egrave; verificato un errore')
+      return redirect(dest)
+    
+   
+  flash('Invio effettuato con successo')
+  return redirect(dest)
+    
+
+@login_required
+@app.route('/invio_fatt/<int:idfatt>', methods=['GET'])
+def invia_fattura(idfatt):
+  fatt = db.session.query(Fattura).get(idfatt)
+  invio_fatt=InvioFattura(fatt, fatt.cliente.email)
+  db.session.add(invio_fatt)
+  db.session.commit()
+  flash('Invio fattura prenotato con successo')
+  dest = request.args.get('next')
+  return redirect(dest)
 
 @login_required
 @app.route('/dfattura/<int:idfatt>', methods=['GET'])
@@ -487,6 +534,20 @@ class VoceFattura(db.Model):
     tot=self.tot_iva()+self.tot_imponibile()
     #print(tot,file=sys.stderr)
     return tot
+
+class InvioFattura(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  fattura_id = db.Column(db.Integer, db.ForeignKey('fattura.id'))
+  data_invio=db.Column(db.Date)
+  email=db.Column(db.String(120))
+  esito=db.Column(db.String(2)) 	#'OK', 'KO'
+  errore=db.Column(db.String(200))
+  fattura = db.relationship('Fattura',
+			    backref = db.backref('invii', lazy='dynamic'))
+  
+  def __init__ (self, fattura, email):
+    self.fattura_id=fattura.id
+    self.email=email
 
 class User(db.Model):
   id = db.Column(db.Integer, primary_key=True)

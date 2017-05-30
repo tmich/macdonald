@@ -116,8 +116,10 @@
 	Operazioni
       </div>
       <div class="panel-body" align="center">
-	<a href="{{url_for('del_fattura', idfatt=fattura.id, next=url_for('fatture_cliente',id=fattura.cliente.id,page=0))}}" class="btn btn-danger">Elimina fattura</a>
+	<a href="{{url_for('del_fattura', idfatt=fattura.id, next=url_for('fatture_cliente',id=fattura.cliente.id,page=0))}}" 
+	  class="btn btn-danger">Elimina fattura</a>
 	<a href="{{url_for('stampa_fattura', idfatt=fattura.id)}}" class="btn btn-default">Stampa</a>
+	<a href="{{url_for('invia_fattura', idfatt=fattura.id, next=url_for('fatture_cliente',id=fattura.cliente.id,page=0))}}" class="btn btn-default">Invia</a>
       </div>
     </div>
   </div>
