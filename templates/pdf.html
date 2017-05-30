@@ -1,0 +1,140 @@
+<html>
+    <head>
+    <style>
+    @page {
+        size: a4 portrait;
+        margin: 1cm;
+    }
+    body { font-family: "Courier New", monospace; font-size: 8pt; }
+    
+    .header td {
+      text-align: left;
+    }
+    
+    .hd { 
+      border: 1px solid black; 
+      font-variant: normal;
+      text-align: right;
+    }
+    
+    .far {
+      border-right: 1px solid black;
+    }  
+    
+    td {
+      text-align: right; 
+      border-bottom: none;
+      border-left: 1px solid black;
+    }
+    
+    .last {
+      border-bottom: 1px solid black;
+    }
+    
+    .void {
+      border: none;
+      text-align: left;
+    }
+    
+    .tot {
+      border-top: 1px solid black;
+      border-bottom: 1px solid black;
+    }
+    
+    </style>
+    </head>
+    <body>
+    {% block body %}
+      <div>
+	<table border="1" cellpadding="5" class="header">
+	  <tr>
+	    <td>
+	      <b>MACDONALD Vittorio e C. s.n.c.</b><br />
+	      <i>Cartoleria - Fornitura per Uffici</i><br />
+	      Via G.Camozzi, 13 - 00195 ROMA<br />
+	      C.F. 07161420588 - P.I. 01706271002<br />
+	      tel. 06-3728796
+	    </td>
+	    <td>
+	    Spett.le<br />
+	    {{ fattura.cliente.ragsoc }}<br />
+	    {{ fattura.cliente.indirizzo }}<br />
+	    {{ fattura.cliente.cap }} {{ fattura.cliente.citta }}<br />
+	    {% if fattura.cliente.p_iva != None %}
+	      {{ fattura.cliente.p_iva }}
+	    {% endif %}
+	    </td>
+	  </tr>
+	</table>
+      </div>
+      <div>
+	<table border="0" cellpadding="5" class="noborder">
+	  <tr>
+	    <td class="void">Fattura n&deg; {{fattura.num}} del {{fattura.data}}</td>
+	    <td class="void">
+	    E-mail: {{ fattura.cliente.email }}<br/>
+	    Scontrino n. {{ fattura.n_scontr1 }}
+	    </td>
+	  </tr>
+	</table>
+      </div>
+      <div>
+	<table class="fattura" style="border-collapse:collapse;" cellpadding="2">
+	  <tr>
+	    <td class="hd" width="50%">Descrizione</td>
+	    <td class="hd" width="5%">Qt&agrave;</td>
+	    <td class="hd" width="10%">Prezzo</td>
+	    <td class="hd" width="5%">%</td>
+	    <td class="hd" width="10%">Impon.</td>
+	    <td class="hd" width="10%">Imp.Iva</td>
+	    <td class="hd far" width="10%">Tot.Euro</td>
+	  </tr>
+	  {% for v in fattura.voci %}
+	    {% set prz = '%0.2f' % v.prezzo|float %}
+	    {% set tot_imp = '%0.2f' % v.tot_imponibile()|float %}
+	    {% set tot_iva = '%0.2f' % v.tot_iva()|float %}
+	    {% set tot = '%0.2f' % v.totale()|float %}
+	    <tr>
+	      <td>{{ v.descr }}</td>
+	      <td>{{ v.qta }}</td>
+	      <td>{{ prz|replace(".",",") }}</td>
+	      <td>{{ "%d"|format(v.aliq) }}</td>
+	      <td>{{ tot_imp|replace(".",",") }}</td>
+	      <td>{{ tot_iva|replace(".",",") }}</td>
+	      <td class="far">{{ tot|replace(".",",") }}</td>
+	    </tr>
+	  {% endfor %}
+	  
+	  {% for i in range(0,n_voci) %}
+	    <tr>
+	      <td class="{{ 'last' if loop.index==n_voci else '' }}">&nbsp;</td>
+	      <td class="{{ 'last' if loop.index==n_voci else '' }}">&nbsp;</td>
+	      <td>&nbsp;</td>
+	      <td>&nbsp;</td>
+	      <td>&nbsp;</td>
+	      <td>&nbsp;</td>
+	      <td class="far">&nbsp;</td>
+	    </tr>
+	  {% endfor %}
+	  
+	  {% set impf = '%0.2f' % fattura.tot_imponibile()|float %}
+	  {% set ivaf = '%0.2f' % fattura.tot_iva()|float %}
+	  {% set totf = '%0.2f' % fattura.totale()|float %}
+	  <tr>
+	    <td class="void" colspan="2">&nbsp;</td>
+	    <td class="tot">Totale</td>
+	    <td class="tot">22</td>
+	    <td class="tot">{{ impf|replace(".",",") }}</td>
+	    <td class="tot">{{ ivaf|replace(".",",") }}</td>
+	    <td class="tot far">&nbsp;</td>
+	  </tr>
+	  <tr>
+	    <td class="void" colspan="4">&nbsp;</td>
+	    <td class="tot" colspan="2">TOTALE FATTURA</td>
+	    <td class="tot far">{{ totf|replace(".",",") }}</td>
+	  </tr>
+	</table>
+      </div>
+    {% endblock %}
+    </body>
+</html>

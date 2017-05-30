@@ -1,0 +1,166 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h1 class="page-header">
+    Fattura n&deg; {{ fattura.num }} del {{ fattura.data }}
+  </h1>
+  <div class="panel-group">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+	Cliente
+      </div>
+      <div class="panel-body">
+	<div id="intestazione" style="text-align:left">
+	  <div>
+	    <h4>{{ fattura.cliente.ragsoc }}</h4>
+	    {{ fattura.cliente.indirizzo }} {{ fattura.cliente.cap }} {{ fattura.cliente.citta }}
+	  </div>
+	  <div>
+	    <label>Partita IVA</label> {{ fattura.cliente.p_iva }}
+	  </div>
+	  <div>
+	    <label>Codice Fiscale</label> {{ fattura.cliente.cod_fiscale }}
+	  </div>
+	  <div>
+	    <label>Telefono</label> {{ fattura.cliente.telefono }}
+	  </div>
+	  <div>
+	    <label>Email</label> {{ fattura.cliente.email }}
+	  </div>
+	</div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+	Fattura
+      </div>
+      <div class="panel-body">
+	<form method="POST" class="form-inline">
+	  <label for="scontr1">Scontrini: </label>&nbsp;
+	  <div class="input-group col-xs-1 { 'has-error has-feedback' if 'scontr1' in errors else '' }} ">
+	    <input type="number" id="scontr1" name="scontr1" class="form-control" placeholder="n. 1" 
+	      value="{{ fattura.n_scontr1 if fattura.n_scontr1 != 0 else ''}}" />
+	  </div>
+	  <div class="input-group col-xs-1 { 'has-error has-feedback' if 'scontr2' in errors else '' }} ">
+	    <input type="number" id="scontr2" name="scontr2" class="form-control" placeholder="n. 2" 
+	      value="{{ fattura.n_scontr2 if fattura.n_scontr2 != 0 else ''}}" />
+	  </div>
+	  <div class="input-group col-xs-1 { 'has-error has-feedback' if 'scontr3' in errors else '' }} ">
+	    <input type="number" id="scontr3" name="scontr3" class="form-control" placeholder="n. 3"
+	      value="{{ fattura.n_scontr3 if fattura.n_scontr3 != 0 else ''}}" />
+	  </div><br /><br />
+	  <table class="table">
+	    <tr>
+	      <th class="col-xs-1">Qta</th>
+	      <th class="col-xs-1">Cod</th>
+	      <th class="col-xs-6">Descrizione</th>
+	      <th class="col-xs-1">Prezzo</th>
+	      <th class="col-xs-1">Aliq</th>
+	      <th class="col-xs-1" colspan="2">&nbsp;</th>
+	    </tr>
+	    {% for v in fattura.voci %}
+	    <tr>
+	      <td>{{ v.qta }}</td>
+	      <td>{{ v.codart }}
+	      <td>{{ v.descr }}</td>
+	      <td>{{ v.prezzo }}</td>
+	      <td>{{ v.aliq }}</td>
+	      <td><a href="?oper=del&id_voce={{v.id}}#form" title="Elimina"><span class="glyphicon glyphicon-remove"></span> </a></td>
+	      <td><a href="?oper=mod&id_voce={{v.id}}#form" title="Modifica"><span class="glyphicon glyphicon-pencil"></span> </a></td>
+	    </tr>
+	    {% endfor %}
+	    <tr>
+	      <th colspan="3">&nbsp;</th>
+	      <th>{{ fattura.tot_imponibile() }}</th>
+	      <th>{{ fattura.tot_iva() }}</th>
+	      <th>{{ fattura.totale() }}</th>
+	      <th>&nbsp;</th>
+	    </tr>
+	  </table>
+	  <a name="form"></a>
+	
+	  {% if vmod != None %}
+	    <input type="hidden" name="vmod" value="{{ vmod.id }}" />
+	  {% endif %}
+	  <div class="input-group col-xs-1 {{ 'has-error has-feedback' if 'qta' in errors else '' }}">
+	    <input id="qta" type="number" class="form-control" name="qta" min="1" value="{{qta if qta != None else 1}}" 
+	      placeholder="qta" />
+	  </div>
+	  <div class="input-group col-xs-1">
+	    <input id="codart" type="text" class="form-control" name="codart" value="{{codart if codart != None else ''}}" 
+	      readonly="readonly" />
+	  </div>
+	  <div class="input-group col-xs-5 {{ 'has-error has-feedback' if 'descr' in errors else '' }}">
+	    <input id="descr" type="text" class="form-control" name="descr" value="{{descr if descr != None else ''}}"
+	      placeholder="descrizione" data-provide="typeahead" />
+	  </div>
+	  <div class="input-group col-xs-1 {{ 'has-error has-feedback' if 'prz' in errors else '' }}">
+	    <input id="prz" type="number" class="form-control" name="prz" min="0.0" step="0.1" placeholder="prezzo" 
+	      value="{{prz if prz != None else 0.00}}" />
+	  </div>
+	  <div class="input-group col-xs-1 {{ 'has-error has-feedback' if 'aliq' in errors else '' }}">
+	    <input id="aliq" type="number" class="form-control" name="aliq" value="{{aliq if aliq != None else 22}}" />
+	  </div>
+	  <div class="input-group col-xs-1">
+	    <input type="submit" class="btn btn-info" value="{{'Modifica' if vmod!=None else 'Aggiungi'}}" />
+	  </div>
+	  {% if vmod!=None %}
+	    <div class="input-group col-xs-1">
+	      <a href="{{url_for('mod_fattura', idfatt=fattura.id)}}#form" class="btn btn-default">Annulla</a>
+	    </div>
+	  {% endif %}
+	</form>
+      </div>
+    </div>
+    <div class="panel panel-default">
+    <div class="panel-heading">
+	Operazioni
+      </div>
+      <div class="panel-body" align="center">
+	<a href="{{url_for('del_fattura', idfatt=fattura.id, next=url_for('fatture_cliente',id=fattura.cliente.id,page=0))}}" class="btn btn-danger">Elimina fattura</a>
+	<a href="{{url_for('stampa_fattura', idfatt=fattura.id)}}" class="btn btn-default">Stampa</a>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript">
+    var $input = $("#descr");
+        
+    $input.typeahead({
+      source: function(query, process) {
+	return $.getJSON(
+	  "/prodotti.json",
+	  function (data) {
+	    var newData = [];
+	    $.each(data, function() {
+	      tdescr = $.trim(this.descr);
+	      sprz = String(this.prezzo);
+	      cod = String(this.codice);
+	      aliq = String(this.aliq);
+	      dict = {id: this.artid, name: tdescr, price: sprz, cod : cod, aliq : aliq}
+	      newData.push(dict);
+	    });
+	    return process(newData);
+	  });
+      },
+      afterSelect : function(current) {
+	if(current) {
+	  $('#prz').val(current.price);
+	  $('#aliq').val(current.aliq);
+	  $('#codart').val(current.cod);
+	}
+      },
+      items	: 6,
+      autoSelect: false
+    });
+    
+    $input.change(function() {
+      var prz = 0.0;
+      var cod = '';
+      var aliq = 22;
+      if($input.val() == '') {     
+	$('#prz').val(prz);
+	$('#aliq').val(aliq);
+	$('#codart').val(cod);
+      }
+    });
+  </script>
+{% endblock %}
