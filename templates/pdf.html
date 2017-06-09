@@ -91,8 +91,8 @@
 	  </tr>
 	  {% for v in fattura.voci %}
 	    {% set prz = '%0.2f' % v.prezzo|float %}
-	    {% set tot_imp = '%0.2f' % v.tot_imponibile()|float %}
-	    {% set tot_iva = '%0.2f' % v.tot_iva()|float %}
+	    {% set tot_imp = '%0.2f' % v.imponibile()|float %}
+	    {% set tot_iva = '%0.2f' % v.iva()|float %}
 	    {% set tot = '%0.2f' % v.totale()|float %}
 	    <tr>
 	      <td>{{ v.descr }}</td>
@@ -126,8 +126,8 @@
 	    <td class="far">&nbsp;</td>
 	  </tr>
 	  
-	  {% set impf = '%0.2f' % fattura.tot_imponibile()|float %}
-	  {% set ivaf = '%0.2f' % fattura.tot_iva()|float %}
+	  {% set impf = '%0.2f' % fattura.imponibile()|float %}
+	  {% set ivaf = '%0.2f' % fattura.iva()|float %}
 	  {% set totf = '%0.2f' % fattura.totale()|float %}
 	  <tr>
 	    <td class="void" colspan="2">&nbsp;</td>
