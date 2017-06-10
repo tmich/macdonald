@@ -1,13 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
   <h1 class="page-header">Clienti</h1>
-  <ul class="pager">
-    {% if page > 0 %}
-    <li><a href="{{url_for('clienti', page=page-1) }}">Pag. precedente</a></li>
-    {% endif %}
-    <li><a href="{{url_for('clienti', page=page+1) }}">Pag. successiva</a></li>
-  </ul>
-  <p align="center">Pagina {{ page+1 }}</p>
   <p>
     <form method="POST" action="{{ url_for('cerca_cliente') }}">
       <label for="nominativo">Cerca per nominativo:</label>&nbsp;
@@ -21,23 +14,36 @@
     <table class="table table-striped">
       <tr>
 		<th>rag. sociale</th>
+		<th>cod. fiscale</th>
+		<th>P.IVA</th>
 		<th>indirizzo</th>
-		<th>cap</th>
-		<th>citta</th>
-		<th>&nbsp;</th>
+		<th>tel</th>
+		<th>email</th>
+		<!--<th>&nbsp;</th>-->
 		  </tr>
 		  {% for cliente in clienti %}
 		<tr>
-		<td><a href="{{ url_for('fatture_cliente', id=cliente.id, page=0) }}" title='Fatture'>{{ cliente.ragsoc }}</a></td>
+		<td><a href="{{ url_for('cliente', id=cliente.id) }}" title='Scheda Cliente'>{{ cliente.ragsoc }}</a></td>
+		<td>{{ cliente.cod_fisc }}</td>
+		<td>{{ cliente.p_iva }}</td>
 		<td>{{ cliente.indirizzo }}</td>
-		<td>{{ cliente.cap }}</td>
-		<td>{{ cliente.citta }}</td>
-		<td><a href="{{ url_for('cliente', id=cliente.id) }}" type="button" class="btn btn-default btn-sm">Modifica</a></td>
+		<td>{{ cliente.tel }}</td>
+		<td>{{ cliente.email }}</td>
+<!-- 		<td><a href="{{ url_for('fatture_cliente', id=cliente.id, page=0) }}" type="button" class="btn btn-default btn-sm">Modifica</a></td> -->
 		</tr>
 		  {% else %}
 		<li><em>Nessun cliente.</em>
 		  {% endfor %}
 	  </table>
   </div>
+  <ul class="pager">
+    {% if page > 0 %}
+    <li><a href="{{url_for('clienti', page=page-1) }}">Pag. precedente</a></li>
+    {% endif %}
+    {% if page < last_page %}
+    <li><a href="{{url_for('clienti', page=page+1) }}">Pag. successiva</a></li>
+    {% endif %}
+  </ul>
+  <p align="center">Pagina {{ page+1 }} di {{ last_page+1 }}</p>
   
 {% endblock %}

@@ -82,13 +82,13 @@
       </div>  
       
       <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-	{% with messages = get_flashed_messages() %}
+	{% with messages = get_flashed_messages(with_categories=true) %}
 	  {% if messages %}
-	    <ul class=flashes>
-	    {% for message in messages %}
-	      <li>{{ message }}</li>
+	    <div class=flashes>
+	    {% for category, message in messages %}
+	      <div class="alert alert-{{ category }}">{{ message }}</div>
 	    {% endfor %}
-	    </ul>
+	    </div>
 	  {% endif %}
 	{% endwith %}
 	{% block body %}{% endblock %}

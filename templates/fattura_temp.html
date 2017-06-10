@@ -124,11 +124,12 @@
       </div>
       <div class="panel-body" align="center">
 	<!--<a href="{{url_for('del_fattura', idfatt=fattura.id, next=url_for('fatture_cliente',id=fattura.cliente.id,page=0))}}" 
-	  class="btn btn-danger">Elimina fattura</a>-->
+	  class="btn btn-danger">Elimina fattura</a>
 	<a href="{{url_for('stampa_fattura', idfatt=fattura.id)}}" class="btn btn-default">Stampa</a>
 	<a href="{{url_for('invia_fattura', idfatt=fattura.id, next=url_for('fatture_cliente',id=fattura.cliente.id,page=0))}}" class="btn btn-default">Invia</a>
-	<a href="{{url_for('salva_fattura', idfatt=fattura.id)}}" class="btn btn-primary">Salva</a>
-	<a href="{{url_for('vis_fattura', idfatt=fattura.id)}}" class="btn btn-default">Esci</a>
+	<a href="{{url_for('vis_fattura', idfatt=fattura.id)}}" class="btn btn-default">Esci</a>-->
+	<a href="{{url_for('salva_fatturatemp', idfatt=fattura.id)}}" class="btn btn-primary">Salva</a>
+	<a href="{{url_for('clienti')}}" class="btn btn-default">Esci</a>
       </div>
     </div>
   </div>

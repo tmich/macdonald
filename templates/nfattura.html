@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h1 class="page-header">
+    Emissione Fattura
+  </h1>
+  <div class="panel-group">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+	Cliente
+      </div>
+      <div class="panel-body">
+	<div id="intestazione" style="text-align:left">
+	  <div>
+	    <h4>{{ cliente.ragsoc }}</h4>
+	    {{ cliente.indirizzo }} {{ cliente.cap }} {{ cliente.citta }}
+	  </div>
+	  <div>
+	    <label>Partita IVA</label> {{ cliente.p_iva }}
+	  </div>
+	  <div>
+	    <label>Codice Fiscale</label> {{ cliente.cod_fiscale }}
+	  </div>
+	  <div>
+	    <label>Telefono</label> {{ cliente.telefono }}
+	  </div>
+	  <div>
+	    <label>Email</label> {{ cliente.email }}
+	  </div>
+	</div>
+      </div>
+    </div>
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+	Fattura
+      </div>
+      <div class="panel-body">
+	<form method="POST" class="form-inline">
+	  <label>Data Fattura</label> {{ datafattura|dt }}<br />
+	  <label>N.ro Fattura</label> {{ numfattura }}<br />
+	  <label for="scontr1">N. scontrini: </label>&nbsp;
+	  <div class="input-group col-xs-1 {{ 'has-error has-feedback' if 'scontr1' in errors else '' }} ">
+	    <input type="number" min="1" id="scontr1" name="scontr1" class="form-control" placeholder="n. 1" 
+	      value="{{ n_scontr1 if n_scontr1 != 0 else ''}}" />
+	  </div>
+	  <div class="input-group col-xs-1 {{ 'has-error has-feedback' if 'scontr2' in errors else '' }} ">
+	    <input type="number" min="1" id="scontr2" name="scontr2" class="form-control" placeholder="n. 2" 
+	      value="{{ n_scontr2 if n_scontr2 != 0 else ''}}" />
+	  </div>
+	  <div class="input-group col-xs-1 {{ 'has-error has-feedback' if 'scontr3' in errors else '' }} ">
+	    <input type="number" min="1" id="scontr3" name="scontr3" class="form-control" placeholder="n. 3"
+	      value="{{ n_scontr3 if n_scontr3 != 0 else ''}}" />
+	  </div>
+	  <input type="submit" value="Prosegui" />
+	</form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

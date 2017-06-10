@@ -7,27 +7,29 @@
     </a>
   </div>
   <br />
+  <div align="center"><b>Fatture emesse</b></div>
+  <div align="center">Record trovati: {{ cnt }}</div>
   {% if cnt > 0 %}
     <div class="table-responsive">
       <table class="table table-striped">
 	<tr>
 	  <th>&nbsp;</th>
-	  <th>numero</th>
 	  <th>data</th>
-	  <th>scontrino (1)</th>
-	  <th>scontrino (2)</th>
-	  <th>scontrino (3)</th>
-	  <th>totale</th>
+	  <th>numero</th>
+	  <th style="text-align:right;">N.scontr. 1</th>
+	  <th style="text-align:right;">N.scontr. 2</th>
+	  <th style="text-align:right;">N.scontr. 3</th>
+	  <th style="text-align:right;">importo</th>
 	</tr>
 	{% for f in fatture %}
 	  <tr>
 	    <td>&nbsp;</td>
-	    <td><a href="{{url_for('mod_fattura',idfatt=f.id) }}">Fatt. n. {{ f.num }}</td>
-	    <td>{{ f.data }}</td>
-	    <td>{{ f.n_scontr1 }}</td>
-	    <td>{{ f.n_scontr2 }}</td>
-	    <td>{{ f.n_scontr3 }}</td>
-	    <td>{{ f.imponibile() }}</td>
+	    <td><a href="{{url_for('vis_fattura',idfatt=f.id) }}">{{ f.data|dt }}</a></td>
+	    <td>{{ f.num }}</td>
+	    <td style="text-align:right;">{{ f.n_scontr1 }}</td>
+	    <td style="text-align:right;">{{ f.n_scontr2 }}</td>
+	    <td style="text-align:right;">{{ f.n_scontr3 }}</td>
+	    <td style="text-align:right;">{{ '%0.2f' % f.totale()|float }}</td>
 	  </tr>
 	{% endfor %}
       </table>
@@ -37,10 +39,12 @@
   {% endif %}
   <ul class="pager">
     {% if page > 0 %}
-    <li><a href="{{url_for('fatture_cliente',id=cliente.id, page=page-1) }}">Pag. precedente</a></li>
+      <li><a href="{{url_for('fatture_cliente',id=cliente.id, page=page-1) }}">Pag. precedente</a></li>
     {% endif %}
-    <li><a href="{{url_for('fatture_cliente',id=cliente.id, page=page+1) }}">Pag. successiva</a></li>
+    {% if page < last_page %}
+      <li><a href="{{url_for('fatture_cliente',id=cliente.id, page=page+1) }}">Pag. successiva</a></li>
+    {% endif %}
   </ul>
-  <p align="center">Pagina {{ page+1 }}</p>
+  <p align="center">Pagina {{ page+1 }} di {{ last_page+1 }}</p>
   <div><a href="{{ url_for('clienti') }}">&laquo; Torna indietro</a></div>
 {% endblock %}

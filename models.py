@@ -56,7 +56,7 @@ class Prodotto(db.Model):
     return data
 
   def __init__(self):
-    canc = 0
+    self.canc = 0
     
 class Fattura(db.Model):
   id = db.Column(db.Integer, primary_key=True)

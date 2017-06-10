@@ -5,6 +5,7 @@ from flask import Flask, request, session, g, redirect, url_for, abort, render_t
 from flask_mail import Mail, Message
 from flask.json import JSONEncoder, JSONDecoder
 from flask_sqlalchemy import SQLAlchemy
+from flask_babel import Babel, format_datetime, format_date
 from decimal import Decimal
 from pdfs import create_pdf
 from models import db, Anagrafica, Cliente, Prodotto, Fattura, VoceFattura, InvioFattura, User, FatturaTemp, VoceFatturaTemp, FatturaSequence
@@ -15,6 +16,7 @@ app.static_folder = 'static'
 mail_ext = Mail(app)
 #db = SQLAlchemy(app)
 db.init_app(app)
+babel = Babel(app)
 
 def login_required(f):
     @wraps(f)
@@ -67,10 +69,12 @@ def logout():
 @app.route('/clienti/<int:page>')
 @login_required
 def clienti(page=0):
-  pagenum = 20
+  pagenum = 50
   offset = page * pagenum
+  cnt = Cliente.query.count()
+  last_page = cnt / pagenum
   clienti = Cliente.query.order_by('ragsoc').offset(offset).limit(pagenum)
-  return render_template('clienti.html', clienti=clienti, page=page, utente=g.user)
+  return render_template('clienti.html', clienti=clienti, page=page, cnt=cnt, last_page=last_page, utente=g.user)
 
 @app.route('/cerca_cliente', methods=['POST'])
 @login_required
@@ -78,11 +82,13 @@ def cerca_cliente(page=0):
   if request.method == 'POST':
     f = request.form
     q = str(f['query'])
-    pagenum = 20
+    pagenum = 50
     #offset = page * pagenum
     offset=0
     clienti = db.session.query(Cliente).filter(Cliente.ragsoc.like('%'+q+'%')).order_by('ragsoc').offset(offset).limit(pagenum)
-    return render_template('clienti.html', clienti=clienti, page=page, utente=g.user)
+    cnt = clienti.count()
+    last_page = cnt / pagenum
+    return render_template('clienti.html', clienti=clienti, page=page, cnt=cnt, last_page=last_page, utente=g.user)
 
 @app.route('/salva_cliente', methods=['POST'])
 @login_required
@@ -112,9 +118,9 @@ def salva_cliente():
     cli.email = email
     
     db.session.commit()
-    flash('Anagrafica cliente aggiornata')
+    flash('Anagrafica cliente aggiornata', 'success')
     
-    return redirect(url_for('clienti'))
+    return redirect(url_for('cliente', id=id))
 
 @app.route('/nuovo_cliente', methods=['GET', 'POST'])
 @login_required
@@ -146,11 +152,9 @@ def cliente(id):
 @app.route('/prodotti', methods=['GET'])
 @app.route('/prodotti/<int:page>')
 @login_required
-def prodotti(page=0):
-  pagenum = 20
-  offset = page * pagenum
-  prodotti = Prodotto.query.order_by('descr').offset(offset).limit(pagenum)
-  return render_template('prodotti.html', prodotti=prodotti, page=page, utente=g.user)
+def prodotti():
+  prodotti = Prodotto.query.order_by('descr')
+  return render_template('prodotti.html', prodotti=prodotti, utente=g.user)
 
 @app.route('/prodotto/<int:id>')
 @login_required
@@ -158,7 +162,7 @@ def prodotto(id):
   p = Prodotto.query.get(id)
   return render_template('prodotto.html', prodotto=p)
   
-@app.route('/nuovo_prodotto', methods=['GET', 'POST'])
+@app.route('/nuovo_prodotto')
 @login_required
 def nuovo_prodotto():
   return render_template('prodotto.html', prodotto=None)
@@ -167,17 +171,27 @@ def nuovo_prodotto():
 @login_required
 def salva_prodotto():
   if request.method == 'POST':
-	f = request.form
-	id = f['id']
-	p = Prodotto.query.get(id)
-	p.codice = f['codice']
-	p.descr = f['descrizione']
-	p.aliq = f['aliquota']
-	p.prezzo = f['prezzo']
-	
-	db.session.commit()
-	flash('Articolo aggiornato')
-  return redirect(url_for('prodotti', page=0))
+    f = request.form
+
+    if 'id' in f:
+      id = f['id']
+      p = Prodotto.query.get(id)
+    else:
+      p=Prodotto()
+    
+    p.codice = f['codice']
+    p.descr = f['descrizione']
+    p.aliq = f['aliquota']
+    p.prezzo = f['prezzo']
+    
+    if not 'id' in f:
+      db.session.add(p)
+    
+    db.session.commit()
+    
+    flash('Articolo aggiornato', 'success')
+    
+    return redirect(url_for('prodotto', id=p.id))
 	
 @app.route('/profilo', methods=['GET', 'POST'])
 @login_required
@@ -194,11 +208,13 @@ def profilo():
 @app.route('/fatture_cliente/<int:id>/<int:page>')
 @login_required
 def fatture_cliente(id, page=0):
-  pagenum = 20
+  pagenum = 50
   offset = page * pagenum
   cli = Cliente.query.get(id)
+  cnt = Fattura.query.filter_by(cliente_id=id).count()
+  last_page = cnt / pagenum
   fatture = Fattura.query.filter_by(cliente_id=id).order_by('data desc').offset(offset).limit(pagenum)
-  return render_template('fatture_cliente.html', fatture=fatture, cliente=cli, page=page, cnt=fatture.count())
+  return render_template('fatture_cliente.html', fatture=fatture, cliente=cli, page=page, cnt=cnt, last_page=last_page)
 
 @app.route('/prodotti.json', methods=['GET','POST'])
 def articoli_json():
@@ -217,17 +233,53 @@ def articoli_json():
 
 @login_required
 @app.route('/nfattura/<int:idc>', methods=['GET', 'POST'])
-def nuova_fattura(idc):     
+def nuova_fattura(idc):
+  errors=dict()
   cli=Cliente.query.get(idc)
   dt=datetime.date.today()
   seq=FatturaSequence()
   numfatt=seq.next_val(dt.year)
-  fatt=Fattura(cli, dt, numfatt)
-  db.session.add(fatt)
-  db.session.commit()
+  #fatt=FatturaTemp(cli, dt, numfatt)
+  #db.session.add(fatt)
+  #db.session.commit()
+  
+  if request.method=='GET':
+    return render_template('nfattura.html', cliente=cli, numfattura=numfatt, datafattura=dt)
+  else:
+    f=request.form
+    scontr1=f['scontr1']
+    scontr2=f['scontr2']
+    scontr3=f['scontr3']
     
-  return redirect(url_for('mod_fattura', idfatt=fatt.id))
-
+    try:
+      scontr1=int(scontr1)
+    except:
+      errors['scontr1'] = 'scontrino 1 non valido'
+      
+    if(scontr2 != ''):
+      try:
+	scontr2=int(scontr2)
+      except:
+	errors['scontr2'] = 'scontrino 2 non valido'
+    
+    if(scontr3 != ''):
+      try:
+	scontr3=int(scontr3)
+      except:
+	errors['scontr3'] = 'scontrino 3 non valido'
+    
+    if(len(errors.keys())==0):
+      fatt=FatturaTemp(cli, dt, numfatt)
+      db.session.add(fatt)
+      fatt.n_scontr1 = scontr1
+      fatt.n_scontr2 = scontr2
+      fatt.n_scontr3 = scontr3
+      db.session.commit()
+    
+      return redirect(url_for('mod_fatturatemp', idfatt=fatt.id))
+    
+    return render_template('nfattura.html', cliente=cli, numfattura=numfatt, datafattura=dt, errors=errors)
+    
 @login_required
 @app.route('/invio', methods=['GET'])
 def fatture_da_inviare():
@@ -293,6 +345,13 @@ def stampa_fattura(idfatt):
   response.headers['Content-Type'] = 'application/pdf'
   response.headers['Content-Disposition'] = 'attachment; filename=fattura.pdf'
   return response
+
+@login_required
+@app.route('/vfattura/<int:idfatt>', methods=['GET'])
+def vis_fattura(idfatt):
+  fatt = db.session.query(Fattura).get(idfatt)
+  return render_template('vfattura.html',fattura=fatt)
+  
   
 @login_required
 @app.route('/mfattura/<int:idfatt>', methods=['GET','POST'])
@@ -404,6 +463,135 @@ def mod_fattura(idfatt):
   return render_template('fattura.html',fattura=fatt,vmod=voce_da_modificare,codart=codart,descr=descr,qta=qta,
 			 prz=prz,aliq=aliq,errors=errors)
 
+@login_required
+@app.route('/mfatturat/<int:idfatt>', methods=['GET','POST'])
+def mod_fatturatemp(idfatt):
+  voce_da_modificare=None
+  fatt = db.session.query(FatturaTemp).get(idfatt)
+  errors=dict()
+  codart=None
+  descr=None
+  qta=None
+  prz=None
+  aliq=None
+  if(fatt==None):
+    abort(404)
+      
+  #if(request.method == 'GET'):
+  if('oper' in request.args):
+    id_voce = request.args.get('id_voce')
+    v = db.session.query(VoceFatturaTemp).get(id_voce)
+    oper = request.args.get('oper')
+    if(oper=='del'):	# elimina voce
+      db.session.delete(v)
+      db.session.commit()
+      return redirect(url_for('mod_fatturatemp', idfatt=fatt.id))
+    else:
+      voce_da_modificare=v
+      codart=voce_da_modificare.codart
+      descr=voce_da_modificare.descr
+      qta=voce_da_modificare.qta
+      prz=voce_da_modificare.prezzo
+      aliq=voce_da_modificare.aliq
+	
+  if(request.method == 'POST'):  
+    f=request.form
+    
+    scontr1=f['scontr1']
+    scontr2=f['scontr2']
+    scontr3=f['scontr3']
+    qta=f['qta']
+    descr=f['descr']
+    prz=f['prz']
+    aliq=f['aliq']
+    codart=f['codart']
+    
+    try:
+      scontr1=int(scontr1)
+    except:
+      errors['scontr1'] = 'scontrino 1 non valido'
+      
+    if(scontr2 != ''):
+      try:
+	scontr2=int(scontr2)
+      except:
+	errors['scontr2'] = 'scontrino 2 non valido'
+    
+    if(scontr3 != ''):
+      try:
+	scontr3=int(scontr3)
+      except:
+	errors['scontr3'] = 'scontrino 3 non valido'
+      
+    try:
+      qta=int(qta)
+    except:
+      errors['qta'] = 'quantit&agrave; non valida'
+      
+    if(descr.strip()==''):
+      errors['descr'] = 'descrizione mancante'
+    
+    try:
+      prz = float(prz)
+      if(prz==0):
+	raise Exception("")
+    except:
+      errors['prz']='prezzo non valido'
+    
+    try:
+      aliq = float(aliq)
+      if(aliq==0):
+	raise Exception("")
+    except:
+      errors['aliq']='aliquota IVA non valida'
+    
+    print(errors, file=sys.stderr)
+    
+    if(len(errors.keys())==0):
+      fatt.n_scontr1 = scontr1
+      fatt.n_scontr2 = scontr2
+      fatt.n_scontr3 = scontr3
+      
+      if('vmod' in f):	# modifica voce
+	v=db.session.query(VoceFatturaTemp).get(f['vmod'])
+	v.codart=codart
+	v.descr=descr
+	v.qta=qta
+	v.prezzo=prz
+	v.aliq=aliq
+      else:	 # crea voce
+	v=fatt.crea_voce(codart=codart,descr=descr,qta=qta,prezzo=prz,aliq=aliq)
+	fatt.voci.append(v)
+      
+      db.session.add(v)
+      db.session.commit()
+      return redirect(url_for('mod_fatturatemp', idfatt=idfatt))
+
+      #print("\t tot. imp. voce: %.2f" % v.tot_imponibile(), file=sys.stderr)
+      #print("\t tot. imp. fattura: %.2f" % fatt.tot_imponibile(), file=sys.stderr)
+  
+  return render_template('fattura_temp.html',fattura=fatt,vmod=voce_da_modificare,codart=codart,descr=descr,qta=qta,
+			 prz=prz,aliq=aliq,errors=errors)
+
+@login_required
+@app.route('/sfatturat/<int:idfatt>')
+def salva_fatturatemp(idfatt):
+  tmpf = db.session.query(FatturaTemp).get(idfatt)
+  f=Fattura(tmpf.cliente, tmpf.data, tmpf.num)
+  f.n_scontr1=tmpf.n_scontr1
+  f.n_scontr2=tmpf.n_scontr2
+  f.n_scontr3=tmpf.n_scontr3
+  db.session.add(f)
+  
+  for tmpv in tmpf.voci:
+    v=VoceFattura(tmpv.codart, tmpv.descr, tmpv.qta, tmpv.prezzo, tmpv.aliq)
+    f.voci.append(v)
+    db.session.add(v)
+  
+  db.session.commit()
+  flash('Fattura inserita correttamente', 'success')
+  return redirect(url_for('vis_fattura', idfatt=f.id))
+
 @app.route('/dett_fattura/<int:id>')
 @login_required
 def dett_fattura(id, page=0):
@@ -412,7 +600,13 @@ def dett_fattura(id, page=0):
   f = Fattura.query.get(id)
   return render_template('dett_fattura.html', fattura=f, voci=f.voci, tot=f.totale())
 
-
+# jinja2 filters
+@app.template_filter('dt')
+def _jinja2_filter_date(date, fmt=None):
+  if fmt:
+    return format_date(date, fmt)
+  else:
+    return format_date(date, 'medium')
 
 if __name__ == "__main__":
   #app.run(host='93.186.254.106', port=80)

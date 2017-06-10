@@ -11,6 +11,7 @@ class Config(object):
   MAIL_DEFAULT_SENDER=('Tiziano Michelessi', 'tiziano.michelessi@gmail.com')
   MAIL_USERNAME = 'tiziano.michelessi'
   MAIL_PASSWORD = 'T1z1@n0!'
+  BABEL_DEFAULT_LOCALE = 'it'
   
 class ProductionConfig(Config):
   pass
