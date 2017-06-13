@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_babel import Babel, format_datetime, format_date
 from decimal import Decimal
 from pdfs import create_pdf
-from models import db, Anagrafica, Cliente, Prodotto, Fattura, VoceFattura, InvioFattura, User, FatturaTemp, VoceFatturaTemp, FatturaSequence, TVoceFattura, TFattura
+from models import db, Anagrafica, Cliente, Prodotto, Fattura, VoceFattura, InvioFattura, User, FatturaTemp, VoceFatturaTemp, FatturaSequence
 from forms import FormNuovaFattura, FormAggiungiVoce
 
 app = Flask(__name__)
@@ -222,6 +222,15 @@ def articoli_json():
   articoli = Prodotto.query.all()
   return json.dumps([a.to_json() for a in articoli])
 
+#@login_required
+#@app.route('/nfattura/<int:idc>/delvoce/<int:idv>', methods=['GET'])
+#def rimuovi_voce_temp(idc, idv):
+  #v=db.session.query(VoceFatturaTemp).get(idv).first()
+  #if(v!=None):
+    #db.session.delete(v)
+    #db.session.commit()
+    #redirect(url_for(nfattura, idc=idc))
+
 @login_required
 @app.route('/invio', methods=['GET'])
 def fatture_da_inviare():
@@ -254,6 +263,7 @@ def invia_tutte():
    
   flash('Invio effettuato con successo')
   return redirect(dest)
+    
 
 @login_required
 @app.route('/invio_fatt/<int:idfatt>', methods=['GET'])
@@ -306,29 +316,34 @@ def nuova_fattura(idc):
   else:
     f=FormNuovaFattura(request.form)
     if(f.valido()):
-      fatt = Fattura(cli, dt)
-      fatt.n_scontr1 = f.n_scontr1
-      fatt.n_scontr2 = f.n_scontr2
-      fatt.n_scontr3 = f.n_scontr3
-      db.session.add(fatt)
-      return render_template('fattura.html', fattura=fatt)
+      tmpfatt=FatturaTemp(cli, dt, numfatt)
+      db.session.add(tmpfatt)
+      tmpfatt.n_scontr1 = f.n_scontr1
+      tmpfatt.n_scontr2 = f.n_scontr2
+      tmpfatt.n_scontr3 = f.n_scontr3
+      db.session.commit()
+      
+      return render_template('fattura.html', fattura=tmpfatt)
     else:
       return render_template('nfattura.html', cliente=cli, numfattura=numfatt, datafattura=dt, errors=f.errors)
 
-@app.route('/agg_voce', methods=['POST'])
-def aggiungi_voce():
-   
+@app.route('/agg_voce/<int:idfatt>', methods=['POST'])
+def aggiungi_voce(idfatt):
+  fatt = db.session.query(FatturaTemp).get(idfatt)
+  
+  if(fatt==None):
+    abort(404)
+  
   f = FormAggiungiVoce(request.form)
   
   if(f.valido()):
-    fattura=session['fattura']
-    cliente=Cliente.query.get(fattura.id_cliente)
-    #v = TVoceFattura(codart=f.codart,descr=f.descr,qta=f.qta,prezzo=f.prz,aliq=f.aliq)
-    fattura.aggiungi(codart=f.codart,descr=f.descr,qta=f.qta,prezzo=f.prz,aliq=f.aliq)
-    session['fattura']=fattura
+    v = fatt.crea_voce(codart=f.codart,descr=f.descr,qta=f.qta,prezzo=f.prz,aliq=f.aliq)
+    fatt.voci.append(v)
+    db.session.add(v)
+    db.session.commit()
     f.pulisci()
   
-  return render_template('fattura.html', fattura=session['fattura'], errors=f.errors, form=f)
+  return render_template('fattura.html', fattura=fatt, errors=f.errors, form=f)
 
 @app.route('/cfattura/<int:idfatt>', methods=['GET'])
 def canc_fattura(idfatt):

@@ -1,7 +1,11 @@
 {% extends "layout.html" %}
 {% block body %}
   <h1 class="page-header">
-    Fattura n&deg; {{ fattura.num }} del {{ fattura.data }}
+  {% if fattura.num > 0 %}
+    Fattura n&deg; {{ fattura.num }} del {{ fattura.data|dt }}
+  {% else %}
+    Emissione Fattura
+  {% endif %}
   </h1>
   <div class="panel-group">
     <div class="panel panel-default">
@@ -34,9 +38,11 @@
 	Fattura
       </div>
       <div class="panel-body">
-	<form method="POST" class="form-inline">
+	<div class="form-inline">
 	  <label>Data Fattura</label> {{ fattura.data|dt }}<br />
-	  <label>N.ro Fattura</label> {{ fattura.num }}<br />
+	  {% if fattura.num > 0 %}
+	    <label>N.ro Fattura</label> {{ fattura.num }}<br />
+	  {% endif %}
 	  <label for="scontr1">N. scontrini: </label>&nbsp;
 	  <div class="input-group col-xs-1 { 'has-error has-feedback' if 'scontr1' in errors else '' }} ">
 	    <input type="number" min="1" id="scontr1" name="scontr1" class="form-control" placeholder="n. 1" 
@@ -49,68 +55,72 @@
 	  <div class="input-group col-xs-1 { 'has-error has-feedback' if 'scontr3' in errors else '' }} ">
 	    <input type="number" min="1" id="scontr3" name="scontr3" class="form-control" placeholder="n. 3"
 	      value="{{ fattura.n_scontr3 if fattura.n_scontr3 != 0 else ''}}" />
-	  </div><br /><br />
-	  <table class="table">
-	    <tr>
-	      <th class="col-xs-1">Qta</th>
-	      <th class="col-xs-1">Cod</th>
-	      <th class="col-xs-5">Descrizione</th>
-	      <th class="col-xs-1">Imponibile</th>
-	      <th class="col-xs-1" style="text-align:center;">%</th>
-	      <th class="col-xs-1">IVA</th>
-	      <th class="col-xs-1">Tot</th>
-	      <th class="col-xs-1" colspan="2">&nbsp;</th>
-	    </tr>
-	    {% for v in fattura.voci %}
-	    <tr>
-	      <td>{{ v.qta }}</td>
-	      <td>{{ v.codart }}</td>
-	      <td>{{ v.descr }}</td>
-	      <td>{{ '%0.2f' % v.imponibile()|float }}</td>
-	      <td style="text-align:center;">{{ v.aliq }}</td>
-	      <td>{{ '%0.2f' % v.iva()|float }}</td>
-	      <td>{{ '%0.2f' % v.totale()|float }}</td>
-	      <td><a href="?oper=del&id_voce={{v.id}}#form" title="Elimina"><span class="glyphicon glyphicon-remove"></span> </a></td>
-	      <td><a href="?oper=mod&id_voce={{v.id}}#form" title="Modifica"><span class="glyphicon glyphicon-pencil"></span> </a></td>
-	    </tr>
-	    {% endfor %}
-	    <tr>
-	      <th colspan="3">&nbsp;</th>
-	      <th>{{ '%0.2f' % fattura.imponibile()|float }}</th>
-	      <th>&nbsp;</th>
-	      <th>{{ '%0.2f' % fattura.iva()|float }}</th>
-	      <th>{{ '%0.2f' % fattura.totale()|float }}</th>
-	      <th>&nbsp;</th>
-	    </tr>
-	  </table>
-	  <a name="form"></a>
+	  </div>
+	</div><br /><br />
+	<table class="table">
+	  <tr>
+	    <th class="col-xs-1">Qta</th>
+	    <th class="col-xs-1">Cod</th>
+	    <th class="col-xs-5">Descrizione</th>
+	    <th class="col-xs-1">Imponibile</th>
+	    <th class="col-xs-1" style="text-align:center;">%</th>
+	    <th class="col-xs-1">IVA</th>
+	    <th class="col-xs-1">Tot</th>
+	    <th class="col-xs-1" colspan="2">&nbsp;</th>
+	  </tr>
+	  {% for v in fattura.voci %}
+	  <tr>
+	    <td>{{ v.qta }}</td>
+	    <td>{{ v.codart }}</td>
+	    <td>{{ v.descr }}</td>
+	    <td>{{ '%0.2f' % v.imponibile()|float }}</td>
+	    <td style="text-align:center;">{{ v.aliq }}</td>
+	    <td>{{ '%0.2f' % v.iva()|float }}</td>
+	    <td>{{ '%0.2f' % v.totale()|float }}</td>
+	    <td><a href="{{ url_for('rimuovi_voce', idvoce=v.id) }}" 
+	      onclick="return confirm('Sei sicuro di voler eliminare la voce?');" 
+	      title="Elimina"><span class="glyphicon glyphicon-remove"></span> </a></td>
+	    <td><a href="#" title="Modifica"><span class="glyphicon glyphicon-pencil"></span> </a></td>
+	  </tr>
+	  {% endfor %}
+	  <tr>
+	    <th colspan="3">&nbsp;</th>
+	    <th>{{ '%0.2f' % fattura.imponibile()|float }}</th>
+	    <th>&nbsp;</th>
+	    <th>{{ '%0.2f' % fattura.iva()|float }}</th>
+	    <th>{{ '%0.2f' % fattura.totale()|float }}</th>
+	    <th>&nbsp;</th>
+	  </tr>
+	</table>
 	
-	  {% if vmod != None %}
+	<a name="form"></a>
+	<form method="POST" class="form-inline" action="{{ url_for('aggiungi_voce') }}#form">
+	  {% if vmod %}
 	    <input type="hidden" name="vmod" value="{{ vmod.id }}" />
 	  {% endif %}
 	  <div class="input-group col-xs-1 {{ 'has-error has-feedback' if 'qta' in errors else '' }}">
-	    <input id="qta" type="number" class="form-control" name="qta" min="1" value="{{qta if qta != None else 1}}" 
+	    <input id="qta" type="number" class="form-control" name="qta" min="1" value="{{form.qta if form else ''}}" 
 	      placeholder="qta" />
 	  </div>
 	  <div class="input-group col-xs-1" style="display:none;">
-	    <input id="codart" type="text" class="form-control" name="codart" value="{{codart if codart != None else ''}}" 
+	    <input id="codart" type="text" class="form-control" name="codart" value="{{form.codart if form else ''}}" 
 	      readonly="readonly" />
 	  </div>
 	  <div class="input-group col-xs-6 {{ 'has-error has-feedback' if 'descr' in errors else '' }}">
-	    <input id="descr" type="text" class="form-control" name="descr" value="{{descr if descr != None else ''}}"
+	    <input id="descr" type="text" class="form-control" name="descr" value="{{form.descr if form else ''}}"
 	      placeholder="descrizione" data-provide="typeahead" />
 	  </div>
 	  <div class="input-group col-xs-1 {{ 'has-error has-feedback' if 'prz' in errors else '' }}">
 	    <input id="prz" type="number" class="form-control" name="prz" min="0.0" step="0.1" placeholder="prezzo" 
-	      value="{{prz if prz != None else 0.00}}" />
+	      value="{{form.prz if form else ''}}" />
 	  </div>
 	  <div class="input-group col-xs-1 {{ 'has-error has-feedback' if 'aliq' in errors else '' }}">
-	    <input id="aliq" type="number" class="form-control" name="aliq" value="{{aliq if aliq != None else 22}}" />
+	    <input id="aliq" type="number" class="form-control" name="aliq" value="{{form.aliq if form else ''}}" />
 	  </div>
 	  <div class="input-group col-xs-1">
-	    <input type="submit" class="btn btn-info" value="{{'Modifica' if vmod!=None else 'Aggiungi'}}" />
+	    <input type="submit" class="btn btn-info" value="{{'Modifica' if vmod else 'Aggiungi'}}" />
 	  </div>
-	  {% if vmod!=None %}
+	  {% if vmod %}
 	    <div class="input-group col-xs-1">
 	      <a href="{{url_for('mod_fattura', idfatt=fattura.id)}}#form" class="btn btn-default">Annulla</a>
 	    </div>
@@ -123,12 +133,10 @@
 	Operazioni
       </div>
       <div class="panel-body" align="center">
-	<!--<a href="{{url_for('del_fattura', idfatt=fattura.id, next=url_for('fatture_cliente',id=fattura.cliente.id,page=0))}}" 
-	  class="btn btn-danger">Elimina fattura</a>-->
-	<a href="{{url_for('stampa_fattura', idfatt=fattura.id)}}" class="btn btn-default">Stampa</a>
-	<a href="{{url_for('invia_fattura', idfatt=fattura.id, next=url_for('fatture_cliente',id=fattura.cliente.id,page=0))}}" class="btn btn-default">Invia</a>
-	<a href="{{url_for('salva_fattura', idfatt=fattura.id)}}" class="btn btn-primary">Salva</a>
-	<a href="{{url_for('vis_fattura', idfatt=fattura.id)}}" class="btn btn-default">Esci</a>
+	<a href="{{url_for('stampa_fattura', idfatt=0)}}" class="btn btn-default">Stampa</a>
+	<a href="{{url_for('invia_fattura', idfatt=0)}}" class="btn btn-default">Invia</a>
+	<a href="{{url_for('salva_fattura', idfatt=0)}}" class="btn btn-primary">Salva</a>
+	<a href="{{url_for('canc_fattura', idfatt=0)}}" class="btn btn-default">Esci</a>
       </div>
     </div>
   </div>

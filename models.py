@@ -3,6 +3,7 @@ from __future__ import print_function
 from flask_sqlalchemy import SQLAlchemy
 import sys
 from decimal import Decimal
+from flask.json import jsonify
 
 db = SQLAlchemy()
 
@@ -245,3 +246,80 @@ class FatturaSequence():
     for row in result:
       num = row[0] + 1
     return num
+
+
+class TVoceFattura:
+  codart = ''
+  descr = ''
+  qta = 1
+  prezzo = 0.00 
+  aliq = 0
+  n_scontr1 = 0
+  n_scontr2 = 0
+  n_scontr3 = 0
+  
+  def __init__(self, codart, descr, qta, prezzo, aliq):
+    self.codart = codart
+    self.descr = descr
+    self.qta = qta
+    self.prezzo=prezzo
+    self.aliq=aliq
+    
+  def serialize(self):
+    return {
+      'codart': self.codart, 
+      'descr': self.descr,
+      'qta': self.qta,
+      'prezzo': self.prezzo,
+      'aliq': self.aliq
+    }
+    
+  def iva(self):
+    p = self.prezzo * self.qta
+    iva = Decimal(p) - Decimal(self.imponibile())
+    return round(iva, 2)
+  
+  def imponibile(self):
+    p = self.prezzo * self.qta
+    al = Decimal(round(self.aliq, 2))
+    cnv = Decimal(al/100)+1
+    imponibile = Decimal(p / cnv, 2)
+    #print("Imponibile: " ,file=sys.stderr)
+    #print(round(imponibile, 2),file=sys.stderr)
+    return round(imponibile, 2)
+  
+  def totale(self):
+    tot=self.iva()+self.imponibile()
+    return tot
+  
+class TFattura:
+  num = 0
+  id_cliente = None
+  data = None
+  voci = None
+  
+  def __init__(self, dt, id_cliente):
+    self.data = dt
+    self.id_cliente = id_cliente
+    self.voci = []
+    
+  def serialize(self):
+    return {
+      'num': self.num, 
+      'data': self.data,
+      'voci': jsonify([v.serialize() for v in self.voci])
+    }
+    
+  def aggiungi(self, codart, descr, qta, prezzo, aliq):
+    v = TVoceFattura(codart, descr, qta, prezzo, aliq)
+    self.voci.append(v)
+    
+  def imponibile(self):
+    return sum([v.imponibile() for v in self.voci])
+  
+  def iva(self):
+    return sum([v.iva() for v in self.voci])
+
+  def totale(self):
+    return sum([v.totale() for v in self.voci])
+  

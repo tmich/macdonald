@@ -77,9 +77,9 @@
 	Operazioni
       </div>
       <div class="panel-body" align="center">
-	<a href="{{url_for('stampa_fattura', idfatt=fattura.id)}}" class="btn btn-default">Stampa</a>
+	<a href="{{url_for('stampa_fattura', idfatt=fattura.id)}}" target="_blank" class="btn btn-default">Stampa</a>
 	<a href="{{url_for('invia_fattura', idfatt=fattura.id, next=url_for('fatture_cliente',id=fattura.cliente.id,page=0))}}" class="btn btn-default">Invia</a>
-	<a href="{{url_for('mod_fattura', idfatt=fattura.id)}}" class="btn btn-primary">Modifica</a>
+	<a href="{{url_for('mod_fattura', idfatt=fattura.id)}}#form" class="btn btn-primary">Modifica</a>
 	<a href="{{url_for('fatture_cliente', id=fattura.cliente.id, page=0)}}" class="btn btn-default">Esci</a>
       </div>
     </div>
