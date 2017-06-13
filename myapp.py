@@ -1,15 +1,17 @@
 from __future__ import print_function
 import os, config, json, datetime, flask, sys
 from functools import wraps
-from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash, make_response
+from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash, make_response, jsonify
 from flask_mail import Mail, Message
 from flask.json import JSONEncoder, JSONDecoder
 from flask_sqlalchemy import SQLAlchemy
 from flask_babel import Babel, format_datetime, format_date
 from decimal import Decimal
 from pdfs import create_pdf
-from models import db, Anagrafica, Cliente, Prodotto, Fattura, VoceFattura, InvioFattura, User, FatturaTemp, VoceFatturaTemp, FatturaSequence, TVoceFattura, TFattura
-from forms import FormNuovaFattura, FormAggiungiVoce
+from models import db, Anagrafica, Cliente, Prodotto, Fattura, VoceFattura, InvioFattura, User, FatturaSequence, ObjFatt, ObjVoce
+from forms import FormNuovaFattura, FormAggiungiVoce, FormScontrini
+import jsonpickle
+from dateutil.parser import parse
 
 app = Flask(__name__)
 app.config.from_object('config.DevelopmentConfig')
@@ -292,43 +294,62 @@ def stampa_fattura(idfatt):
 def vis_fattura(idfatt):
   fatt = db.session.query(Fattura).get(idfatt)
   return render_template('vfattura.html',fattura=fatt)
-  
-@login_required
-@app.route('/nfattura/<int:idc>', methods=['GET', 'POST'])
-def nuova_fattura(idc):
-  cli=Cliente.query.get(idc)
-  dt=datetime.date.today()
-  seq=FatturaSequence()
-  numfatt=seq.next_val(dt.year)
-  
-  if request.method=='GET':
-    return render_template('nfattura.html', cliente=cli, numfattura=numfatt, datafattura=dt)
-  else:
-    f=FormNuovaFattura(request.form)
-    if(f.valido()):
-      fatt = Fattura(cli, dt)
-      fatt.n_scontr1 = f.n_scontr1
-      fatt.n_scontr2 = f.n_scontr2
-      fatt.n_scontr3 = f.n_scontr3
-      db.session.add(fatt)
-      return render_template('fattura.html', fattura=fatt)
-    else:
-      return render_template('nfattura.html', cliente=cli, numfattura=numfatt, datafattura=dt, errors=f.errors)
 
+@login_required
+@app.route('/ins_scontrini/<int:id_cliente>', methods=['GET','POST'])
+def inserisci_scontrini(id_cliente):
+  errors=[]
+  n_scontr1=0
+  n_scontr2=0
+  n_scontr3=0
+  cli=Cliente.query.get(id_cliente)
+  numfatt=FatturaSequence().next_val(datetime.date.today().year)
+  
+  if request.method=='POST':
+    f=FormScontrini(request.form)
+    errors=f.errors
+    if(f.valido()):
+      n_scontr1=f.n_scontr1
+      n_scontr2=f.n_scontr2
+      n_scontr3=f.n_scontr3
+      dt=parse(f.dtfatt)
+      numfatt=f.numfatt
+	  #session['voci']=None
+      fatt=ObjFatt(numfatt,n_scontr1,n_scontr2,n_scontr3,dt,id_cliente)
+      session['fatt']=jsonpickle.encode(fatt)
+      #return redirect(url_for('nuova_fattura', idc=id_cliente, n_scontr1=n_scontr1, n_scontr2=n_scontr2, n_scontr3=n_scontr3, dt=dt, numfatt=numfatt))
+      return redirect(url_for('nuova_fattura', idc=fatt.id_cliente))
+	  
+  return render_template('scontrini.html', cliente=cli, datafattura=datetime.date.today(), numfattura=numfatt, errors=errors)
+
+@login_required
+@app.route('/nfattura/<int:idc>', methods=['GET','POST'])
+def nuova_fattura(idc):
+  fatt=jsonpickle.decode(session['fatt'])
+  cli=Cliente.query.get(fatt.id_cliente)
+
+  if(request.method=='POST'):
+    f = FormAggiungiVoce(request.form)
+
+    if(not f.valido()):
+	  return render_template('nfattura.html',errors=f.errors,form=f,datafattura=fatt.dt, numfatt=fatt.num, n_scontr1=fatt.n_scontr1,n_scontr2=fatt.n_scontr2,n_scontr3=fatt.n_scontr3, cliente=cli, imponibile=fatt.imponibile(),iva=fatt.iva(),totale=fatt.totale(),voci=fatt.voci)
+    else:
+	  ## aggiungi voce!!!
+	  fatt.aggiungi(ObjVoce(qta=f.qta,descr=f.descr,codart=f.codart,prz=f.prz,aliq=f.aliq))
+	  
+	  ## salvo data e scontrini
+	  fatt.n_scontr1=f.n_scontr1
+	  fatt.n_scontr2=f.n_scontr2
+	  fatt.n_scontr3=f.n_scontr3
+	  fatt.dt=parse(f.dtfatt)
+	  session['fatt']=jsonpickle.encode(fatt)
+	
+  return render_template('nfattura.html', datafattura=fatt.dt, numfatt=fatt.num, n_scontr1=fatt.n_scontr1,n_scontr2=fatt.n_scontr2,n_scontr3=fatt.n_scontr3, cliente=cli, imponibile=fatt.imponibile(),iva=fatt.iva(),totale=fatt.totale(),voci=fatt.voci)  
+  
 @app.route('/agg_voce', methods=['POST'])
 def aggiungi_voce():
-   
-  f = FormAggiungiVoce(request.form)
+  pass
   
-  if(f.valido()):
-    fattura=session['fattura']
-    cliente=Cliente.query.get(fattura.id_cliente)
-    #v = TVoceFattura(codart=f.codart,descr=f.descr,qta=f.qta,prezzo=f.prz,aliq=f.aliq)
-    fattura.aggiungi(codart=f.codart,descr=f.descr,qta=f.qta,prezzo=f.prz,aliq=f.aliq)
-    session['fattura']=fattura
-    f.pulisci()
-  
-  return render_template('fattura.html', fattura=session['fattura'], errors=f.errors, form=f)
 
 @app.route('/cfattura/<int:idfatt>', methods=['GET'])
 def canc_fattura(idfatt):
@@ -341,13 +362,12 @@ def canc_fattura(idfatt):
   db.session.commit()
   return redirect(url_for('fatture_cliente', id=id_cliente, page=0))
 
-@app.route('/del_voce/<int:idvoce>', methods=['GET'])
-def rimuovi_voce(idvoce):
-  voce = db.session.query(VoceFatturaTemp).get(idvoce)
-  fatt = db.session.query(FatturaTemp).get(voce.fattura_id)
-  db.session.delete(voce)
-  db.session.commit()
-  return render_template('fattura.html', fattura=fatt)
+@app.route('/del_voce/<int:index>', methods=['GET'])
+def rimuovi_voce(index):
+  fatt=jsonpickle.decode(session['fatt'])
+  fatt.rimuovi(index-1)
+  session['fatt']=jsonpickle.encode(fatt)
+  return redirect(url_for('nuova_fattura', idc=fatt.id_cliente)) 
   
 @login_required
 @app.route('/mfattura/<int:idfatt>', methods=['GET','POST'])
@@ -531,10 +551,10 @@ def dett_fattura(id, page=0):
 @app.template_filter('dt')
 def _jinja2_filter_date(date, fmt=None):
   if fmt:
-    return format_date(date, fmt)
+    return date.strftime(fmt)  #format_date(date, fmt)
   else:
     return format_date(date, 'medium')
 
 if __name__ == "__main__":
-  #app.run(host='93.186.254.106', port=80)
-  app.run()
+  app.run(host='93.186.254.106', port=80)
+  #app.run()

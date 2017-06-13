@@ -170,73 +170,71 @@ class User(db.Model):
   def __repr__(self):
       return '<User %r>' % self.username
 
-class FatturaTemp(db.Model):
-  id = db.Column(db.Integer, primary_key=True)
-  num = db.Column(db.Integer)
-  data = db.Column(db.Date)
-  n_scontr1 = db.Column(db.Integer)
-  n_scontr2 = db.Column(db.Integer)
-  n_scontr3 = db.Column(db.Integer)
-  cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'))
-  cliente = db.relationship('Cliente',
-			    backref = db.backref('fatturetemp', lazy='dynamic'))
-  voci = db.relationship('VoceFatturaTemp', cascade="save-update, merge, delete")
-  canc = db.Column(db.Integer)
+# class FatturaTemp(db.Model):
+  # id = db.Column(db.Integer, primary_key=True)
+  # num = db.Column(db.Integer)
+  # data = db.Column(db.Date)
+  # n_scontr1 = db.Column(db.Integer)
+  # n_scontr2 = db.Column(db.Integer)
+  # n_scontr3 = db.Column(db.Integer)
+  # cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'))
+  # cliente = db.relationship('Cliente',
+			    # backref = db.backref('fatturetemp', lazy='dynamic'))
+  # voci = db.relationship('VoceFatturaTemp', cascade="save-update, merge, delete")
+  # canc = db.Column(db.Integer)
   
-  def __init__(self, cliente, data, num = 0):
-    self.cliente = cliente
-    self.data = data
-    self.num = num
-    self.canc = 0
+  # def __init__(self, cliente, data, num = 0):
+    # self.cliente = cliente
+    # self.data = data
+    # self.num = num
+    # self.canc = 0
   
-  def imponibile(self):
-    return sum([v.imponibile() for v in self.voci])
+  # def imponibile(self):
+    # return sum([v.imponibile() for v in self.voci])
   
-  def iva(self):
-    return sum([v.iva() for v in self.voci])
+  # def iva(self):
+    # return sum([v.iva() for v in self.voci])
 
-  def totale(self):
-    return sum([v.totale() for v in self.voci])
+  # def totale(self):
+    # return sum([v.totale() for v in self.voci])
   
-  def crea_voce(self, codart, descr, qta, prezzo, aliq):
-    return VoceFatturaTemp(codart, descr, qta, prezzo, aliq)
+  # def crea_voce(self, codart, descr, qta, prezzo, aliq):
+    # return VoceFatturaTemp(codart, descr, qta, prezzo, aliq)
 
-class VoceFatturaTemp(db.Model):
-  id = db.Column(db.Integer, primary_key=True)
-  seq = db.Column(db.Integer)
-  codart = db.Column(db.String(80))
-  descr = db.Column(db.String(120))
-  qta = db.Column(db.Integer)
-  prezzo = db.Column(db.Numeric(10, 2)) 
-  aliq = db.Column(db.Integer)
-  fattura_id = db.Column(db.Integer, db.ForeignKey('fattura_temp.id'))
-  canc = db.Column(db.Integer)
+# class VoceFatturaTemp(db.Model):
+  # id = db.Column(db.Integer, primary_key=True)
+  # seq = db.Column(db.Integer)
+  # codart = db.Column(db.String(80))
+  # descr = db.Column(db.String(120))
+  # qta = db.Column(db.Integer)
+  # prezzo = db.Column(db.Numeric(10, 2)) 
+  # aliq = db.Column(db.Integer)
+  # fattura_id = db.Column(db.Integer, db.ForeignKey('fattura_temp.id'))
+  # canc = db.Column(db.Integer)
   
-  def __init__(self, codart, descr, qta, prezzo, aliq):
-    self.codart=codart
-    self.descr=descr
-    self.qta=qta
-    self.prezzo=prezzo
-    self.aliq=aliq
-    self.canc = 0
+  # def __init__(self, codart, descr, qta, prezzo, aliq):
+    # self.codart=codart
+    # self.descr=descr
+    # self.qta=qta
+    # self.prezzo=prezzo
+    # self.aliq=aliq
+    # self.canc = 0
   
-  def iva(self):
-    p = self.prezzo * self.qta
-    iva = Decimal(p) - Decimal(self.imponibile())
-    return round(iva, 2)
+  # def iva(self):
+    # p = self.prezzo * self.qta
+    # iva = Decimal(p) - Decimal(self.imponibile())
+    # return round(iva, 2)
   
-  def imponibile(self):
-    p = self.prezzo * self.qta
-    al = Decimal(round(self.aliq, 2))
-    cnv = Decimal(al/100)+1
-    imponibile = Decimal(p / cnv, 2)
-    #print("Imponibile: " ,file=sys.stderr)
-    #print(round(imponibile, 2),file=sys.stderr)
-    return round(imponibile, 2)
+  # def imponibile(self):
+    # p = self.prezzo * self.qta
+    # al = Decimal(round(self.aliq, 2))
+    # cnv = Decimal(al/100)+1
+    # imponibile = Decimal(p / cnv, 2)
+    # return round(imponibile, 2)
   
-  def totale(self):
-    tot=self.iva()+self.imponibile()
-    return tot
+  # def totale(self):
+    # tot=self.iva()+self.imponibile()
+    # return tot
     
 class FatturaSequence():
   def next_val(self, year):
@@ -247,40 +245,23 @@ class FatturaSequence():
       num = row[0] + 1
     return num
 
+# classi per la memorizzazione in sessione delle fatture
 
-class TVoceFattura:
-  codart = ''
-  descr = ''
-  qta = 1
-  prezzo = 0.00 
-  aliq = 0
-  n_scontr1 = 0
-  n_scontr2 = 0
-  n_scontr3 = 0
-  
-  def __init__(self, codart, descr, qta, prezzo, aliq):
-    self.codart = codart
-    self.descr = descr
-    self.qta = qta
-    self.prezzo=prezzo
+class ObjVoce:
+  def __init__(self, qta, codart, descr, aliq, prz):
+    self.qta=qta
+    self.codart=codart
+    self.descr=descr
     self.aliq=aliq
-    
-  def serialize(self):
-    return {
-      'codart': self.codart, 
-      'descr': self.descr,
-      'qta': self.qta,
-      'prezzo': self.prezzo,
-      'aliq': self.aliq
-    }
-    
+    self.prezzo=prz
+
   def iva(self):
     p = self.prezzo * self.qta
     iva = Decimal(p) - Decimal(self.imponibile())
     return round(iva, 2)
   
   def imponibile(self):
-    p = self.prezzo * self.qta
+    p = Decimal(self.prezzo * self.qta)
     al = Decimal(round(self.aliq, 2))
     cnv = Decimal(al/100)+1
     imponibile = Decimal(p / cnv, 2)
@@ -291,29 +272,23 @@ class TVoceFattura:
   def totale(self):
     tot=self.iva()+self.imponibile()
     return tot
-  
-class TFattura:
-  num = 0
-  id_cliente = None
-  data = None
-  voci = None
-  
-  def __init__(self, dt, id_cliente):
-    self.data = dt
-    self.id_cliente = id_cliente
+
+class ObjFatt:
+  def __init__(self, num, n_scontr1, n_scontr2, n_scontr3, dt, id_cliente):
+    self.num=num
+    self.n_scontr1=n_scontr1
+    self.n_scontr2=n_scontr2
+    self.n_scontr3=n_scontr3
+    self.dt=dt
+    self.id_cliente=id_cliente
     self.voci = []
-    
-  def serialize(self):
-    return {
-      'num': self.num, 
-      'data': self.data,
-      'voci': jsonify([v.serialize() for v in self.voci])
-    }
-    
-  def aggiungi(self, codart, descr, qta, prezzo, aliq):
-    v = TVoceFattura(codart, descr, qta, prezzo, aliq)
-    self.voci.append(v)
-    
+	
+  def aggiungi(self, voce):
+    self.voci.append(voce)
+	
+  def rimuovi(self, idx):
+    del self.voci[idx]
+
   def imponibile(self):
     return sum([v.imponibile() for v in self.voci])
   
@@ -322,4 +297,76 @@ class TFattura:
 
   def totale(self):
     return sum([v.totale() for v in self.voci])
+	
+# class TVoceFattura:
+  # codart = ''
+  # descr = ''
+  # qta = 1
+  # prezzo = 0.00 
+  # aliq = 0
+  # n_scontr1 = 0
+  # n_scontr2 = 0
+  # n_scontr3 = 0
   
+  # def __init__(self, codart, descr, qta, prezzo, aliq):
+    # self.codart = codart
+    # self.descr = descr
+    # self.qta = qta
+    # self.prezzo=prezzo
+    # self.aliq=aliq
+    
+  # def serialize(self):
+    # return {
+      # 'codart': self.codart, 
+      # 'descr': self.descr,
+      # 'qta': self.qta,
+      # 'prezzo': self.prezzo,
+      # 'aliq': self.aliq
+    # }
+    
+  # def iva(self):
+    # p = self.prezzo * self.qta
+    # iva = Decimal(p) - Decimal(self.imponibile())
+    # return round(iva, 2)
+  
+  # def imponibile(self):
+    # p = self.prezzo * self.qta
+    # al = Decimal(round(self.aliq, 2))
+    # cnv = Decimal(al/100)+1
+    # imponibile = Decimal(p / cnv, 2)
+    # return round(imponibile, 2)
+  
+  # def totale(self):
+    # tot=self.iva()+self.imponibile()
+    # return tot
+  
+# class TFattura:
+  # num = 0
+  # id_cliente = None
+  # data = None
+  # voci = None
+  
+  # def __init__(self, dt, id_cliente):
+    # self.data = dt
+    # self.id_cliente = id_cliente
+    # self.voci = []
+    
+  # def serialize(self):
+    # return {
+      # 'num': self.num, 
+      # 'data': self.data,
+      # 'voci': jsonify([v.serialize() for v in self.voci])
+    # }
+    
+  # def aggiungi(self, codart, descr, qta, prezzo, aliq):
+    # v = TVoceFattura(codart, descr, qta, prezzo, aliq)
+    # self.voci.append(v)
+    
+  # def imponibile(self):
+    # return sum([v.imponibile() for v in self.voci])
+  
+  # def iva(self):
+    # return sum([v.iva() for v in self.voci])
+
+  # def totale(self):
+    # return sum([v.totale() for v in self.voci])

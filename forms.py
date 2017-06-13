@@ -1,22 +1,26 @@
-from models import db, Cliente, Prodotto, Fattura, VoceFattura, FatturaTemp, VoceFatturaTemp, FatturaSequence
+from models import db, Cliente, Prodotto, Fattura, VoceFattura, FatturaSequence
 
-class Form:
+class Form(object):
   errors = None
   
-  def __init__(self, f):	# f=request.form  
+  def __init__(self, f):    # f=request.form  
     self.form = f
     self.errors = dict()
     
   def valido(self):
     return len(self.errors.keys())==0
 
-
-class FormNuovaFattura(Form):
+class FormScontrini(Form):
   n_scontr1 = 0
   n_scontr2 = 0
   n_scontr3 = 0
-
+  dtfatt=None
+  numfatt=0
+  
   def valido(self):
+    self.numfatt=self.form['nfatt']
+    self.dtfatt=self.form['dtfatt']
+  
     try:
       self.n_scontr1 = int(self.form['scontr1'])
     except:
@@ -24,36 +28,51 @@ class FormNuovaFattura(Form):
       
     if(self.form['scontr2'] != ''):
       try:
-	self.n_scontr2 = int(self.form['scontr2'])
+        self.n_scontr2 = int(self.form['scontr2'])
       except:
-	self.errors['scontr2'] = 'scontrino 2 non valido'
+        self.errors['scontr2'] = 'scontrino 2 non valido'
          
     if(self.form['scontr3'] != ''):
       try:
-	self.n_scontr3 = int(self.form['scontr3'])
+        self.n_scontr3 = int(self.form['scontr3'])
       except:
-	self.errors['scontr3'] = 'scontrino 3 non valido'
-	
+        self.errors['scontr3'] = 'scontrino 3 non valido'
+    
     return len(self.errors.keys())==0
 
+class FormNuovaFattura(Form):
+  
+  def valido(self):
+    return false
 
-class FormAggiungiVoce(Form):
-  qta = 1
+
+class FormAggiungiVoce(FormScontrini):
+  qta = 0
   codart = ''
   descr = ''
   aliq = 22
   prz = 0.00
-  
+  idfatt = 0
+   
   def pulisci(self):
-    self.qta=1
+    self.qta=0
     self.codart=''
     self.descr=''
     self.aliq=22
     self.prz=0.00
-  
+    self.idfatt=0
+      
   def valido(self):
+    
+    try:
+      self.idfatt=int(self.form['idfatt'])
+    except:  
+      self.idfatt=0
+    
     try:
       self.qta=int(self.form['qta'])
+      if(self.qta == 0):
+        self.errors['qta'] = "quantita' non valida"	  
     except:
       self.errors['qta'] = "quantita' non valida"
       
@@ -74,5 +93,7 @@ class FormAggiungiVoce(Form):
     except:
       self.errors['prz'] = "prezzo mancante"
     
-    return len(self.errors.keys())==0
+    super_valid=super(FormAggiungiVoce, self).valido()
+	
+    return super_valid and len(self.errors.keys())==0
       

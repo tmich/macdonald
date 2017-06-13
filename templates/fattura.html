@@ -1,11 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
   <h1 class="page-header">
-  {% if fattura.num > 0 %}
-    Fattura n&deg; {{ fattura.num }} del {{ fattura.data|dt }}
-  {% else %}
-    Emissione Fattura
-  {% endif %}
+  Fattura n&deg; {{ numfatt }} del {{ datafattura|dt }}
   </h1>
   <div class="panel-group">
     <div class="panel panel-default">
@@ -15,20 +11,20 @@
       <div class="panel-body">
 	<div id="intestazione" style="text-align:left">
 	  <div>
-	    <h4>{{ fattura.cliente.ragsoc }}</h4>
-	    {{ fattura.cliente.indirizzo }} {{ fattura.cliente.cap }} {{ fattura.cliente.citta }}
+	    <h4>{{ cliente.ragsoc }}</h4>
+	    {{ cliente.indirizzo }} {{ cliente.cap }} {{ cliente.citta }}
 	  </div>
 	  <div>
-	    <label>Partita IVA</label> {{ fattura.cliente.p_iva }}
+	    <label>Partita IVA</label> {{ cliente.p_iva }}
 	  </div>
 	  <div>
-	    <label>Codice Fiscale</label> {{ fattura.cliente.cod_fiscale }}
+	    <label>Codice Fiscale</label> {{ cliente.cod_fiscale }}
 	  </div>
 	  <div>
-	    <label>Telefono</label> {{ fattura.cliente.telefono }}
+	    <label>Telefono</label> {{ cliente.telefono }}
 	  </div>
 	  <div>
-	    <label>Email</label> {{ fattura.cliente.email }}
+	    <label>Email</label> {{ cliente.email }}
 	  </div>
 	</div>
       </div>
@@ -39,22 +35,20 @@
       </div>
       <div class="panel-body">
 	<div class="form-inline">
-	  <label>Data Fattura</label> {{ fattura.data|dt }}<br />
-	  {% if fattura.num > 0 %}
-	    <label>N.ro Fattura</label> {{ fattura.num }}<br />
-	  {% endif %}
+	  <label>Data Fattura</label> {{ datafattura|dt }}<br />
+	  <label>N.ro Fattura</label> {{ numfatt }}<br />
 	  <label for="scontr1">N. scontrini: </label>&nbsp;
 	  <div class="input-group col-xs-1 { 'has-error has-feedback' if 'scontr1' in errors else '' }} ">
 	    <input type="number" min="1" id="scontr1" name="scontr1" class="form-control" placeholder="n. 1" 
-	      value="{{ fattura.n_scontr1 if fattura.n_scontr1 != 0 else ''}}" />
+	      value="{{ n_scontr1 if n_scontr1 != 0 else ''}}" />
 	  </div>
 	  <div class="input-group col-xs-1 { 'has-error has-feedback' if 'scontr2' in errors else '' }} ">
 	    <input type="number" min="1" id="scontr2" name="scontr2" class="form-control" placeholder="n. 2" 
-	      value="{{ fattura.n_scontr2 if fattura.n_scontr2 != 0 else ''}}" />
+	      value="{{ n_scontr2 if n_scontr2 != 0 else ''}}" />
 	  </div>
 	  <div class="input-group col-xs-1 { 'has-error has-feedback' if 'scontr3' in errors else '' }} ">
 	    <input type="number" min="1" id="scontr3" name="scontr3" class="form-control" placeholder="n. 3"
-	      value="{{ fattura.n_scontr3 if fattura.n_scontr3 != 0 else ''}}" />
+	      value="{{ n_scontr3 if n_scontr3 != 0 else ''}}" />
 	  </div>
 	</div><br /><br />
 	<table class="table">
@@ -68,7 +62,7 @@
 	    <th class="col-xs-1">Tot</th>
 	    <th class="col-xs-1" colspan="2">&nbsp;</th>
 	  </tr>
-	  {% for v in fattura.voci %}
+	  {% for v in voci %}
 	  <tr>
 	    <td>{{ v.qta }}</td>
 	    <td>{{ v.codart }}</td>
@@ -85,19 +79,20 @@
 	  {% endfor %}
 	  <tr>
 	    <th colspan="3">&nbsp;</th>
-	    <th>{{ '%0.2f' % fattura.imponibile()|float }}</th>
+	    <th>{{ '%0.2f' % imponibile|float }}</th>
 	    <th>&nbsp;</th>
-	    <th>{{ '%0.2f' % fattura.iva()|float }}</th>
-	    <th>{{ '%0.2f' % fattura.totale()|float }}</th>
+	    <th>{{ '%0.2f' % iva|float }}</th>
+	    <th>{{ '%0.2f' % totale|float }}</th>
 	    <th>&nbsp;</th>
 	  </tr>
 	</table>
 	
 	<a name="form"></a>
-	<form method="POST" class="form-inline" action="{{ url_for('aggiungi_voce') }}#form">
+	<form method="POST" class="form-inline" action="{{ url_for('aggiungi_voce') }}">
 	  {% if vmod %}
 	    <input type="hidden" name="vmod" value="{{ vmod.id }}" />
 	  {% endif %}
+	  {# <input type="text" name="idfatt" value="{{ fattura.id }}" /> #}
 	  <div class="input-group col-xs-1 {{ 'has-error has-feedback' if 'qta' in errors else '' }}">
 	    <input id="qta" type="number" class="form-control" name="qta" min="1" value="{{form.qta if form else ''}}" 
 	      placeholder="qta" />
