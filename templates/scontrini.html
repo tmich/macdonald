@@ -34,16 +34,15 @@
 	Fattura
       </div>
       <div class="panel-body">
-	<form method="POST" class="form-inline">
+	<form method="POST" class="form-inline" action="#form">
 	  <div class="input-group col-xs-1">
-				<label for="dtfatt">Data Fattura</label>
-				<input type="date" size="80" id="dtfatt" name="dtfatt" class="form-control" 
-					value="{{ datafattura|dt('%Y-%m-%d') }}" />
-			  </div><br />
-			  <div class="input-group col-xs-1">
-				<label for="nfatt">N.ro Fattura</label>
-				<input type="number" readonly="readonly" id="nfatt" name="nfatt" class="form-control" value="{{ numfattura }}" />
-			  </div><br /><br />
+	    <label for="dtfatt">Data Fattura</label>
+	    <input type="date" size="80" id="dtfatt" name="dtfatt" class="form-control" value="{{ datafattura|dt('%Y-%m-%d') }}" />
+	  </div><br />
+	  <div class="input-group col-xs-1">
+	    <label for="nfatt">N.ro Fattura</label>
+	    <input type="number" readonly="readonly" id="nfatt" name="nfatt" class="form-control" value="{{ numfattura }}" />
+	  </div><br /><br />
 	  <label for="scontr1">N. scontrini: </label>&nbsp;
 	  <div class="input-group col-xs-1 {{ 'has-error has-feedback' if 'scontr1' in errors else '' }} ">
 	    <input type="number" min="1" id="scontr1" name="scontr1" class="form-control" placeholder="n. 1" 

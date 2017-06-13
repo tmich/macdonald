@@ -274,7 +274,7 @@ class ObjVoce:
     return tot
 
 class ObjFatt:
-  def __init__(self, num, n_scontr1, n_scontr2, n_scontr3, dt, id_cliente):
+  def __init__(self, num, n_scontr1, n_scontr2, n_scontr3, dt, id_cliente, id=0):
     self.num=num
     self.n_scontr1=n_scontr1
     self.n_scontr2=n_scontr2
@@ -282,13 +282,14 @@ class ObjFatt:
     self.dt=dt
     self.id_cliente=id_cliente
     self.voci = []
+    self.id=id
 	
   def aggiungi(self, voce):
     self.voci.append(voce)
 	
   def rimuovi(self, idx):
     del self.voci[idx]
-
+  
   def imponibile(self):
     return sum([v.imponibile() for v in self.voci])
   

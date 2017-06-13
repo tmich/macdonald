@@ -223,13 +223,13 @@ def articoli_json():
   return json.dumps([a.to_json() for a in articoli])
 
 #@login_required
-#@app.route('/nfattura/<int:idc>/delvoce/<int:idv>', methods=['GET'])
+#@app.route('/componi_fattura/<int:idc>/delvoce/<int:idv>', methods=['GET'])
 #def rimuovi_voce_temp(idc, idv):
   #v=db.session.query(VoceFatturaTemp).get(idv).first()
   #if(v!=None):
     #db.session.delete(v)
     #db.session.commit()
-    #redirect(url_for(nfattura, idc=idc))
+    #redirect(url_for(componi_fattura, idc=idc))
 
 @login_required
 @app.route('/invio', methods=['GET'])
@@ -304,15 +304,15 @@ def vis_fattura(idfatt):
   return render_template('vfattura.html',fattura=fatt)
   
 @login_required
-@app.route('/nfattura/<int:idc>', methods=['GET', 'POST'])
-def nuova_fattura(idc):
+@app.route('/componi_fattura/<int:idc>', methods=['GET', 'POST'])
+def componi_fattura(idc):
   cli=Cliente.query.get(idc)
   dt=datetime.date.today()
   seq=FatturaSequence()
   numfatt=seq.next_val(dt.year)
   
   if request.method=='GET':
-    return render_template('nfattura.html', cliente=cli, numfattura=numfatt, datafattura=dt)
+    return render_template('componi_fattura.html', cliente=cli, numfattura=numfatt, datafattura=dt)
   else:
     f=FormNuovaFattura(request.form)
     if(f.valido()):
@@ -325,7 +325,7 @@ def nuova_fattura(idc):
       
       return render_template('fattura.html', fattura=tmpfatt)
     else:
-      return render_template('nfattura.html', cliente=cli, numfattura=numfatt, datafattura=dt, errors=f.errors)
+      return render_template('componi_fattura.html', cliente=cli, numfattura=numfatt, datafattura=dt, errors=f.errors)
 
 @app.route('/agg_voce/<int:idfatt>', methods=['POST'])
 def aggiungi_voce(idfatt):

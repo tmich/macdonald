@@ -9,7 +9,7 @@ from flask_babel import Babel, format_datetime, format_date
 from decimal import Decimal
 from pdfs import create_pdf
 from models import db, Anagrafica, Cliente, Prodotto, Fattura, VoceFattura, InvioFattura, User, FatturaSequence, ObjFatt, ObjVoce
-from forms import FormNuovaFattura, FormAggiungiVoce, FormScontrini
+from forms import FormNuovaFattura, FormAggiungiVoce, FormNuovaFattura
 import jsonpickle
 from dateutil.parser import parse
 
@@ -268,14 +268,14 @@ def invia_fattura(idfatt):
   dest = request.args.get('next')
   return redirect(dest)
 
-@login_required
-@app.route('/dfattura/<int:idfatt>', methods=['GET'])
-def del_fattura(idfatt):
-  fatt = db.session.query(Fattura).get(idfatt)
-  db.session.delete(fatt)
-  db.session.commit()
-  dest = request.args.get('next')
-  return redirect(dest)
+#@login_required
+#@app.route('/dfattura/<int:idfatt>', methods=['GET'])
+#def del_fattura(idfatt):
+  #fatt = db.session.query(Fattura).get(idfatt)
+  #db.session.delete(fatt)
+  #db.session.commit()
+  #dest = request.args.get('next')
+  #return redirect(dest)
 
 @app.route('/stampa_fatt/<int:idfatt>', methods=['GET'])
 def stampa_fattura(idfatt):
@@ -296,17 +296,19 @@ def vis_fattura(idfatt):
   return render_template('vfattura.html',fattura=fatt)
 
 @login_required
-@app.route('/ins_scontrini/<int:id_cliente>', methods=['GET','POST'])
-def inserisci_scontrini(id_cliente):
+@app.route('/nuova_fattura/<int:id_cliente>', methods=['GET','POST'])
+def nuova_fattura(id_cliente):
   errors=[]
   n_scontr1=0
   n_scontr2=0
   n_scontr3=0
-  cli=Cliente.query.get(id_cliente)
+  cli=db.session.query(Cliente).get(id_cliente)
   numfatt=FatturaSequence().next_val(datetime.date.today().year)
+  session['fatt']=None
+  session.pop('fatt')
   
   if request.method=='POST':
-    f=FormScontrini(request.form)
+    f=FormNuovaFattura(request.form)
     errors=f.errors
     if(f.valido()):
       n_scontr1=f.n_scontr1
@@ -314,238 +316,167 @@ def inserisci_scontrini(id_cliente):
       n_scontr3=f.n_scontr3
       dt=parse(f.dtfatt)
       numfatt=f.numfatt
-	  #session['voci']=None
+      # creo l'oggetto ObjFatt da memorizzare in sessione
       fatt=ObjFatt(numfatt,n_scontr1,n_scontr2,n_scontr3,dt,id_cliente)
+      fatt.id_cliente=id_cliente
       session['fatt']=jsonpickle.encode(fatt)
-      #return redirect(url_for('nuova_fattura', idc=id_cliente, n_scontr1=n_scontr1, n_scontr2=n_scontr2, n_scontr3=n_scontr3, dt=dt, numfatt=numfatt))
-      return redirect(url_for('nuova_fattura', idc=fatt.id_cliente))
+      return redirect(url_for(''))
 	  
   return render_template('scontrini.html', cliente=cli, datafattura=datetime.date.today(), numfattura=numfatt, errors=errors)
 
 @login_required
-@app.route('/nfattura/<int:idc>', methods=['GET','POST'])
-def nuova_fattura(idc):
-  fatt=jsonpickle.decode(session['fatt'])
-  cli=Cliente.query.get(fatt.id_cliente)
-
-  if(request.method=='POST'):
-    f = FormAggiungiVoce(request.form)
-
-    if(not f.valido()):
-	  return render_template('nfattura.html',errors=f.errors,form=f,datafattura=fatt.dt, numfatt=fatt.num, n_scontr1=fatt.n_scontr1,n_scontr2=fatt.n_scontr2,n_scontr3=fatt.n_scontr3, cliente=cli, imponibile=fatt.imponibile(),iva=fatt.iva(),totale=fatt.totale(),voci=fatt.voci)
-    else:
-	  ## aggiungi voce!!!
-	  fatt.aggiungi(ObjVoce(qta=f.qta,descr=f.descr,codart=f.codart,prz=f.prz,aliq=f.aliq))
-	  
-	  ## salvo data e scontrini
-	  fatt.n_scontr1=f.n_scontr1
-	  fatt.n_scontr2=f.n_scontr2
-	  fatt.n_scontr3=f.n_scontr3
-	  fatt.dt=parse(f.dtfatt)
-	  session['fatt']=jsonpickle.encode(fatt)
-	
-  return render_template('nfattura.html', datafattura=fatt.dt, numfatt=fatt.num, n_scontr1=fatt.n_scontr1,n_scontr2=fatt.n_scontr2,n_scontr3=fatt.n_scontr3, cliente=cli, imponibile=fatt.imponibile(),iva=fatt.iva(),totale=fatt.totale(),voci=fatt.voci)  
+@app.route('/modifica_fattura/<int:id>')
+def modifica_fattura(id):
+  session['fatt']=None
+  session.pop('fatt')
+  fattura=db.session.query(Fattura).get(id)
   
-@app.route('/agg_voce', methods=['POST'])
-def aggiungi_voce():
-  pass
-  
-
-@app.route('/cfattura/<int:idfatt>', methods=['GET'])
-def canc_fattura(idfatt):
-  fatt = db.session.query(FatturaTemp).get(idfatt)
-  id_cliente = fatt.cliente_id
-  if(fatt==None):
-    abort(404)
+  # creo l'oggetto ObjFatt da memorizzare in sessione
+  objf=ObjFatt(fattura.num,fattura.n_scontr1,fattura.n_scontr2,fattura.n_scontr3,fattura.data,fattura.cliente_id,id=fattura.id)
+  for v in fattura.voci:
+    objv=ObjVoce(qta=v.qta, codart=v.codart, descr=v.descr, aliq=v.aliq, prz=v.prezzo)
+    objf.aggiungi(objv)
     
-  db.session.delete(fatt)
-  db.session.commit()
+  session['fatt']=jsonpickle.encode(objf)
+  return redirect(url_for('componi_fattura'))
+
+@login_required
+@app.route('/componi_fattura', methods=['GET','POST'])
+def componi_fattura():
+  errors=[]
+  fatt=jsonpickle.decode(session['fatt'])
+  cli=db.session.query(Cliente).get(fatt.id_cliente)
+  
+  codart='' 
+  descr='' 
+  qta=0
+  prezzo=0.0
+  aliq=''
+  idx_voce=0
+  
+  if(request.method=='GET'):
+    if('idx' in request.args):
+      idx_voce=request.args.get('idx')
+      codart=request.args.get('codart')
+      descr=request.args.get('descr')
+      qta=request.args.get('qta')
+      prezzo=request.args.get('prezzo')
+      aliq=request.args.get('aliq')
+  elif(request.method=='POST'):
+    if('salva_fattura' in request.form):
+      #salva fattura
+      f = FormNuovaFattura(request.form)
+      
+      if(f.valido()):
+	return salva_fattura(f)
+      else:
+	errors=f.errors
+    else:
+      # aggiungi voce
+      f = FormAggiungiVoce(request.form)
+
+      if(f.valido()):
+	return aggiungi_voce(f)
+      else:
+	errors=f.errors
+      
+  return render_template('componi_fattura.html',errors=errors,datafattura=fatt.dt,numfatt=fatt.num,n_scontr1=fatt.n_scontr1,n_scontr2=fatt.n_scontr2,n_scontr3=fatt.n_scontr3,cliente=cli,imponibile=fatt.imponibile(),iva=fatt.iva(),totale=fatt.totale(),voci=fatt.voci,codart=codart,descr=descr,qta=qta,prezzo=prezzo,aliq=aliq,idx_voce=idx_voce)  
+
+def aggiungi_voce(f):
+  objf=jsonpickle.decode(session['fatt'])
+  cli=db.session.query(Cliente).get(objf.id_cliente)
+  codart='' 
+  descr='' 
+  qta=0
+  prezzo=0.0
+  aliq=''
+  idx_voce=0
+  
+  objv=ObjVoce(qta=f.qta,descr=f.descr,codart=f.codart,prz=f.prz,aliq=f.aliq)
+  if(f.idx_voce > 0):
+    ## sostituisco la voce
+    objf.voci[f.idx_voce-1]=objv
+  else:	
+    ## aggiungi voce!!!
+    objf.aggiungi(objv)
+  
+  ## salvo data e scontrini
+  objf.n_scontr1=f.n_scontr1
+  objf.n_scontr2=f.n_scontr2
+  objf.n_scontr3=f.n_scontr3
+  objf.dt=parse(f.dtfatt)
+  session['fatt']=jsonpickle.encode(objf)
+  
+  return redirect(url_for('componi_fattura'))
+
+@app.route('/annulla_fattura')
+def annulla_fattura():
+  objf=jsonpickle.decode(session['fatt'])
+  id_cliente = objf.id_cliente
+  session['fatt']=None
+  session.pop('fatt')
   return redirect(url_for('fatture_cliente', id=id_cliente, page=0))
 
-@app.route('/del_voce/<int:index>', methods=['GET'])
+def salva_fattura(f):
+  objf=jsonpickle.decode(session['fatt'])
+  cli=db.session.query(Cliente).get(objf.id_cliente)
+  if(objf.id == 0):
+    # creo una nuova fattura
+    fattura = Fattura(cli, objf.dt, objf.num)
+    db.session.add(fattura)
+  else:
+    # modifico una fattura esistente
+    fattura = db.session.query(Fattura).get(objf.id)
+    for v in fattura.voci:
+      db.session.delete(v)
+  
+  fattura.data=f.dtfatt
+  fattura.n_scontr1=f.n_scontr1
+  fattura.n_scontr2=f.n_scontr2
+  fattura.n_scontr3=f.n_scontr3
+  
+  for objv in objf.voci:
+    voce=VoceFattura(codart=objv.codart, descr=objv.descr, qta=objv.qta, prezzo=objv.prezzo, aliq=objv.aliq)
+    fattura.voci.append(voce)
+  
+  db.session.commit()
+  session['fatt']=None
+  session.pop('fatt')
+  
+  flash('Fattura salvata correttamente', 'success')
+  return redirect(url_for('vis_fattura', idfatt=fattura.id))
+
+#@app.route('/cfattura/<int:idfatt>', methods=['GET'])
+#def canc_fattura(idfatt):
+  #fatt = db.session.query(FatturaTemp).get(idfatt)
+  #id_cliente = fatt.cliente_id
+  #if(fatt==None):
+    #abort(404)
+    
+  #db.session.delete(fatt)
+  #db.session.commit()
+  #return redirect(url_for('fatture_cliente', id=id_cliente, page=0))
+
+@app.route('/modifica_voce/<int:index>', methods=['GET'])
+def modifica_voce(index):
+  fatt=jsonpickle.decode(session['fatt'])
+  v=fatt.voci[index-1]
+  return redirect(url_for('componi_fattura',_anchor='form',codart=v.codart,descr=v.descr,qta=v.qta,prezzo=v.prezzo,aliq=v.aliq,idx=index)) 
+
+@app.route('/rimuovi_voce/<int:index>', methods=['GET'])
 def rimuovi_voce(index):
   fatt=jsonpickle.decode(session['fatt'])
   fatt.rimuovi(index-1)
   session['fatt']=jsonpickle.encode(fatt)
-  return redirect(url_for('nuova_fattura', idc=fatt.id_cliente)) 
+  return redirect(url_for('componi_fattura',_anchor='form')) 
   
-@login_required
-@app.route('/mfattura/<int:idfatt>', methods=['GET','POST'])
-def mod_fattura(idfatt):
-  fatt = db.session.query(Fattura).get(idfatt)
-  
-  if(fatt==None):
-    abort(404)
-  
-  tmpfatt = FatturaTemp(fatt.cliente, fatt.data, fatt.num)
-  tmpfatt.n_scontr1=fatt.n_scontr1
-  tmpfatt.n_scontr2=fatt.n_scontr2
-  tmpfatt.n_scontr3=fatt.n_scontr3
-  
-  for v in fatt.voci:
-    vt = tmpfatt.crea_voce(codart=v.codart, descr=v.descr, qta=v.qta, prezzo=v.prezzo, aliq=v.aliq)
-    tmpfatt.voci.append(vt)
-    db.session.add(vt)
-    db.session.commit()
-  
-  return render_template('fattura.html', fattura=tmpfatt)
-
-@login_required
-@app.route('/mfatturat/<int:idfatt>', methods=['GET','POST'])
-def mod_fatturatemp(idfatt):
-  voce_da_modificare=None
-  fatt = db.session.query(FatturaTemp).get(idfatt)
-  errors=dict()
-  codart=None
-  descr=None
-  qta=None
-  prz=None
-  aliq=None
-  if(fatt==None):
-    abort(404)
-      
-  #if(request.method == 'GET'):
-  if('oper' in request.args):
-    id_voce = request.args.get('id_voce')
-    v = db.session.query(VoceFatturaTemp).get(id_voce)
-    oper = request.args.get('oper')
-    if(oper=='del'):	# elimina voce
-      db.session.delete(v)
-      db.session.commit()
-      return redirect(url_for('mod_fatturatemp', idfatt=fatt.id))
-    else:
-      voce_da_modificare=v
-      codart=voce_da_modificare.codart
-      descr=voce_da_modificare.descr
-      qta=voce_da_modificare.qta
-      prz=voce_da_modificare.prezzo
-      aliq=voce_da_modificare.aliq
-	
-  if(request.method == 'POST'):  
-    f=request.form
-    
-    scontr1=f['scontr1']
-    scontr2=f['scontr2']
-    scontr3=f['scontr3']
-    qta=f['qta']
-    descr=f['descr']
-    prz=f['prz']
-    aliq=f['aliq']
-    codart=f['codart']
-    
-    try:
-      scontr1=int(scontr1)
-    except:
-      errors['scontr1'] = 'scontrino 1 non valido'
-      
-    if(scontr2 != ''):
-      try:
-	scontr2=int(scontr2)
-      except:
-	errors['scontr2'] = 'scontrino 2 non valido'
-    
-    if(scontr3 != ''):
-      try:
-	scontr3=int(scontr3)
-      except:
-	errors['scontr3'] = 'scontrino 3 non valido'
-      
-    try:
-      qta=int(qta)
-    except:
-      errors['qta'] = 'quantit&agrave; non valida'
-      
-    if(descr.strip()==''):
-      errors['descr'] = 'descrizione mancante'
-    
-    try:
-      prz = float(prz)
-      if(prz==0):
-	raise Exception("")
-    except:
-      errors['prz']='prezzo non valido'
-    
-    try:
-      aliq = float(aliq)
-      if(aliq==0):
-	raise Exception("")
-    except:
-      errors['aliq']='aliquota IVA non valida'
-    
-    print(errors, file=sys.stderr)
-    
-    if(len(errors.keys())==0):
-      fatt.n_scontr1 = scontr1
-      fatt.n_scontr2 = scontr2
-      fatt.n_scontr3 = scontr3
-      
-      if('vmod' in f):	# modifica voce
-	v=db.session.query(VoceFatturaTemp).get(f['vmod'])
-	v.codart=codart
-	v.descr=descr
-	v.qta=qta
-	v.prezzo=prz
-	v.aliq=aliq
-      else:	 # crea voce
-	v=fatt.crea_voce(codart=codart,descr=descr,qta=qta,prezzo=prz,aliq=aliq)
-	fatt.voci.append(v)
-      
-      db.session.add(v)
-      db.session.commit()
-      return redirect(url_for('mod_fatturatemp', idfatt=idfatt))
-
-      #print("\t tot. imp. voce: %.2f" % v.tot_imponibile(), file=sys.stderr)
-      #print("\t tot. imp. fattura: %.2f" % fatt.tot_imponibile(), file=sys.stderr)
-  
-  return render_template('fattura_temp.html',fattura=fatt,vmod=voce_da_modificare,codart=codart,descr=descr,qta=qta,
-			 prz=prz,aliq=aliq,errors=errors)
-
+#@app.route('/dett_fattura/<int:id>')
 #@login_required
-#@app.route('/sfatturat/<int:idfatt>')
-#def salva_fatturatemp(idfatt):
-  #tmpf = db.session.query(FatturaTemp).get(idfatt)
-  #f=Fattura(tmpf.cliente, tmpf.data, tmpf.num)
-  #f.n_scontr1=tmpf.n_scontr1
-  #f.n_scontr2=tmpf.n_scontr2
-  #f.n_scontr3=tmpf.n_scontr3
-  #db.session.add(f)
-  
-  #for tmpv in tmpf.voci:
-    #v=VoceFattura(tmpv.codart, tmpv.descr, tmpv.qta, tmpv.prezzo, tmpv.aliq)
-    #f.voci.append(v)
-    #db.session.add(v)
-  
-  #db.session.commit()
-  #flash('Fattura inserita correttamente', 'success')
-  #return redirect(url_for('vis_fattura', idfatt=f.id))
-
-@login_required
-@app.route('/sfattura/<int:idfatt>')
-def salva_fattura(idfatt):
-  tmpf = db.session.query(FatturaTemp).get(idfatt)
-  f=Fattura(tmpf.cliente, tmpf.data, tmpf.num)
-  f.n_scontr1=tmpf.n_scontr1
-  f.n_scontr2=tmpf.n_scontr2
-  f.n_scontr3=tmpf.n_scontr3
-  db.session.add(f)
-  
-  for tmpv in tmpf.voci:
-    v=VoceFattura(tmpv.codart, tmpv.descr, tmpv.qta, tmpv.prezzo, tmpv.aliq)
-    f.voci.append(v)
-    db.session.add(v)
-  
-  db.session.delete(tmpf)
-  db.session.commit()
-  flash('Fattura salvata correttamente', 'success')
-  return redirect(url_for('vis_fattura', idfatt=f.id))
-
-@app.route('/dett_fattura/<int:id>')
-@login_required
-def dett_fattura(id, page=0):
-  pagenum = 20
-  offset = page * pagenum
-  f = Fattura.query.get(id)
-  return render_template('dett_fattura.html', fattura=f, voci=f.voci, tot=f.totale())
+#def dett_fattura(id, page=0):
+  #pagenum = 20
+  #offset = page * pagenum
+  #f = Fattura.query.get(id)
+  #return render_template('dett_fattura.html', fattura=f, voci=f.voci, tot=f.totale())
 
 # jinja2 filters
 @app.template_filter('dt')
@@ -556,5 +487,5 @@ def _jinja2_filter_date(date, fmt=None):
     return format_date(date, 'medium')
 
 if __name__ == "__main__":
-  app.run(host='93.186.254.106', port=80)
-  #app.run()
+  #app.run(host='93.186.254.106', port=80)
+  app.run()

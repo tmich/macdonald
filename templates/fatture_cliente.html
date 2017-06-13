@@ -2,7 +2,7 @@
 {% block body %}
   <h1 class="page-header">Fatture per {{ cliente.ragsoc }}</h1>
   <div>
-    <a href="{{ url_for('nuova_fattura', idc=cliente.id) }}" type="button" class="btn btn-success">
+    <a href="{{ url_for('nuova_fattura', id_cliente=cliente.id) }}" type="button" class="btn btn-success">
       <span class="glyphicon glyphicon-plus"></span> Nuova fattura
     </a>
   </div>
