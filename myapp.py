@@ -11,7 +11,7 @@ from pdfs import create_pdf
 from models import db, Anagrafica, Cliente, Prodotto, Fattura, VoceFattura, InvioFattura, User, FatturaSequence, ObjFatt, ObjVoce
 from forms import FormNuovaFattura, FormAggiungiVoce, FormNuovaFattura
 import jsonpickle
-from dateutil.parser import parse
+#from dateutil.parser import parse
 
 app = Flask(__name__)
 app.config.from_object('config.DevelopmentConfig')
@@ -314,7 +314,7 @@ def nuova_fattura(id_cliente):
       n_scontr1=f.n_scontr1
       n_scontr2=f.n_scontr2
       n_scontr3=f.n_scontr3
-      dt=parse(f.dtfatt)
+      dt=f.dtfatt
       numfatt=f.numfatt
       # creo l'oggetto ObjFatt da memorizzare in sessione
       fatt=ObjFatt(numfatt,n_scontr1,n_scontr2,n_scontr3,dt,id_cliente)
@@ -412,7 +412,7 @@ def aggiungi_voce(f):
   objf.n_scontr1=f.n_scontr1
   objf.n_scontr2=f.n_scontr2
   objf.n_scontr3=f.n_scontr3
-  objf.dt=parse(f.dtfatt)
+  objf.dt=f.dtfatt
   session['fatt']=jsonpickle.encode(objf)
   
   return redirect(url_for('componi_fattura'))

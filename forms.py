@@ -1,4 +1,5 @@
 from models import db, Cliente, Prodotto, Fattura, VoceFattura, FatturaSequence
+from dateutil.parser import parse
 
 class Form(object):
   errors = None
@@ -27,8 +28,12 @@ class FormNuovaFattura(Form):
   
   def valido(self):
     self.numfatt=self.form['nfatt']
-    self.dtfatt=self.form['dtfatt']
-  
+    
+    try:
+      self.dtfatt=parse(str(self.form['dtfatt']))
+    except:
+      self.errors['dtfatt'] = 'data non valida'
+      
     try:
       self.n_scontr1 = int(self.form['scontr1'])
     except:
