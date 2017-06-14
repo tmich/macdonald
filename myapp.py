@@ -343,6 +343,9 @@ def modifica_fattura(id):
 @login_required
 @app.route('/componi_fattura', methods=['GET','POST'])
 def componi_fattura():
+  if(not 'fatt' in session):
+    abort(404)
+    
   errors=[]
   fatt=jsonpickle.decode(session['fatt'])
   cli=db.session.query(Cliente).get(fatt.id_cliente)
@@ -378,6 +381,11 @@ def componi_fattura():
       if(f.valido()):
 	return aggiungi_voce(f)
       else:
+	codart=f.codart
+	prezzo=f.prz
+	qta=f.qta
+	descr=f.descr
+	aliq=f.aliq
 	errors=f.errors
       
   return render_template('componi_fattura.html',errors=errors,datafattura=fatt.dt,numfatt=fatt.num,n_scontr1=fatt.n_scontr1,n_scontr2=fatt.n_scontr2,n_scontr3=fatt.n_scontr3,cliente=cli,imponibile=fatt.imponibile(),iva=fatt.iva(),totale=fatt.totale(),voci=fatt.voci,codart=codart,descr=descr,qta=qta,prezzo=prezzo,aliq=aliq,idx_voce=idx_voce)  
