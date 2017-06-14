@@ -322,7 +322,7 @@ def nuova_fattura(id_cliente):
       session['fatt']=jsonpickle.encode(fatt)
       return redirect(url_for(''))
 	  
-  return render_template('scontrini.html', cliente=cli, datafattura=datetime.date.today(), numfattura=numfatt, errors=errors)
+  return render_template('nuova_fattura.html', cliente=cli, datafattura=datetime.date.today(), numfattura=numfatt, errors=errors)
 
 @login_required
 @app.route('/modifica_fattura/<int:id>')
