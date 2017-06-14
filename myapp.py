@@ -320,7 +320,7 @@ def nuova_fattura(id_cliente):
       fatt=ObjFatt(numfatt,n_scontr1,n_scontr2,n_scontr3,dt,id_cliente)
       fatt.id_cliente=id_cliente
       session['fatt']=jsonpickle.encode(fatt)
-      return redirect(url_for(''))
+      return redirect(url_for('componi_fattura'))
 	  
   return render_template('nuova_fattura.html', cliente=cli, datafattura=datetime.date.today(), numfattura=numfatt, errors=errors)
 
