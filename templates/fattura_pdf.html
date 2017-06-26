@@ -40,6 +40,11 @@
       border-top: 1px solid black;
       border-bottom: 1px solid black;
     }
+	
+	.fattura td {
+	  font-size: 9pt;
+	  vertical-align:bottom;
+	}
     
     </style>
     </head>
@@ -49,20 +54,27 @@
 	<table border="1" cellpadding="5" class="header">
 	  <tr>
 	    <td>
-	      <b>MACDONALD Vittorio e C. s.n.c.</b><br />
+	      <span style="font-size: 12pt;">
+		  <b>MACDONALD Vittorio e C. s.n.c.</b><br />
 	      <i>Cartoleria - Fornitura per Uffici</i><br />
-	      Via G.Camozzi, 13 - 00195 ROMA<br />
+	      </span>
+		  <span style="font-size: 9pt;">
+		  Via G.Camozzi, 13 - 00195 ROMA<br />
 	      C.F. 07161420588 - P.I. 01706271002<br />
 	      tel. 06-3728796
+		  </span>
 	    </td>
 	    <td>
-	    Spett.le<br />
-	    {{ fattura.cliente.ragsoc }}<br />
-	    {{ fattura.cliente.indirizzo }}<br />
-	    {{ fattura.cliente.cap }} {{ fattura.cliente.citta }}<br />
-	    {% if fattura.cliente.p_iva != None %}
-	      {{ fattura.cliente.p_iva }}
-	    {% endif %}
+			<span style="font-size: 10pt;">
+			Spett.le<br />
+			{{ fattura.cliente.ragsoc }}<br />
+			{{ fattura.cliente.indirizzo }}<br />
+			{{ fattura.cliente.cap }} {{ fattura.cliente.citta }}<br />
+			{% if fattura.cliente.p_iva != None %}
+			  p. iva {{ fattura.cliente.p_iva }}
+			{% endif %}<br />
+			tel. {{ fattura.cliente.tel if fattura.cliente.tel != None else ''  }}
+			</span>
 	    </td>
 	  </tr>
 	</table>
@@ -70,8 +82,8 @@
       <div>
 	<table border="0" cellpadding="5" class="noborder">
 	  <tr>
-	    <td class="void">Fattura n&deg; {{fattura.num}} del {{fattura.data}}</td>
-	    <td class="void">
+	    <td class="void" style="font-size: 10pt;">Fattura n&deg; {{fattura.num}} del {{fattura.data|dt('%d/%m/%Y')}}</td>
+	    <td class="void" style="font-size: 10pt;">
 	    E-mail: {{ fattura.cliente.email }}<br/>
 	    Scontrino n. {{ fattura.n_scontr1 }}
 	    </td>
@@ -81,13 +93,13 @@
       <div>
 	<table class="fattura" style="border-collapse:collapse;" cellpadding="2">
 	  <tr>
-	    <td class="hd" width="50%">Descrizione</td>
+	    <td class="hd" style="text-align: left;" width="58%">Descrizione</td>
 	    <td class="hd" width="5%">Qt&agrave;</td>
-	    <td class="hd" width="10%">Prezzo</td>
+	    <td class="hd" width="8%">Prezzo</td>
 	    <td class="hd" width="5%">%</td>
-	    <td class="hd" width="10%">Impon.</td>
-	    <td class="hd" width="10%">Imp.Iva</td>
-	    <td class="hd far" width="10%">Tot.Euro</td>
+	    <td class="hd" width="8%">Impon.</td>
+	    <td class="hd" width="8%">Iva</td>
+	    <td class="hd far" width="8%">Tot. &euro;</td>
 	  </tr>
 	  {% for v in fattura.voci %}
 	    {% set prz = '%0.2f' % v.prezzo|float %}
@@ -95,7 +107,7 @@
 	    {% set tot_iva = '%0.2f' % v.iva()|float %}
 	    {% set tot = '%0.2f' % v.totale()|float %}
 	    <tr>
-	      <td>{{ v.descr }}</td>
+	      <td style="text-align: left;">{{ v.descr }}</td>
 	      <td>{{ v.qta }}</td>
 	      <td>{{ prz|replace(".",",") }}</td>
 	      <td>{{ "%d"|format(v.aliq) }}</td>
@@ -131,8 +143,7 @@
 	  {% set totf = '%0.2f' % fattura.totale()|float %}
 	  <tr>
 	    <td class="void" colspan="2">&nbsp;</td>
-	    <td class="tot">Totale</td>
-	    <td class="tot">22</td>
+	    <td class="tot" colspan="2">Totale</td>
 	    <td class="tot">{{ impf|replace(".",",") }}</td>
 	    <td class="tot">{{ ivaf|replace(".",",") }}</td>
 	    <td class="tot far">&nbsp;</td>

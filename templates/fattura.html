@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h1 class="page-header">
+  <h3 class="page-header">
   Fattura n&deg; {{ numfatt }} del {{ datafattura|dt }}
-  </h1>
+  </h3>
   <div class="panel-group">
     <div class="panel panel-default">
       <div class="panel-heading">
@@ -55,7 +55,8 @@
 	  <tr>
 	    <th class="col-xs-1">Qta</th>
 	    <th class="col-xs-1">Cod</th>
-	    <th class="col-xs-5">Descrizione</th>
+	    <th class="col-xs-4">Descrizione</th>
+		<th class="col-xs-1">P.U.</th>
 	    <th class="col-xs-1">Imponibile</th>
 	    <th class="col-xs-1" style="text-align:center;">%</th>
 	    <th class="col-xs-1">IVA</th>
@@ -67,6 +68,7 @@
 	    <td>{{ v.qta }}</td>
 	    <td>{{ v.codart }}</td>
 	    <td>{{ v.descr }}</td>
+		<td>{{ '%0.2f' % v.prezzo_unitario()|float }}</td>
 	    <td>{{ '%0.2f' % v.imponibile()|float }}</td>
 	    <td style="text-align:center;">{{ v.aliq }}</td>
 	    <td>{{ '%0.2f' % v.iva()|float }}</td>

@@ -123,6 +123,10 @@ class VoceFattura(db.Model):
     iva = Decimal(p) - Decimal(self.imponibile())
     return round(iva, 2)
   
+  def prezzo_unitario(self):
+    p = Decimal(self.prezzo)
+    return round(p, 2)
+  
   def imponibile(self):
     p = self.prezzo * self.qta
     al = Decimal(round(self.aliq, 2))
@@ -259,7 +263,11 @@ class ObjVoce:
     p = self.prezzo * self.qta
     iva = Decimal(p) - Decimal(self.imponibile())
     return round(iva, 2)
-  
+
+  def prezzo_unitario(self):
+    p = Decimal(self.prezzo)
+    return round(p, 2)
+	
   def imponibile(self):
     p = Decimal(self.prezzo * self.qta)
     al = Decimal(round(self.aliq, 2))

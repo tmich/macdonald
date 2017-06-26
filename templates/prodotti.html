@@ -1,9 +1,32 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h1 class="page-header">Articoli</h1>
-  <br />
+  <h3 class="page-header">Articoli</h3>
+  <p>
+	<form method="POST" action="{{ url_for('cerca_prodotto') }}" class="form-inline" id="formCercaArticoli">  
+		<div id="custom-search-input">
+			<div class="input-group col-md-5">
+				<input type="text" class="form-control input-md" name="query" value="{{ query if query else '' }}" 
+					placeholder="cerca per nome" />
+				<span class="input-group-btn">
+					<button class="btn btn-info btn-md" type="button" 
+							onclick="document.getElementById('formCercaArticoli').submit();">
+						<i class="glyphicon glyphicon-search"></i>
+					</button>
+				</span>
+			</div>
+			<div class="input-group col-md-5">
+				<a href="{{ url_for('nuovo_prodotto') }}" class="btn btn-success btn-md">
+					<span class="glyphicon glyphicon-plus-sign"></span> Nuovo articolo 
+				</a>
+			</div>
+		</div>
+		<div>
+			{% if query %}<a href="{{ url_for('annulla_ricerca_prodotto') }}">annulla ricerca</a>{% endif %}
+		</div>
+	</form>
+  </p>
   <div class="table-responsive">
-    <p><a href="{{url_for('nuovo_prodotto') }}" type="button" class="btn btn-success btn-sm">Nuovo articolo</a></p>
+    <div>Trovati {{ cnt }} risultati</div>
     <table class="table table-striped">
       <tr>
 	<th>codice</th>

@@ -1,19 +1,37 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h1 class="page-header">Fatture da inviare</h1>
+  <h3 class="page-header">Fatture da inviare</h3>
+  
+  {% if errors|length > 0 %}
+	  <div id="errors">
+		<ul>
+		{% for e in errors %}
+			<li>{{ e }}</li>
+		{% endfor %}
+		</ul>
+	  </div>
+  {% endif %}
+  
   <div class="table-responsive">
     {% if cnt > 0 %}
       <table class="table table-striped">
 	<tr>
 	  <th>Fatt. n</th>
 	  <th>Data</th>
+	  <th>Cliente</th>
 	  <th>Email</th>
+	  <th>Importo</th>
+	  <th>&nbsp;</th>
 	</tr>
 	{% for inv in fatture_da_inviare %}
 	  <tr>
 	    <td>{{inv.fattura.num}}</td>
-	    <td>{{inv.fattura.data}}</td>
+	    <td>{{inv.fattura.data|dt('%d/%m/%Y')}}</td>
+	    <td>{{inv.fattura.cliente.ragsoc}}</td>
 	    <td>{{inv.email}}</td>
+	    <td>{{'%0.2f' % inv.fattura.totale()|float}}</td>
+	    <td><a onclick="return confirm('Sei sicuro di voler annullare l\'invio della fattura?');" 
+				href="{{url_for('annulla_invio', id=inv.id)}}">Annulla</a></td>
 	  </tr>
 	{% endfor %}
       </table>

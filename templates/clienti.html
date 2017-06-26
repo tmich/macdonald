@@ -1,16 +1,36 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h1 class="page-header">Clienti</h1>
+  <h3 class="page-header">Clienti</h3>
   <p>
-    <form method="POST" action="{{ url_for('cerca_cliente') }}">
-      <label for="nominativo">Cerca per nominativo:</label>&nbsp;
-      <input type="text" name="query" value="" />&nbsp;
-      <input type="submit" class="btn btn-primary btn-md" value="Cerca" />
+    <form method="POST" action="{{ url_for('cerca_cliente') }}" class="form-inline" id="formCercaClienti">  
+		<div id="custom-search-input">
+			<div class="input-group col-md-5">
+				<input type="text" class="form-control input-md" name="query" value="{{ query if query else '' }}" 
+					placeholder="cerca per nominativo" />
+				<span class="input-group-btn">
+					<button class="btn btn-info btn-md" type="button" 
+							onclick="document.getElementById('formCercaClienti').submit();">
+						<i class="glyphicon glyphicon-search"></i>
+					</button>
+				</span>
+			</div>
+			<!-- <div class="input-group col-md-1">	 -->
+				<!-- <button class="btn btn-danger btn-md" type="button"> -->
+					<!-- <i class="glyphicon glyphicon-remove-sign">&nbsp;</i> -->
+			<!-- </div> -->
+			<div class="input-group col-md-5">
+				<a href="{{ url_for('nuovo_cliente') }}" class="btn btn-success btn-md">
+					<span class="glyphicon glyphicon-plus-sign"></span> Nuovo cliente 
+				</a>
+			</div>
+		</div>
     </form>
   </p>
   <br />
+	<div style="text-align:center; font-weight: bold;">
+		Trovati {{ cnt }} risultati {% if query %}<a href="{{ url_for('annulla_ricerca_cliente') }}">annulla ricerca</a>{% endif %}
+	</div><br />
   <div class="table-responsive">
-    <p><a href="{{ url_for('nuovo_cliente') }}" type="button" class="btn btn-success btn-sm">Nuovo cliente</a></p>
     <table class="table table-striped">
       <tr>
 		<th>rag. sociale</th>

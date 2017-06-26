@@ -1,38 +1,42 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h1 class="page-header">
-  {%  if prodotto != None %}Modifica articolo{% else %}Inserisci articolo{% endif %}
-  </h1>
+  <h3 class="page-header">
+  {%  if id > 0 %}
+	Modifica articolo
+  {% else %}
+	Inserisci articolo
+  {% endif %}
+  </h3>
     <div class="panel-group">
       <div class="panel panel-primary">
 	<div class="panel-heading">
-	{%  if prodotto != None %}
-	  {{ prodotto.descr }}
+	{%  if id > 0 %}
+	  {{ descr }}
 	{% else %}
 	  Nuovo articolo
 	{% endif %}
 	</div>
+	
 	<div class="panel-body">
 	  <form method="POST" action="{{ url_for('salva_prodotto') }}">
-	    {%  if prodotto != None %}
-		<input type="hidden" name="id" value="{{ prodotto.id }}" />
+	    {%  if id > 0 %}
+		<input type="hidden" name="id" value="{{ id }}" />
 	    {%  endif %}
 	    <div class="form-group">
 	      <label for="codice">Codice</label>
-	      <input type="text" class="form-control" name="codice" value="{{ prodotto.codice }}" />
+	      <input type="text" class="form-control" name="codice" value="{{ codice }}" />
 	    </div>
-	    <div class="form-group">
+	    <div class="form-group {{ 'has-error has-feedback' if 'descrizione' in errors else '' }}">
 	      <label for="descrizione">Descrizione</label>
-	      <input type="text" class="form-control" name="descrizione" value="{{ prodotto.descr if prodotto != None else '' }}" />
+	      <input type="text" class="form-control" name="descrizione" value="{{ descr }}" />
 	    </div>
-	    <div class="form-group">
+	    <div class="form-group {{ 'has-error has-feedback' if 'aliquota' in errors else '' }}">
 	      <label for="aliquota">Aliquota</label>
-	      <input type="text" class="form-control" name="aliquota" value="{{ prodotto.aliq if prodotto != None else '22' }}" />
+	      <input type="text" class="form-control" name="aliquota" value="{{ aliq }}" />
 	    </div>
-	    <div class="form-group">
+	    <div class="form-group {{ 'has-error has-feedback' if 'prezzo' in errors else '' }}">
 	      <label for="prezzo">Prezzo</label>
-	      <input type="number" min="0.0" step="0.1" class="form-control" name="prezzo" 
-		value="{{ prodotto.prezzo if prodotto != None else '0.0' }}" />
+	      <input type="text" class="form-control" name="prezzo" value="{{ prezzo }}" />
 	    </div>
 	    <a href="{{ url_for('prodotti') }}" type="button" class="btn btn-default btn-md">&laquo; Indietro</a>
 	    <input type="submit" class="btn btn-success btn-md" value="Salva" />

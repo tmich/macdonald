@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h1 class="page-header">Fattura n. {{ fattura.num }} del {{ fattura.data }}</h1>
+  <h3 class="page-header">Fattura n. {{ fattura.num }} del {{ fattura.data }}</h3>
   <a href="javascript:history.back();">&laquo; Torna indietro</a><br /><br />
   <div class="table-responsive">
 	<p>Intestata a: <b>{{ fattura.cliente.ragsoc }}</b></p>
