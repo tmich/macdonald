@@ -91,70 +91,71 @@
 	</table>
       </div>
       <div>
-	<table class="fattura" style="border-collapse:collapse;" cellpadding="2">
-	  <tr>
-	    <td class="hd" style="text-align: left;" width="58%">Descrizione</td>
-	    <td class="hd" width="5%">Qt&agrave;</td>
-	    <td class="hd" width="8%">Prezzo</td>
-	    <td class="hd" width="5%">%</td>
-	    <td class="hd" width="8%">Impon.</td>
-	    <td class="hd" width="8%">Iva</td>
-	    <td class="hd far" width="8%">Tot. &euro;</td>
-	  </tr>
-	  {% for v in fattura.voci %}
-	    {% set prz = '%0.2f' % v.prezzo|float %}
-	    {% set tot_imp = '%0.2f' % v.imponibile()|float %}
-	    {% set tot_iva = '%0.2f' % v.iva()|float %}
-	    {% set tot = '%0.2f' % v.totale()|float %}
-	    <tr>
-	      <td style="text-align: left;">{{ v.descr }}</td>
-	      <td>{{ v.qta }}</td>
-	      <td>{{ prz|replace(".",",") }}</td>
-	      <td>{{ "%d"|format(v.aliq) }}</td>
-	      <td>{{ tot_imp|replace(".",",") }}</td>
-	      <td>{{ tot_iva|replace(".",",") }}</td>
-	      <td class="far">{{ tot|replace(".",",") }}</td>
-	    </tr>
-	  {% endfor %}
-	  {% for i in range(0,n_righe) %}
-	    <tr>
-	      <td>&nbsp;</td>
-	      <td>&nbsp;</td>
-	      <td>&nbsp;</td>
-	      <td>&nbsp;</td>
-	      <td>&nbsp;</td>
-	      <td>&nbsp;</td>
-	      <td class="far">&nbsp;</td>
-	    </tr>
-	  {% endfor %}
-	  
-	  <tr>
-	    <td class="last">&nbsp;</td>
-	    <td class="last">&nbsp;</td>
-	    <td>&nbsp;</td>
-	    <td>&nbsp;</td>
-	    <td>&nbsp;</td>
-	    <td>&nbsp;</td>
-	    <td class="far">&nbsp;</td>
-	  </tr>
-	  
-	  {% set impf = '%0.2f' % fattura.imponibile()|float %}
-	  {% set ivaf = '%0.2f' % fattura.iva()|float %}
-	  {% set totf = '%0.2f' % fattura.totale()|float %}
-	  <tr>
-	    <td class="void" colspan="2">&nbsp;</td>
-	    <td class="tot" colspan="2">Totale</td>
-	    <td class="tot">{{ impf|replace(".",",") }}</td>
-	    <td class="tot">{{ ivaf|replace(".",",") }}</td>
-	    <td class="tot far">&nbsp;</td>
-	  </tr>
-	  <tr>
-	    <td class="void" colspan="4">&nbsp;</td>
-	    <td class="tot" colspan="2">TOTALE FATTURA</td>
-	    <td class="tot far">{{ totf|replace(".",",") }}</td>
-	  </tr>
-	</table>
+		<table class="fattura" style="border-collapse:collapse;" cellpadding="2">
+		  <tr>
+			<td class="hd" style="text-align: left;" width="58%">Descrizione</td>
+			<td class="hd" width="5%">Qt&agrave;</td>
+			<td class="hd" width="8%">Prezzo</td>
+			<td class="hd" width="5%">%</td>
+			<td class="hd" width="8%">Impon.</td>
+			<td class="hd" width="8%">Iva</td>
+			<td class="hd far" width="8%">Tot. &euro;</td>
+		  </tr>
+		  {% for v in fattura.voci %}
+			{% set prz = '%0.2f' % v.prezzo|float %}
+			{% set tot_imp = '%0.2f' % v.imponibile()|float %}
+			{% set tot_iva = '%0.2f' % v.iva()|float %}
+			{% set tot = '%0.2f' % v.totale()|float %}
+			<tr>
+			  <td style="text-align: left;">{{ v.descr }}</td>
+			  <td>{{ v.qta }}</td>
+			  <td>{{ prz|replace(".",",") }}</td>
+			  <td>{{ "%d"|format(v.aliq) }}</td>
+			  <td>{{ tot_imp|replace(".",",") }}</td>
+			  <td>{{ tot_iva|replace(".",",") }}</td>
+			  <td class="far">{{ tot|replace(".",",") }}</td>
+			</tr>
+		  {% endfor %}
+		  {% for i in range(0,n_righe) %}
+			<tr>
+			  <td>&nbsp;</td>
+			  <td>&nbsp;</td>
+			  <td>&nbsp;</td>
+			  <td>&nbsp;</td>
+			  <td>&nbsp;</td>
+			  <td>&nbsp;</td>
+			  <td class="far">&nbsp;</td>
+			</tr>
+		  {% endfor %}
+		  
+		  <tr>
+			<td class="last">&nbsp;</td>
+			<td class="last">&nbsp;</td>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+			<td class="far">&nbsp;</td>
+		  </tr>
+		  
+		  {% set impf = '%0.2f' % fattura.imponibile()|float %}
+		  {% set ivaf = '%0.2f' % fattura.iva()|float %}
+		  {% set totf = '%0.2f' % fattura.totale()|float %}
+		  <tr>
+			<td class="void" colspan="2">&nbsp;</td>
+			<td class="tot" colspan="2">Totale</td>
+			<td class="tot">{{ impf|replace(".",",") }}</td>
+			<td class="tot">{{ ivaf|replace(".",",") }}</td>
+			<td class="tot far">&nbsp;</td>
+		  </tr>
+		  <tr>
+			<td class="void" colspan="4">&nbsp;</td>
+			<td class="tot" colspan="2">TOTALE FATTURA</td>
+			<td class="tot far">{{ totf|replace(".",",") }}</td>
+		  </tr>
+		</table>
       </div>
+	  <br />
     {% endblock %}
     </body>
 </html>

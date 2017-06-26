@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% set current="clienti" %}
 {% block actions %}
     <form method="POST" action="{{ url_for('cerca_cliente') }}" class="form-inline" id="formCercaClienti">  
         <div class="input-group col-md-5">

@@ -75,13 +75,19 @@
       <div class="col-sm-3 col-md-2 sidebar">
         {% if g.user != None %}
           <ul class="nav nav-sidebar">
-              <li><a href="{{ url_for('clienti') }}"><span class="glyphicon glyphicon-user"></span> Clienti</a></li>
-              <li><a href="{{ url_for('prodotti') }}"><span class="glyphicon glyphicon-barcode"></span> Articoli</a></li>
-              <li><a href="{{ url_for('fatture_da_inviare') }}"><span class="glyphicon glyphicon-envelope"></span> Fatture da inviare</a></li>
+              <li class="{{ 'active' if current=='clienti' else '' }}"><a href="{{ url_for('clienti') }}"><span class="glyphicon glyphicon-user"></span> Clienti</a></li>
+              <li class="{{ 'active' if current=='prodotti' else '' }}"><a href="{{ url_for('prodotti') }}"><span class="glyphicon glyphicon-barcode"></span> Articoli</a></li>
+              <li class="{{ 'active' if current=='invio_fatture' else '' }}"><a href="{{ url_for('fatture_da_inviare') }}"><span class="glyphicon glyphicon-envelope"></span> Invio fatture</a></li>
+              <li>
+				<a data-toggle="collapse" href="#collapse1"><span class="glyphicon glyphicon-print"></span> Stampa fatture  <span class="caret"></span></a></li>
+				<ul id="collapse1" class="nav nav-sidebar panel-collapse collapse {{ 'in' if current in ['stampa', 'lista_fatture', 'ristampa_fatture'] else '' }}">
+					<li class="{{ 'active' if current=='stampa' else '' }}" style="margin-left: 30px;"><a href="#"><span class="glyphicon glyphicon-print"></span> Stampa</a></li>
+					<li class="{{ 'active' if current=='lista_fatture' else '' }}" style="margin-left: 30px;"><a href="{{ url_for('lista_fatture') }}"><span class="glyphicon glyphicon-list"></span> Ristampa lista</a></li>
+					<li class="{{ 'active' if current=='ristampa_fatture' else '' }}" style="margin-left: 30px;"><a href="{{ url_for('ristampa_fatture') }}"><span class="glyphicon glyphicon-calendar"></span> Ristampa fatture</a></li>
+				</ul>
           </ul>
         {% endif %}
       </div>  
-      
       <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 ">
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
@@ -92,7 +98,7 @@
             </div>
           {% endif %}
         {% endwith %}
-        <div class="actions">
+        <div class="actions hidden-print">
             {% block actions %}{% endblock %}
         </div>
         {% block body %}{% endblock %}

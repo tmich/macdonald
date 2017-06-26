@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% set current="clienti" %}
 {% block actions %}
     <div style="text-align: left;">
         <a href="{{ url_for('fatture_cliente', id=id, page=0) }}" title="Ricerca fatture" class="btn btn-default btn-sm" type="button">

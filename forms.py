@@ -1,5 +1,6 @@
 from models import db, Cliente, Prodotto, Fattura, VoceFattura, FatturaSequence, User
 from dateutil.parser import parse
+from datetime import datetime
 
 class Form(object):
   errors = None
@@ -279,3 +280,45 @@ class FormCliente(object):
 			self.errors['email'] = "manca l'email"			
 
 		return len(self.errors.keys())==0
+		
+class FormDate(Form):
+	data_inizio=None
+	data_fine=None
+	
+	def __init__(self, f):    # f=request.form  
+		self.errors = dict()
+		self.data_inizio=f.get('data_inizio')
+		self.data_fine=f.get('data_fine')
+		
+	def valido(self):
+		try:
+			self.data_inizio=parse(str(self.data_inizio))
+		except:
+			self.errors['data_inizio'] = 'data non valida'
+		
+		try:
+			self.data_fine=parse(str(self.data_fine))
+		except:
+			self.errors['data_fine'] = 'data non valida'
+			
+		return len(self.errors.keys())==0
+		
+class FormDateFatture(FormDate):
+	nro_da=None
+	nro_a=None
+	
+	def __init__(self, f):    # f=request.form  
+		super(FormDateFatture, self).__init__(f)
+		self.nro_da=f.get('nro_da')
+		self.nro_a=f.get('nro_a')
+	
+	def valido(self):
+		val=super(FormDateFatture, self).valido()
+		
+		if self.nro_da.strip()=='':
+			self.errors['nro_da'] = 'numero da non valido'
+		
+		if self.nro_a.strip()=='':
+			self.errors['nro_a'] = 'numero a non valido'
+		
+		return val and len(self.errors.keys())==0

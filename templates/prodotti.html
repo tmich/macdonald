@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% set current="prodotti" %}
 {% block actions %}
     <form method="POST" action="{{ url_for('cerca_prodotto') }}" class="form-inline" id="formCercaArticoli">  		
         <div class="input-group col-md-5">

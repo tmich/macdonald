@@ -9,7 +9,7 @@ from flask_babel import Babel, format_datetime, format_date
 from decimal import Decimal
 from pdfs import create_pdf
 from models import db, Anagrafica, Cliente, Prodotto, Fattura, VoceFattura, InvioFattura, User, FatturaSequence, ObjFatt, ObjVoce
-from forms import FormNuovaFattura, FormAggiungiVoce, FormNuovaFattura, FormCliente, FormProdotto, FormProfilo
+from forms import FormNuovaFattura, FormAggiungiVoce, FormNuovaFattura, FormCliente, FormProdotto, FormProfilo, FormDate, FormDateFatture
 import jsonpickle
 from smtplib import SMTPException, SMTPAuthenticationError, SMTPRecipientsRefused
 #from dateutil.parser import parse
@@ -654,15 +654,42 @@ def rimuovi_voce(index):
   fatt.rimuovi(index-1)
   session['fatt']=jsonpickle.encode(fatt)
   return redirect(url_for('componi_fattura',_anchor='form')) 
-  
-#@app.route('/dett_fattura/<int:id>')
-#@login_required
-#def dett_fattura(id, page=0):
-  #pagenum = 20
-  #offset = page * pagenum
-  #f = Fattura.query.get(id)
-  #return render_template('dett_fattura.html', fattura=f, voci=f.voci, tot=f.totale())
 
+@app.route('/lista_fatture', methods=['GET', 'POST'])
+def lista_fatture():
+	errors=dict()
+	if request.method=='POST':
+		f=FormDate(request.form)
+		if f.valido():
+			fatture = db.session.query(Fattura).filter(Fattura.data.between(f.data_inizio, f.data_fine)).order_by(Fattura.num)
+			return render_template('lista_fatture.html', fatture=fatture, data_inizio=f.data_inizio, data_fine=f.data_fine)
+		else:
+			errors=f.errors
+	return render_template('form_date.html', errors=errors, titolo='Lista fatture', data_inizio=datetime.datetime.today(), data_fine=datetime.datetime.today())
+
+@app.route('/ristampa_fatture', methods=['GET', 'POST'])
+def ristampa_fatture():
+	errors=dict()
+	if request.method=='POST':
+		f=FormDateFatture(request.form)
+		if f.valido():
+			fatture = db.session.query(Fattura).filter(Fattura.data.between(f.data_inizio, f.data_fine)).order_by(Fattura.num)
+			#return render_template('lista_fatture.html', fatture=fatture, data_inizio=f.data_inizio, data_fine=f.data_fine)
+			min_righe=10
+			stringone=""
+			for fatt in fatture:
+				n_righe = max(len(fatt.voci), min_righe) - min(len(fatt.voci), min_righe)
+				stringone = stringone + render_template('fattura_pdf.html', fattura=fatt, n_righe=n_righe)
+			
+			pdf=create_pdf(stringone)
+			response=make_response(pdf.getvalue())
+			response.headers['Content-Type'] = 'application/pdf'
+			response.headers['Content-Disposition'] = 'inline; filename=stampa_fatture.pdf'
+			return response
+		else:
+			errors=f.errors
+	return render_template('form_date_fatture.html', errors=errors, titolo='Ristampa fatture', data_inizio=datetime.datetime.today(), data_fine=datetime.datetime.today())
+		
 # jinja2 filters
 @app.template_filter('dt')
 def _jinja2_filter_date(date, fmt=None):
