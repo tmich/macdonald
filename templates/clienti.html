@@ -1,35 +1,40 @@
 {% extends "layout.html" %}
+{% block actions %}
+    <form method="POST" action="{{ url_for('cerca_cliente') }}" class="form-inline" id="formCercaClienti">  
+        <div class="input-group col-md-5">
+            <input type="text" class="form-control input-md" name="query" value="{{ query if query else '' }}" 
+                placeholder="cerca per nominativo" />
+            <span class="input-group-btn">
+                <button class="btn btn-info btn-md" type="button" 
+                        onclick="document.getElementById('formCercaClienti').submit();">
+                    <i class="glyphicon glyphicon-search"></i>
+                </button>
+            </span>
+        </div>
+        <div class="input-group col-md-3">
+            Record trovati: <span class="badge">{{ cnt }}</span>&nbsp;&nbsp;&nbsp;
+            {% if query %}
+                <a href="{{ url_for('annulla_ricerca_cliente') }}" class="btn btn-xs btn-danger">
+                    <span class="glyphicon glyphicon-remove"></span> Annulla ricerca
+                </a>
+            {% endif %}
+        </div>
+        <div class="input-group col-md-auto pull-right">
+            <a href="{{ url_for('nuovo_cliente') }}" class="btn btn-sm btn-success" title="Nuovo cliente">
+                <span class="glyphicon glyphicon-plus"></span> Nuovo cliente
+            </a>&nbsp;&nbsp;&nbsp;
+            {% if selezionabile %}
+            <div class="pull-right">
+                <a href="{{ url_for('componi_fattura') }}" class="btn btn-sm btn-danger" title="Annulla selezione">
+                    <span class="glyphicon glyphicon-remove"></span> Annulla selezione
+                </a>
+            </div>
+        {% endif %}
+        </div>
+    </form>
+{% endblock %}
 {% block body %}
   <h3 class="page-header">Clienti</h3>
-  <p>
-    <form method="POST" action="{{ url_for('cerca_cliente') }}" class="form-inline" id="formCercaClienti">  
-		<div id="custom-search-input">
-			<div class="input-group col-md-5">
-				<input type="text" class="form-control input-md" name="query" value="{{ query if query else '' }}" 
-					placeholder="cerca per nominativo" />
-				<span class="input-group-btn">
-					<button class="btn btn-info btn-md" type="button" 
-							onclick="document.getElementById('formCercaClienti').submit();">
-						<i class="glyphicon glyphicon-search"></i>
-					</button>
-				</span>
-			</div>
-			<!-- <div class="input-group col-md-1">	 -->
-				<!-- <button class="btn btn-danger btn-md" type="button"> -->
-					<!-- <i class="glyphicon glyphicon-remove-sign">&nbsp;</i> -->
-			<!-- </div> -->
-			<div class="input-group col-md-5">
-				<a href="{{ url_for('nuovo_cliente') }}" class="btn btn-success btn-md">
-					<span class="glyphicon glyphicon-plus-sign"></span> Nuovo cliente 
-				</a>
-			</div>
-		</div>
-    </form>
-  </p>
-  <br />
-	<div style="text-align:center; font-weight: bold;">
-		Trovati {{ cnt }} risultati {% if query %}<a href="{{ url_for('annulla_ricerca_cliente') }}">annulla ricerca</a>{% endif %}
-	</div><br />
   <div class="table-responsive">
     <table class="table table-striped">
       <tr>
@@ -39,31 +44,35 @@
 		<th>indirizzo</th>
 		<th>tel</th>
 		<th>email</th>
-		<!--<th>&nbsp;</th>-->
-		  </tr>
-		  {% for cliente in clienti %}
-		<tr>
+        {% if selezionabile %}
+            <th>&nbsp;</th>
+        {% endif %}
+	  </tr>
+	{% for cliente in clienti %}
+	  <tr>
 		<td><a href="{{ url_for('cliente', id=cliente.id) }}" title='Scheda Cliente'>{{ cliente.ragsoc }}</a></td>
 		<td>{{ cliente.cod_fisc }}</td>
 		<td>{{ cliente.p_iva }}</td>
 		<td>{{ cliente.indirizzo }}</td>
 		<td>{{ cliente.tel }}</td>
 		<td>{{ cliente.email }}</td>
-<!-- 		<td><a href="{{ url_for('fatture_cliente', id=cliente.id, page=0) }}" type="button" class="btn btn-default btn-sm">Modifica</a></td> -->
-		</tr>
-		  {% else %}
+        {% if selezionabile %}
+            <td><a href="{{url_for('cambia_cliente_fattura', idfatt=0, idcli=cliente.id)}}" type="button" class="btn btn-xs btn-success" title="Seleziona {{cliente.ragsoc}}"><span class="glyphicon glyphicon-ok"></span></a></td>
+        {% endif %}
+	  </tr>
+	{% else %}
 		<li><em>Nessun cliente.</em>
 		  {% endfor %}
 	  </table>
-  </div>
-  <ul class="pager">
-    {% if page > 0 %}
-    <li><a href="{{url_for('clienti', page=page-1) }}">Pag. precedente</a></li>
-    {% endif %}
-    {% if page < last_page %}
-    <li><a href="{{url_for('clienti', page=page+1) }}">Pag. successiva</a></li>
-    {% endif %}
-  </ul>
-  <p align="center">Pagina {{ page+1 }} di {{ last_page+1 }}</p>
+    </div>
+      <ul class="pager">
+        {% if page > 0 %}
+        <li><a href="{{url_for('clienti', page=page-1) }}">Pag. precedente</a></li>
+        {% endif %}
+        {% if page < last_page %}
+        <li><a href="{{url_for('clienti', page=page+1) }}">Pag. successiva</a></li>
+        {% endif %}
+      </ul>
+    <p align="center">Pagina {{ page+1 }} di {{ last_page+1 }}</p>
   
 {% endblock %}

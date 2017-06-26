@@ -9,7 +9,7 @@ from flask_babel import Babel, format_datetime, format_date
 from decimal import Decimal
 from pdfs import create_pdf
 from models import db, Anagrafica, Cliente, Prodotto, Fattura, VoceFattura, InvioFattura, User, FatturaSequence, ObjFatt, ObjVoce
-from forms import FormNuovaFattura, FormAggiungiVoce, FormNuovaFattura, FormCliente, FormProdotto
+from forms import FormNuovaFattura, FormAggiungiVoce, FormNuovaFattura, FormCliente, FormProdotto, FormProfilo
 import jsonpickle
 from smtplib import SMTPException, SMTPAuthenticationError, SMTPRecipientsRefused
 #from dateutil.parser import parse
@@ -68,7 +68,7 @@ def logout():
   if 'uid' in session:
 	session.pop('uid')
   return redirect(url_for('main'))
-
+ 
 @app.route('/clienti', methods=['GET'])
 @app.route('/clienti/<int:page>')
 @login_required
@@ -77,6 +77,10 @@ def clienti(page=0):
 	pagenum = 50
 	offset = page * pagenum
 	cnt = db.session.query(Cliente).count()
+	selezionabile=False
+	
+	if('id_fattura_cambio_cliente' in session):
+		selezionabile=True
 	
 	if('qry_cliente' in session):
 		q = session.get('qry_cliente')
@@ -86,7 +90,7 @@ def clienti(page=0):
 		clienti = db.session.query(Cliente).order_by('ragsoc').offset(offset).limit(pagenum)
 		
 	last_page = cnt / pagenum
-	return render_template('clienti.html', clienti=clienti, page=page, cnt=cnt, last_page=last_page, query=q)
+	return render_template('clienti.html', clienti=clienti, page=page, cnt=cnt, last_page=last_page, query=q, selezionabile=selezionabile)
 
 @app.route('/cerca_cliente', methods=['GET','POST'])
 @login_required
@@ -310,14 +314,33 @@ def salva_prodotto():
 @app.route('/profilo', methods=['GET', 'POST'])
 @login_required
 def profilo():
-  if request.method == 'POST':
-	f = request.form
-	u = User.query.get(g.user.id)
-	u.nome = f['nome']
-	u.email = f['email']
-	db.session.commit()
-	flash('Profilo utente aggiornato')
-  return render_template('profilo.html')
+    id=g.user.id
+    username=g.user.username
+    nome=g.user.nome
+    email=g.user.email
+    errors=dict()
+    
+    if request.method == 'POST':
+        f = FormProfilo(request.form)
+        id=f.user_id
+        username=f.username
+        nome=f.nome
+        email=f.email
+        
+        if f.valido():
+            u = User.query.get(f.user_id)
+            u.nome = f.nome
+            u.email = f.email
+            
+            if f.password_cambiata:
+                u.password = f.nuova_pwd
+                
+            db.session.commit()
+            
+            flash('Profilo utente aggiornato', 'success')
+        else:
+            errors = f.errors
+    return render_template('profilo.html', id=id, username=username, nome=nome, email=email, errors=errors)
   
 @app.route('/fatture_cliente/<int:id>/<int:page>')
 @login_required
@@ -455,6 +478,21 @@ def nuova_fattura(id_cliente):
   return render_template('nuova_fattura.html', cliente=cli, datafattura=datetime.date.today(), numfattura=numfatt, errors=errors)
 
 @login_required
+@app.route('/cambia_cliente_fattura/<int:idfatt>')
+@app.route('/cambia_cliente_fattura/<int:idfatt>/<int:idcli>')
+def cambia_cliente_fattura(idfatt,idcli=0):
+    if(idcli == 0):
+        session['id_fattura_cambio_cliente'] = idfatt
+        return redirect(url_for('clienti', page=0))
+    else:
+        if 'id_fattura_cambio_cliente' in session:
+            id_fattura_cambio_cliente = session.pop('id_fattura_cambio_cliente')
+            objf=jsonpickle.decode(session['fatt'])
+            objf.id_cliente = idcli
+            session['fatt']=jsonpickle.encode(objf)
+            return redirect(url_for('componi_fattura'))
+
+@login_required
 @app.route('/modifica_fattura/<int:id>')
 def modifica_fattura(id):
   session['fatt']=None
@@ -490,6 +528,9 @@ def componi_fattura():
   aliq=''
   idx_voce=0
   
+  if 'id_fattura_cambio_cliente' in session:
+    session.pop('id_fattura_cambio_cliente')
+  
   #if(request.method=='GET'):
   if('idx' in request.args):
 	idx_voce=request.args.get('idx')
@@ -522,7 +563,7 @@ def componi_fattura():
 		aliq=f.aliq
 		errors=f.errors
 		  
-  return render_template('componi_fattura.html',errors=errors,datafattura=fatt.dt,numfatt=fatt.num,n_scontr1=fatt.n_scontr1,n_scontr2=fatt.n_scontr2,n_scontr3=fatt.n_scontr3,cliente=cli,imponibile=fatt.imponibile(),iva=fatt.iva(),totale=fatt.totale(),voci=fatt.voci,codart=codart,descr=descr,qta=qta,prezzo=prezzo,aliq=aliq,idx_voce=idx_voce)  
+  return render_template('componi_fattura.html',errors=errors,idfatt=fatt.id,datafattura=fatt.dt,numfatt=fatt.num,n_scontr1=fatt.n_scontr1,n_scontr2=fatt.n_scontr2,n_scontr3=fatt.n_scontr3,cliente=cli,imponibile=fatt.imponibile(),iva=fatt.iva(),totale=fatt.totale(),voci=fatt.voci,codart=codart,descr=descr,qta=qta,prezzo=prezzo,aliq=aliq,idx_voce=idx_voce)  
 
 def aggiungi_voce(f):
   objf=jsonpickle.decode(session['fatt'])
@@ -573,6 +614,7 @@ def salva_fattura(f):
 	for v in fattura.voci:
 	  db.session.delete(v)
   
+  fattura.cliente_id=objf.id_cliente
   fattura.data=f.dtfatt
   fattura.n_scontr1=f.n_scontr1
   fattura.n_scontr2=f.n_scontr2

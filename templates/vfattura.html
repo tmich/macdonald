@@ -1,32 +1,49 @@
 {% extends "layout.html" %}
+{% block actions %}
+<div>
+    <a href="{{url_for('fatture_cliente', id=fattura.cliente.id, page=0)}}" class="btn btn-default btn-sm">&laquo; Indietro</a>
+    <a href="{{url_for('stampa_fattura', idfatt=fattura.id)}}" target="_blank" class="btn btn-default btn-sm">
+        <span class="glyphicon glyphicon-print"></span> Stampa
+    </a>
+    <a href="{{url_for('invia_fattura', idfatt=fattura.id, next=url_for('fatture_cliente',id=fattura.cliente.id,page=0))}}" class="btn btn-default btn-sm">
+        <span class="glyphicon glyphicon-envelope"></span> Invia
+    </a>
+    <a href="{{url_for('modifica_fattura', id=fattura.id)}}#form" class="btn btn-primary btn-sm">
+        <span class="glyphicon glyphicon-pencil"></span> Modifica
+    </a>
+    <!-- <a href="{{url_for('stampa_fattura', idfatt=fattura.id)}}" target="_blank" class="btn btn-default">Stampa</a> -->
+    <!-- <a href="{{url_for('invia_fattura', idfatt=fattura.id, next=url_for('fatture_cliente',id=fattura.cliente.id,page=0))}}" class="btn btn-default">Invia</a> -->
+    <!-- <a href="{{url_for('modifica_fattura', id=fattura.id)}}#form" class="btn btn-primary">Modifica</a> -->
+</div>
+{% endblock %}
 {% block body %}
-  <h1 class="page-header">
+  <h3 class="page-header">
     Visualizza Fattura
-  </h1>
+  </h3>
   <div class="panel-group">
     <div class="panel panel-default">
       <div class="panel-heading">
-	Cliente
+        Cliente
       </div>
       <div class="panel-body">
-	<div id="intestazione" style="text-align:left">
-	  <div>
-	    <h4>{{ fattura.cliente.ragsoc }}</h4>
-	    {{ fattura.cliente.indirizzo }} {{ fattura.cliente.cap }} {{ fattura.cliente.citta }}
-	  </div>
-	  <div>
-	    <label>Partita IVA</label> {{ fattura.cliente.p_iva }}
-	  </div>
-	  <div>
-	    <label>Codice Fiscale</label> {{ fattura.cliente.cod_fisc }}
-	  </div>
-	  <div>
-	    <label>Telefono</label> {{ fattura.cliente.tel }}
-	  </div>
-	  <div>
-	    <label>Email</label> {{ fattura.cliente.email }}
-	  </div>
-	</div>
+        <div id="intestazione" style="text-align:left">
+          <div>
+            <h4>{{ fattura.cliente.ragsoc }}</h4>
+            {{ fattura.cliente.indirizzo }} {{ fattura.cliente.cap }} {{ fattura.cliente.citta }}
+          </div>
+          <div>
+            <label>Partita IVA</label> {{ fattura.cliente.p_iva }}
+          </div>
+          <div>
+            <label>Codice Fiscale</label> {{ fattura.cliente.cod_fisc }}
+          </div>
+          <div>
+            <label>Telefono</label> {{ fattura.cliente.tel }}
+          </div>
+          <div>
+            <label>Email</label> {{ fattura.cliente.email }}
+          </div>
+        </div>
       </div>
     </div>
     <div class="panel panel-primary">
@@ -72,28 +89,44 @@
 	    <th style="text-align:right;">{{ '%0.2f' % fattura.totale()|float }}</th>
 	  </tr>
 	</table>
+        <!-- <div class="actions" style="text-align:center;"> -->
+            <!-- <a href="{{url_for('modifica_fattura', id=fattura.id)}}#form" class="btn btn-primary"> -->
+				<!-- <span class="glyphicon glyphicon-pencil"></span> Modifica -->
+			<!-- </a> -->
+			<!-- <a href="{{url_for('stampa_fattura', idfatt=fattura.id)}}" target="_blank" class="btn btn-default"> -->
+				<!-- <span class="glyphicon glyphicon-print"></span> Stampa -->
+			<!-- </a> -->
+			<!-- <a href="{{url_for('invia_fattura', idfatt=fattura.id, next=url_for('fatture_cliente',id=fattura.cliente.id,page=0))}}"  -->
+			   <!-- class="btn btn-default"> -->
+				<!-- <span class="glyphicon glyphicon-envelope"></span> Invia -->
+			<!-- </a> -->
+            <!-- <!-- <a href="{{url_for('stampa_fattura', idfatt=fattura.id)}}" target="_blank" class="btn btn-default">Stampa</a> -->
+            <!-- <!-- <a href="{{url_for('invia_fattura', idfatt=fattura.id, next=url_for('fatture_cliente',id=fattura.cliente.id,page=0))}}" class="btn btn-default">Invia</a> -->
+            <!-- <!-- <a href="{{url_for('modifica_fattura', id=fattura.id)}}#form" class="btn btn-primary">Modifica</a> -->
+            <!-- <a href="{{url_for('fatture_cliente', id=fattura.cliente.id, page=0)}}" class="btn btn-default">Esci</a> -->
+        <!-- </div> -->
       </div>
     </div>
-    <div class="panel panel-default">
-    <div class="panel-heading">
-	Operazioni
-      </div>
-      <div class="panel-body" align="left">
-			<a href="{{url_for('modifica_fattura', id=fattura.id)}}#form" class="btn btn-primary">
-				<span class="glyphicon glyphicon-pencil"></span> Modifica
-			</a>
-			<a href="{{url_for('stampa_fattura', idfatt=fattura.id)}}" target="_blank" class="btn btn-default">
-				<span class="glyphicon glyphicon-print"></span> Stampa
-			</a>
-			<a href="{{url_for('invia_fattura', idfatt=fattura.id, next=url_for('fatture_cliente',id=fattura.cliente.id,page=0))}}" 
-			   class="btn btn-default">
-				<span class="glyphicon glyphicon-envelope"></span> Invia
-			</a>
-		<!-- <a href="{{url_for('stampa_fattura', idfatt=fattura.id)}}" target="_blank" class="btn btn-default">Stampa</a> -->
-		<!-- <a href="{{url_for('invia_fattura', idfatt=fattura.id, next=url_for('fatture_cliente',id=fattura.cliente.id,page=0))}}" class="btn btn-default">Invia</a> -->
-		<!-- <a href="{{url_for('modifica_fattura', id=fattura.id)}}#form" class="btn btn-primary">Modifica</a> -->
-		<a href="{{url_for('fatture_cliente', id=fattura.cliente.id, page=0)}}" class="btn btn-default">Esci</a>
-      </div>
-    </div>
+    <!-- <div class="panel panel-default"> -->
+    <!-- <div class="panel-heading"> -->
+	<!-- Operazioni -->
+      <!-- </div> -->
+      <!-- <div class="panel-body" align="left"> -->
+			<!-- <a href="{{url_for('modifica_fattura', id=fattura.id)}}#form" class="btn btn-primary"> -->
+				<!-- <span class="glyphicon glyphicon-pencil"></span> Modifica -->
+			<!-- </a> -->
+			<!-- <a href="{{url_for('stampa_fattura', idfatt=fattura.id)}}" target="_blank" class="btn btn-default"> -->
+				<!-- <span class="glyphicon glyphicon-print"></span> Stampa -->
+			<!-- </a> -->
+			<!-- <a href="{{url_for('invia_fattura', idfatt=fattura.id, next=url_for('fatture_cliente',id=fattura.cliente.id,page=0))}}"  -->
+			   <!-- class="btn btn-default"> -->
+				<!-- <span class="glyphicon glyphicon-envelope"></span> Invia -->
+			<!-- </a> -->
+		<!-- <!-- <a href="{{url_for('stampa_fattura', idfatt=fattura.id)}}" target="_blank" class="btn btn-default">Stampa</a> -->
+		<!-- <!-- <a href="{{url_for('invia_fattura', idfatt=fattura.id, next=url_for('fatture_cliente',id=fattura.cliente.id,page=0))}}" class="btn btn-default">Invia</a> -->
+		<!-- <!-- <a href="{{url_for('modifica_fattura', id=fattura.id)}}#form" class="btn btn-primary">Modifica</a> -->
+		<!-- <a href="{{url_for('fatture_cliente', id=fattura.cliente.id, page=0)}}" class="btn btn-default">Esci</a> -->
+      <!-- </div> -->
+    <!-- </div> -->
   </div>
 {% endblock %}

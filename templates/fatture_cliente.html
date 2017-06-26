@@ -1,14 +1,16 @@
 {% extends "layout.html" %}
+{% block actions %}
+    <div>
+        <a href="{{ url_for('cliente', id=cliente.id) }}"  class="btn btn-default btn-sm">&laquo; Torna indietro</a>
+        <a href="{{ url_for('nuova_fattura', id_cliente=cliente.id) }}" class="btn btn-sm btn-success" title="Nuova fattura">
+            <span class="glyphicon glyphicon-plus-sign"></span> Nuova fattura
+        </a>
+        Record trovati: <span class="badge">{{ cnt }}</span> 
+    </div>
+{% endblock %}
 {% block body %}
-	<h3 class="page-header">Fatture per {{ cliente.ragsoc }}</h3>
-	<div class="input-group col-md-5">
-		<a href="{{ url_for('nuova_fattura', id_cliente=cliente.id) }}" class="btn btn-success">
-			<span class="glyphicon glyphicon-plus-sign"></span> Nuova fattura 
-		</a>
-	</div>
-	<div align="center"><b>Fatture emesse</b></div>
-	<div align="center">Record trovati: {{ cnt }}</div>
-	{% if cnt > 0 %}
+	<h3 class="page-header">Fatture emesse per {{ cliente.ragsoc }}</h3>
+    {% if cnt > 0 %}
 	<div class="table-responsive">
 	  <table class="table table-striped">
 	<tr>
@@ -45,5 +47,4 @@
 	{% endif %}
 	</ul>
 	<p align="center">Pagina {{ page+1 }} di {{ last_page+1 }}</p>
-	<div><a href="{{ url_for('cliente', id=cliente.id) }}">&laquo; Torna indietro</a></div>
 {% endblock %}

@@ -1,4 +1,11 @@
 {% extends "layout.html" %}
+{% block actions %}
+    <div style="text-align: left;">
+        <!-- Fatture da inviare: <span class="badge">{{fatture_da_inviare|count}}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
+        <a href="{{url_for('invia_tutte')}}" class="btn btn-sm btn-success {{'disabled' if fatture_da_inviare|count == 0 else '' }}">
+            <span class="glyphicon glyphicon-envelope"></span> Invia <span class="badge">{{fatture_da_inviare|count}}</span></a>
+    </div>
+{% endblock %}
 {% block body %}
   <h3 class="page-header">Fatture da inviare</h3>
   
@@ -35,7 +42,6 @@
 	  </tr>
 	{% endfor %}
       </table>
-      <a href="{{url_for('invia_tutte', next=url_for('fatture_da_inviare'))}}" class="btn btn-primary">Invia tutte</a>
     {% else %}
       <p>Nessuna fattura da inviare</p>
     {% endif %}

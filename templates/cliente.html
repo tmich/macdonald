@@ -1,71 +1,73 @@
 {% extends "layout.html" %}
+{% block actions %}
+    <div style="text-align: left;">
+        <a href="{{ url_for('fatture_cliente', id=id, page=0) }}" title="Ricerca fatture" class="btn btn-default btn-sm" type="button">
+            <span class="glyphicon glyphicon-search"></span> Ricerca fatture
+        </a>&nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="{{ url_for('nuova_fattura', id_cliente=id) }}" title="Nuova fattura" class="btn btn-success btn-sm" type="button">
+            <span class="glyphicon glyphicon-plus-sign"></span> Nuova fattura
+        </a>
+    </div>
+{% endblock %}
 {% block body %}
-  <h3 class="page-header">
-  {%  if id > 0 %}Anagrafica cliente{% else %}Inserisci cliente{% endif %}
-  </h3>
+    <h3 class="page-header">
+        {%  if id > 0 %}Anagrafica cliente{% else %}Inserisci cliente{% endif %}
+    </h3>
     <div class="panel-group">
-      <div class="panel panel-primary">
-	<div class="panel-heading">
-	{% if id > 0 %}
-	  {{ ragsoc }}
-	{% else %}
-	  Nuovo cliente
-	{% endif %}
-	</div>
-	<div class="panel-body">
-	  <form method="POST" action="{%  if id == 0 %}{{ url_for('nuovo_cliente') }}{% else %}{{ url_for('salva_cliente') }}{%  endif %}">
-	    {%  if id > 0 %}
-	    <div class="form-group">
-	      <label for="codice">codice:</label>
-	      <input type="text" class="form-control" name="id" value="{{ id }}" readonly="readonly" />
-	    </div>
-	    {%  endif %}
-	    <div class="form-group {{ 'has-error has-feedback' if 'ragsoc' in errors else '' }}">
-	      <label for="ragione_sociale">Nominativo/ragione sociale</label>
-	      <input type="text" class="form-control" name="ragione_sociale" value="{{ ragsoc }}" />
-	    </div>
-	    <div class="form-group {{ 'has-error has-feedback' if 'indirizzo' in errors else '' }}">
-	      <label for="indirizzo">Indirizzo</label>
-	      <input type="text" class="form-control" name="indirizzo" value="{{ indirizzo }}" />
-	    </div>
-	    <div class="form-group {{ 'has-error has-feedback' if 'cap' in errors else '' }}">
-	      <label for="cap">CAP</label>
-	      <input type="text" name="cap" class="form-control" value="{{ cap }}" />
-	    </div>
-	    <div class="form-group {{ 'has-error has-feedback' if 'citta' in errors else '' }}">
-	      <label for="citta">Citta</label>
-	      <input type="text" class="form-control" name="citta" value="{{ citta }}" />
-	    </div>
-	    <div class="form-group {{ 'has-error has-feedback' if 'piva' in errors else '' }}">
-	      <label for="p_iva">Partita IVA</label>
-	      <input type="text" class="form-control" name="p_iva" value="{{ piva }}" />
-	    </div>
-	    <div class="form-group {{ 'has-error has-feedback' if 'cfisc' in errors else '' }}">
-	      <label for="cod_fiscale">Codice Fiscale</label>
-	      <input type="text" class="form-control" name="cod_fiscale" value="{{ cfisc }}" />
-	    </div>
-	    <div class="form-group {{ 'has-error has-feedback' if 'telefono' in errors else '' }}">
-	      <label for="telefono">Telefono</label>
-	      <input type="text" class="form-control" name="telefono" value="{{ telefono }}" />
-	    </div>
-	    <div class="form-group {{ 'has-error has-feedback' if 'email' in errors else '' }}">
-	      <label for="email">Email</label>
-	      <input type="email" class="form-control" name="email" value="{{ email }}" />
-	    </div>
-		{%  if id > 0 %}
-	    <div style="float:left;">
-	      <a href="{{ url_for('fatture_cliente', id=id, page=0) }}" type="button" class="btn btn-default btn-md" 
-		title="Ricerca fatture">Ricerca fatture</a>
-	      <a href="{{ url_for('nuova_fattura', id_cliente=id) }}" type="button" class="btn btn-default btn-md"
-		title="Nuova fattura">Nuova fattura</a>
-	    </div>
-		{% endif %}
-	    <div style="float:right;">
-	      <a href="{{url_for('clienti')}}" type="button" class="btn btn-default btn-md">Esci</a>
-	      <input type="submit" class="btn btn-success btn-md" value="Salva" />
-	    </div>
-	  </form>
-	</div>
-      </div>
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                {% if id > 0 %}
+                  {{ ragsoc }}
+                {% else %}
+                  Nuovo cliente
+                {% endif %}
+            </div>
+            <div class="panel-body">
+              <form method="POST" action="{%  if id == 0 %}{{ url_for('nuovo_cliente') }}{% else %}{{ url_for('salva_cliente') }}{% endif %}">
+                {%  if id > 0 %}
+                    <div class="form-group">
+                      <label for="codice" class="col-2 col-form-label">Codice</label>
+                      <input type="text" class="form-control" name="id" value="{{ id }}" readonly="readonly" />
+                    </div>
+                {%  endif %}
+                <div class="form-group {{ 'has-error has-feedback' if 'ragsoc' in errors else '' }}">
+                  <label for="ragione_sociale">Nominativo/ragione sociale</label>
+                  <input type="text" class="form-control" name="ragione_sociale" value="{{ ragsoc }}" />
+                </div>
+                <div class="form-group {{ 'has-error has-feedback' if 'indirizzo' in errors else '' }}">
+                  <label for="indirizzo">Indirizzo</label>
+                  <input type="text" class="form-control" name="indirizzo" value="{{ indirizzo }}" />
+                </div>
+                <div class="form-group {{ 'has-error has-feedback' if 'cap' in errors else '' }}">
+                  <label for="cap">CAP</label>
+                  <input type="text" name="cap" class="form-control" value="{{ cap }}" />
+                </div>
+                <div class="form-group {{ 'has-error has-feedback' if 'citta' in errors else '' }}">
+                  <label for="citta">Citta</label>
+                  <input type="text" class="form-control" name="citta" value="{{ citta }}" />
+                </div>
+                <div class="form-group {{ 'has-error has-feedback' if 'piva' in errors else '' }}">
+                  <label for="p_iva">Partita IVA</label>
+                  <input type="text" class="form-control" name="p_iva" value="{{ piva }}" />
+                </div>
+                <div class="form-group {{ 'has-error has-feedback' if 'cfisc' in errors else '' }}">
+                  <label for="cod_fiscale">Codice Fiscale</label>
+                  <input type="text" class="form-control" name="cod_fiscale" value="{{ cfisc }}" />
+                </div>
+                <div class="form-group {{ 'has-error has-feedback' if 'telefono' in errors else '' }}">
+                  <label for="telefono">Telefono</label>
+                  <input type="text" class="form-control" name="telefono" value="{{ telefono }}" />
+                </div>
+                <div class="form-group {{ 'has-error has-feedback' if 'email' in errors else '' }}">
+                  <label for="email">Email</label>
+                  <input type="email" class="form-control" name="email" value="{{ email }}" />
+                </div>
+                <div class="form-group">
+                  <a href="{{url_for('clienti')}}" type="button" class="btn btn-default btn-md">&laquo; Esci</a>
+                  <input type="submit" class="btn btn-success btn-md" value="Salva" />
+                </div>
+              </form>
+            </div>
+        </div>
     </div>
 {% endblock %}

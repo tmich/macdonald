@@ -1,48 +1,48 @@
 {% extends "layout.html" %}
+{% block actions %}
+    <form method="POST" action="{{ url_for('cerca_prodotto') }}" class="form-inline" id="formCercaArticoli">  		
+        <div class="input-group col-md-5">
+            <input type="text" class="form-control input-md" name="query" value="{{ query if query else '' }}" 
+                placeholder="cerca per nome" />
+            <span class="input-group-btn">
+                <button class="btn btn-info btn-md" type="button" 
+                        onclick="document.getElementById('formCercaArticoli').submit();">
+                    <i class="glyphicon glyphicon-search"></i>
+                </button>
+            </span>
+        </div>
+        Record trovati: <span class="badge">{{ cnt }}</span>
+        {% if query %}
+            <a href="{{ url_for('annulla_ricerca_prodotto') }}" class="btn btn-xs btn-danger">
+                <span class="glyphicon glyphicon-remove"></span> annulla ricerca
+            </a>
+        {% endif %}
+        <div class="pull-right">
+            <a href="{{ url_for('nuovo_prodotto') }}" class="btn btn-success btn-sm" title="Nuovo articolo">
+                <span class="glyphicon glyphicon-plus"></span> Nuovo articolo 
+            </a>
+        </div>
+	</form>
+{% endblock %}
 {% block body %}
   <h3 class="page-header">Articoli</h3>
-  <p>
-	<form method="POST" action="{{ url_for('cerca_prodotto') }}" class="form-inline" id="formCercaArticoli">  
-		<div id="custom-search-input">
-			<div class="input-group col-md-5">
-				<input type="text" class="form-control input-md" name="query" value="{{ query if query else '' }}" 
-					placeholder="cerca per nome" />
-				<span class="input-group-btn">
-					<button class="btn btn-info btn-md" type="button" 
-							onclick="document.getElementById('formCercaArticoli').submit();">
-						<i class="glyphicon glyphicon-search"></i>
-					</button>
-				</span>
-			</div>
-			<div class="input-group col-md-5">
-				<a href="{{ url_for('nuovo_prodotto') }}" class="btn btn-success btn-md">
-					<span class="glyphicon glyphicon-plus-sign"></span> Nuovo articolo 
-				</a>
-			</div>
-		</div>
-		<div>
-			{% if query %}<a href="{{ url_for('annulla_ricerca_prodotto') }}">annulla ricerca</a>{% endif %}
-		</div>
-	</form>
-  </p>
   <div class="table-responsive">
-    <div>Trovati {{ cnt }} risultati</div>
     <table class="table table-striped">
       <tr>
-	<th>codice</th>
-	<th>descrizione</th>
-	<th>IVA</th>
-	<th style="text-align:right;">prezzo</th>
+        <th>codice</th>
+        <th>descrizione</th>
+        <th>IVA</th>
+        <th style="text-align:right;">prezzo</th>
       </tr>
       {% for p in prodotti %}
-	<tr>
-	  <td>{{ p.codice }}</td>
-	  <td><a href="{{ url_for('prodotto', id=p.id) }}">{{ p.descr }}</a></td>
-	  <td>{{ p.aliq }}</td>
-	  <td style="text-align:right;">{{ p.prezzo }}</td>
-	</tr>
+        <tr>
+          <td>{{ p.codice }}</td>
+          <td><a href="{{ url_for('prodotto', id=p.id) }}">{{ p.descr }}</a></td>
+          <td>{{ p.aliq }}</td>
+          <td style="text-align:right;">{{ p.prezzo }}</td>
+        </tr>
       {% else %}
-	<li><em>Nessun prodotto.</em>
+        <li><em>Nessun prodotto.</em>
       {% endfor %}
   </table>
   

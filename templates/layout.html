@@ -8,9 +8,10 @@
   <meta name="description" content="">
   <meta name="author" content="">
   <link rel="icon" href="favicon.ico">
+  
   <!-- Bootstrap core CSS -->
   <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
-
+  
   <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
   <link href="http://getbootstrap.com/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
 
@@ -72,26 +73,29 @@
   <div class="container-fluid">
     <div class="row">
       <div class="col-sm-3 col-md-2 sidebar">
-	{% if g.user != None %}
-	  <ul class="nav nav-sidebar">
-	  <li><a href="{{ url_for('clienti') }}">Clienti</a></li>
-	  <li><a href="{{ url_for('prodotti') }}">Articoli</a></li>
-	  <li><a href="{{ url_for('fatture_da_inviare') }}">Fatture da inviare</a></li>
-	  </ul>
-	{% endif %}
+        {% if g.user != None %}
+          <ul class="nav nav-sidebar">
+              <li><a href="{{ url_for('clienti') }}"><span class="glyphicon glyphicon-user"></span> Clienti</a></li>
+              <li><a href="{{ url_for('prodotti') }}"><span class="glyphicon glyphicon-barcode"></span> Articoli</a></li>
+              <li><a href="{{ url_for('fatture_da_inviare') }}"><span class="glyphicon glyphicon-envelope"></span> Fatture da inviare</a></li>
+          </ul>
+        {% endif %}
       </div>  
       
-      <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-	{% with messages = get_flashed_messages(with_categories=true) %}
-	  {% if messages %}
-	    <div class=flashes>
-	    {% for category, message in messages %}
-	      <div class="alert alert-{{ category }}">{{ message }}</div>
-	    {% endfor %}
-	    </div>
-	  {% endif %}
-	{% endwith %}
-	{% block body %}{% endblock %}
+      <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 ">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class=flashes>
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+        <div class="actions">
+            {% block actions %}{% endblock %}
+        </div>
+        {% block body %}{% endblock %}
       </div>
     </div>
   </div>

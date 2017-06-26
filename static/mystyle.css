@@ -1,7 +1,7 @@
 /*
  * Base structure
  */
-
+ 
 /* Move down content because we have a fixed navbar that is 50px tall */
 body {
   padding-top: 50px;
@@ -83,6 +83,8 @@ body {
   margin-top: 0;
 }
 
+.page-header {margin-top: 10px;}
+
 
 /*
  * Placeholder dashboard ideas
@@ -102,3 +104,10 @@ body {
   display: inline-block;
   border-radius: 50%;
 } 
+
+.actions {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background: #fafafa;
+    border-bottom: 1px solid #e1e1e1;
+}

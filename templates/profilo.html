@@ -1,27 +1,43 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h1 class="page-header">Profilo</h1>
-  <div>
-	<a href="#" type="button" class="btn btn-default btn-md">Cambio Password</a>
-  </div><br />
+  <h3 class="page-header">Profilo</h3>
+  <!-- <div> -->
+	<!-- <a href="#" type="button" class="btn btn-default btn-md">Cambio Password</a> -->
+  <!-- </div><br /> -->
     <div class="panel-group">
       <div class="panel panel-primary">
 	<div class="panel-heading">
-	{{ g.user.nome }}
+	{{ nome }}
 	</div>
+    {% for k,v in errors.items() %}
+        <li>{{ v }}</li>
+    {% endfor %}
 	<div class="panel-body">
 	  <form method="POST" action="{{ url_for('profilo') }}">
+        <input type="hidden" name="id" readonly="readonly" value="{{ id }}" />
 	    <div class="form-group">
 	      <label for="username">Nome Utente</label>
-	      <input type="text" class="form-control" name="username" readonly="readonly" value="{{ g.user.username }}" />
+	      <input type="text" class="form-control" name="username" readonly="readonly" value="{{ username }}" />
 	    </div>
-	    <div class="form-group">
+	    <div class="form-group {{ 'has-error has-feedback' if 'nome' in errors else '' }}">
 	      <label for="nome">Nome</label>
-	      <input type="text" class="form-control" name="nome" value="{{ g.user.nome }}" />
+	      <input type="text" class="form-control" name="nome" value="{{ nome }}" />
 	    </div>
-	    <div class="form-group">
+	    <div class="form-group {{ 'has-error has-feedback' if 'email' in errors else '' }}">
 	      <label for="email">Email</label>
-	      <input type="email" class="form-control" name="email" value="{{ g.user.email }}" />
+	      <input type="email" class="form-control" name="email" value="{{ email }}" />
+	    </div>
+        <div class="form-group {{ 'has-error has-feedback' if 'password' in errors else '' }}">
+	      <label for="password">Password attuale</label>
+	      <input type="password" class="form-control" name="password" value="" />
+	    </div>
+        <div class="form-group {{ 'has-error has-feedback' if 'nuovapwd' in errors else '' }}">
+	      <label for="nuovapwd">Nuova Password</label>
+	      <input type="password" class="form-control" name="nuovapwd" value="" />
+	    </div>
+        <div class="form-group">
+	      <label for="confpwd">Conferma Password</label>
+	      <input type="password" class="form-control" name="confpwd" value="" />
 	    </div>
 	    <a href="{{ url_for('main') }}" type="button" class="btn btn-default btn-md">&laquo; Indietro</a>
 		<input type="submit" class="btn btn-success btn-md" value="Salva" />

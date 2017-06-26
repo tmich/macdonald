@@ -1,4 +1,4 @@
-from models import db, Cliente, Prodotto, Fattura, VoceFattura, FatturaSequence
+from models import db, Cliente, Prodotto, Fattura, VoceFattura, FatturaSequence, User
 from dateutil.parser import parse
 
 class Form(object):
@@ -90,6 +90,51 @@ class FormNuovaFattura(Form):
 	
 	#return len(self.errors.keys())==0
 
+class FormProfilo(Form):
+    user_id=0
+    username=""
+    nome=""
+    email=""
+    nuova_pwd=""
+    conferma_pwd=""
+    password_cambiata = False
+    
+    def __init__(self, f):    # f=request.form  
+		self.errors = dict()
+		self.user_id = f.get('id', 0)
+		self.username = f.get('username')
+		self.nome = f.get('nome')
+		self.email = f.get('email')
+		self.password = f.get('password')
+		self.nuova_pwd = f.get('nuovapwd')
+		self.conferma_pwd = f.get('confpwd')
+        
+    def autentica(self):
+        u=db.session.query(User).get(self.user_id)
+        return u.password == self.password
+    
+    def valido(self):
+        if self.username.strip() == '':
+            self.errors['username'] = "manca il nome utente"
+            
+        if self.nome.strip() == '':
+            self.errors['nome'] = "manca il nome"
+            
+        if self.email.strip() == '':
+            self.errors['email'] = "manca l'email"
+            
+        if self.nuova_pwd != '':
+            # auth
+            if self.autentica():
+                if self.conferma_pwd == self.nuova_pwd:
+                    self.password_cambiata = True
+                else:
+                    self.errors['nuovapwd'] = "le password non coincidono"
+            else:
+                self.errors['password'] = "password non corretta"
+                
+        return len(self.errors.keys())==0
+            
 
 class FormAggiungiVoce(FormNuovaFattura):
   qta = 0
