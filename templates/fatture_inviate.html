@@ -33,7 +33,7 @@
 	{% for inv in fatture_inviate %}
 	  <tr>
 	    <td>{{inv.fattura.num}}</td>
-	    <td>{{inv.fattura.data|dt('%d/%m/%Y')}}</td>
+	    <td>{{inv.data_invio|dt('%d/%m/%Y')}}</td>
 	    <td>{{inv.fattura.cliente.ragsoc}}</td>
 	    <td>{{inv.email}}</td>
 	    <td>{{'%0.2f' % inv.fattura.totale()|float}}</td>
