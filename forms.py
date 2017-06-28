@@ -92,15 +92,15 @@ class FormNuovaFattura(Form):
 	#return len(self.errors.keys())==0
 
 class FormProfilo(Form):
-    user_id=0
-    username=""
-    nome=""
-    email=""
-    nuova_pwd=""
-    conferma_pwd=""
-    password_cambiata = False
-    
-    def __init__(self, f):    # f=request.form  
+	user_id=0
+	username=""
+	nome=""
+	email=""
+	nuova_pwd=""
+	conferma_pwd=""
+	password_cambiata = False
+	
+	def __init__(self, f):    # f=request.form  
 		self.errors = dict()
 		self.user_id = f.get('id', 0)
 		self.username = f.get('username')
@@ -109,33 +109,33 @@ class FormProfilo(Form):
 		self.password = f.get('password')
 		self.nuova_pwd = f.get('nuovapwd')
 		self.conferma_pwd = f.get('confpwd')
-        
-    def autentica(self):
-        u=db.session.query(User).get(self.user_id)
-        return u.password == self.password
-    
-    def valido(self):
-        if self.username.strip() == '':
-            self.errors['username'] = "manca il nome utente"
-            
-        if self.nome.strip() == '':
-            self.errors['nome'] = "manca il nome"
-            
-        if self.email.strip() == '':
-            self.errors['email'] = "manca l'email"
-            
-        if self.nuova_pwd != '':
-            # auth
-            if self.autentica():
-                if self.conferma_pwd == self.nuova_pwd:
-                    self.password_cambiata = True
-                else:
-                    self.errors['nuovapwd'] = "le password non coincidono"
-            else:
-                self.errors['password'] = "password non corretta"
-                
-        return len(self.errors.keys())==0
-            
+		
+	def autentica(self):
+		u=db.session.query(User).get(self.user_id)
+		return u.password == self.password
+	
+	def valido(self):
+		if self.username.strip() == '':
+			self.errors['username'] = "manca il nome utente"
+			
+		if self.nome.strip() == '':
+			self.errors['nome'] = "manca il nome"
+			
+		if self.email.strip() == '':
+			self.errors['email'] = "manca l'email"
+			
+		if self.nuova_pwd != '':
+			# auth
+			if self.autentica():
+				if self.conferma_pwd == self.nuova_pwd:
+					self.password_cambiata = True
+				else:
+					self.errors['nuovapwd'] = "le password non coincidono"
+			else:
+				self.errors['password'] = "password non corretta"
+				
+		return len(self.errors.keys())==0
+			
 
 class FormAggiungiVoce(FormNuovaFattura):
   qta = 0
@@ -304,21 +304,19 @@ class FormDate(Form):
 		return len(self.errors.keys())==0
 		
 class FormDateFatture(FormDate):
-	nro_da=None
-	nro_a=None
+	nro_da=0
+	nro_a=0
+	anno=0
 	
 	def __init__(self, f):    # f=request.form  
 		super(FormDateFatture, self).__init__(f)
-		self.nro_da=f.get('nro_da')
-		self.nro_a=f.get('nro_a')
+		nro_da=f.get('nro_da', '')
+		nro_a=f.get('nro_a', '')
+		anno=f.get('anno', '')
+		
+		self.nro_da=0 if nro_da == '' else int(nro_da)
+		self.nro_a=0 if nro_a == '' else int(nro_a)
+		self.anno=0 if anno == '' else int(anno)
 	
 	def valido(self):
-		val=super(FormDateFatture, self).valido()
-		
-		if self.nro_da.strip()=='':
-			self.errors['nro_da'] = 'numero da non valido'
-		
-		if self.nro_a.strip()=='':
-			self.errors['nro_a'] = 'numero a non valido'
-		
-		return val and len(self.errors.keys())==0
+		return super(FormDateFatture, self).valido()

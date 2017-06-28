@@ -51,33 +51,33 @@
     <body>
     {% block body %}
       <div>
-	<table border="1" cellpadding="5" class="header">
-	  <tr>
-	    <td>
-	      <span style="font-size: 12pt;">
-		  <b>MACDONALD Vittorio e C. s.n.c.</b><br />
-	      <i>Cartoleria - Fornitura per Uffici</i><br />
-	      </span>
-		  <span style="font-size: 9pt;">
-		  Via G.Camozzi, 13 - 00195 ROMA<br />
-	      C.F. 07161420588 - P.I. 01706271002<br />
-	      tel. 06-3728796
-		  </span>
-	    </td>
-	    <td>
-			<span style="font-size: 10pt;">
-			Spett.le<br />
-			{{ fattura.cliente.ragsoc }}<br />
-			{{ fattura.cliente.indirizzo }}<br />
-			{{ fattura.cliente.cap }} {{ fattura.cliente.citta }}<br />
-			{% if fattura.cliente.p_iva != None %}
-			  p. iva {{ fattura.cliente.p_iva }}
-			{% endif %}<br />
-			tel. {{ fattura.cliente.tel if fattura.cliente.tel != None else ''  }}
-			</span>
-	    </td>
-	  </tr>
-	</table>
+        <table border="1" cellpadding="5" class="header">
+          <tr>
+            <td>
+              <span style="font-size: 12pt;">
+              <b>{{ ragsoc }}</b><br />
+              <i>{{ descr }}</i><br />
+              </span>
+              <span style="font-size: 9pt;">
+              {{ indirizzo }}<br />
+              C.F. 07161420588 - P.I. 01706271002<br />
+              tel. 06-3728796
+              </span>
+            </td>
+            <td>
+                <span style="font-size: 10pt;">
+                Spett.le<br />
+                {{ fattura.cliente.ragsoc }}<br />
+                {{ fattura.cliente.indirizzo }} {{ fattura.cliente.cap }} {{ fattura.cliente.citta }}<br />
+                {% if fattura.cliente.p_iva != None %}
+                  p. iva {{ fattura.cliente.p_iva }} / 
+                {% endif %}
+                CF: {{ fattura.cliente.cod_fisc }}<br />
+                tel. {{ fattura.cliente.tel if fattura.cliente.tel != None else ''  }}
+                </span>
+            </td>
+          </tr>
+        </table>
       </div>
       <div>
 	<table border="0" cellpadding="5" class="noborder">
@@ -85,7 +85,8 @@
 	    <td class="void" style="font-size: 10pt;">Fattura n&deg; {{fattura.num}} del {{fattura.data|dt('%d/%m/%Y')}}</td>
 	    <td class="void" style="font-size: 10pt;">
 	    E-mail: {{ fattura.cliente.email }}<br/>
-	    Scontrino n. {{ fattura.n_scontr1 }}
+	    Scontrino n. {{ fattura.scontrini }}<br />
+        MF: {{ mf }}
 	    </td>
 	  </tr>
 	</table>

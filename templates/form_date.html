@@ -1,20 +1,48 @@
 {% extends "layout.html" %}
+{% block actions %}
+	<div style="text-align: left;">
+		<a href="#" class="btn btn-success" onclick="onCerca();"><span class="glyphicon glyphicon-search"></span> Ricerca</a>&nbsp;
+		<a href="{{ url_for('main') }}" class="btn btn-default">&laquo; Indietro</a>
+	</div>
+{% endblock %}
 {% block body %}
 	<h3>{{ titolo }}</h3>
-	<form method="POST">
-		<div class="form-group {{ 'has-error has-feedback' if 'data_inizio' in errors else '' }}">
-			<label for="data_inizio">Data inizio</label>
-			<input type="date" class="form-control" name="data_inizio" value="{{ data_inizio|dt('%Y-%m-%d') }}" />
+	<form method="POST" name="myform">
+		<div id="div1" class="form-group row {{ 'has-error has-feedback' if 'data_inizio' in errors else '' }}">
+			<div class="col-xs-4">
+				<label for="data_inizio">Data inizio</label>
+				<input type="date" class="form-control" id="data_inizio" name="data_inizio" value="{{ data_inizio|dt('%Y-%m-%d') if data_inizio else '--' }}" />
+			</div>
 		</div>
-		<div class="form-group {{ 'has-error has-feedback' if 'data_fine' in errors else '' }}">
-			<label for="data_fine">Data fine</label>
-			<input type="date" class="form-control" name="data_fine" value="{{ data_fine|dt('%Y-%m-%d') }}" />
+		<div id="div2" class="form-group row {{ 'has-error has-feedback' if 'data_fine' in errors else '' }}">
+			<div class="col-xs-4">
+				<label for="data_fine">Data fine</label>
+				<input type="date" class="form-control" id="data_fine" name="data_fine" value="{{ data_fine|dt('%Y-%m-%d') if data_fine else '--' }}" />
+			</div>
 		</div>
 		{% block others %}
 		{% endblock %}
-		<div class="form-group">
-			<input type="submit" class="btn btn-success" value="Ricerca" />
-			<a href="#" class="btn btn-default">&laquo; Indietro</a>
-		</div>
+		<!-- <div class="form-group"> -->
+			<!-- <input type="submit" class="btn btn-success" value="Ricerca" /> -->
+			<!-- <a href="#" class="btn btn-default">&laquo; Indietro</a> -->
+		<!-- </div> -->
 	</form>
+	<script type="text/javascript">
+	function onCerca() {
+		data_inizio = $("#data_inizio").val();
+		data_fine = $("#data_fine").val();
+		
+		if(data_inizio == '') {
+			$("#div1").addClass('has-error has-feedback');
+			return false;
+		}
+				
+		if(data_fine == '') {
+			$("#div2").addClass('has-error has-feedback');
+			return false;
+		}
+		
+		document.forms[0].submit();
+	}
+	</script>
 {% endblock %}
