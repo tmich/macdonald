@@ -1,31 +1,64 @@
 {% extends "layout.html" %}
 {% set current="lista_fatture" %}
 {% block actions %}
-	<div>
-        <a href="{{ url_for('lista_fatture') }}" class="btn btn-default btn-sm">&laquo; Torna indietro</a>
-        <a href="#" onclick="window.print(); return false;" class="btn btn-success btn-sm"><span class="glyphicon glyphicon-print"></span> Stampa</a>
+	<div class="row">
+		<div class="col-md-4">
+			<a href="{{ url_for('lista_fatture') }}" class="btn btn-default">&laquo; Torna indietro</a>&nbsp;&nbsp;&nbsp;
+			Record trovati: <span class="badge">{{ cnt }}</span>
+		</div>
+		<div class="input-group col-md-auto pull-right">
+			<a href="#" onclick="window.print(); return false;" class="btn btn-success">
+				<span class="glyphicon glyphicon-print"></span> Stampa</a>&nbsp;&nbsp;&nbsp;
+		</div>
 	</div>
 {% endblock %}
 {% block body %}
-  <h3 class="page-header">Lista fatture dal {{ data_inizio|dt('%d/%m/%Y') }} al {{ data_fine|dt('%d/%m/%Y') }}</h3>
-  <table class="table table-responsive">
-	<tr>
-		<th>Data fatt.</th>
-		<th>Nro</th>
-		<th>Scontr.</th>
-		<th>Ragione Sociale</th>
-		<th>Email</th>
-		<th>Importo</th>
-	</tr>
-  {% for f in fatture %}
-	<tr>
-		<td>{{ f.data|dt('%d/%m/%Y') }}</td>
-		<td>{{ f.num }}</td>
-		<td>{{ f.scontrini }}</td>
-		<td>{{ f.cliente.ragsoc }}</td>
-		<td>{{ f.cliente.email }}</td>
-		<td>{{ '%0.2f' % f.totale()|float }}</td>
-	</tr>
-  {% endfor %}
-  </table>
+	<div class="hidden-print">
+		<h3 class="page-header">Lista fatture dal {{ data_inizio|dt('%d/%m/%Y') }} al {{ data_fine|dt('%d/%m/%Y') }}</h3>
+		<table class="table table-responsive">
+			<tr>
+				<th>Data fatt.</th>
+				<th>Nro</th>
+				<th>Scontr.</th>
+				<th>Ragione Sociale</th>
+				<th>Email</th>
+				<th>Importo</th>
+			</tr>
+			{% for f in fatture %}
+			<tr>
+				<td>{{ f.data|dt('%d/%m/%Y') }}</td>
+				<td>{{ f.num }}</td>
+				<td>{{ f.scontrini }}</td>
+				<td>{{ f.cliente.ragsoc }}</td>
+				<td>{{ f.cliente.email }}</td>
+				<td>{{ '%0.2f' % f.totale()|float }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+	</div>
+  
+	<div class="visible-print-block" style="font-size: 7pt;">
+		<b>Lista fatture dal {{ data_inizio|dt('%d/%m/%Y') }} al {{ data_fine|dt('%d/%m/%Y') }}</b>
+		<table border="1" style="border-collapse:collapse;">
+			<tr>
+				<th width="10%">Data fatt.</th>
+				<th width="5%">Nro</th>
+				<th width="5%">Scontr.</th>
+				<th width="50%">Ragione Sociale</th>
+				<th width="20%">Email</th>
+				<th width="10%">Importo</th>
+			</tr>
+			{% for f in fatture %}
+			<tr>
+				<td>{{ f.data|dt('%d/%m/%Y') }}</td>
+				<td>{{ f.num }}</td>
+				<td>{{ f.scontrini }}</td>
+				<td>{{ f.cliente.ragsoc }}</td>
+				<td>{{ f.cliente.email }}</td>
+				<td>{{ '%0.2f' % f.totale()|float }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+	</div>
+  
 {% endblock %}

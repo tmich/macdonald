@@ -71,6 +71,7 @@ class Fattura(db.Model):
 			    backref = db.backref('fatture', lazy='dynamic'))
   voci = db.relationship('VoceFattura', cascade="save-update, merge, delete")
   canc = db.Column(db.Integer)
+  stampato = db.Column(db.Integer)
   
   def __init__(self, cliente, data, num = 0):
     self.cliente = cliente
@@ -98,6 +99,9 @@ class Fattura(db.Model):
 
   def crea_voce(self, codart, descr, qta, prezzo, aliq):
     return VoceFattura(codart, descr, qta, prezzo, aliq)
+	
+  # def stampato(self):
+    # return self.stampato==1
 
 class VoceFattura(db.Model):
   id = db.Column(db.Integer, primary_key=True)
@@ -170,6 +174,9 @@ class User(db.Model):
     self.nome = nome
     self.profilo = profilo
     self.attivo = attivo
+	
+  def is_admin(self):
+    return self.profilo == 'A'
 
   def __repr__(self):
       return '<User %r>' % self.username

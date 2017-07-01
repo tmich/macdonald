@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block actions %}
+    <div style="text-align: left;">
+		<a href="{{url_for('contatori')}}" title="Esci" class="btn btn-default" type="button">&laquo; Esci</a>
+        <a href="#" onclick="submitForm();" title="Salva" class="btn btn-success" type="button">
+            <span class="glyphicon glyphicon-floppy-disk"></span> Salva
+        </a>
+    </div>
+{% endblock %}
+{% block body %}
+  <h3 class="page-header">Gestione contatori {{anno}}</h3>
+  <form method="post" id="form1">
+	<input type="hidden" name="anno" value="{{anno}}" />
+	<div class="form-group row">
+		<div class="col-xs-2">
+			<label for="uf">Ultima fattura emessa</label>
+			<input class="form-control" id="uf" name="uf" type="number" step="1" readonly value="{{ultima_fattura}}" />
+		</div>
+	</div>
+	<div class="form-group row">
+		<div class="col-xs-2">
+			<label for="ufs">Ultima fattura stampata</label>
+			<input type="number" id="ufs" class="form-control" name="ufs" step="1" min="1" max="{{ultima_fattura}}" value="{{ultima_fattura_stampata}}" />
+		</div>
+	</div>
+  </form>
+  
+  <script type="text/javascript">
+  function submitForm() {
+    if(confirm('Modificare i contatori?')) {
+		$("#form1").submit();
+	}
+  }
+  </script>
+{% endblock %}

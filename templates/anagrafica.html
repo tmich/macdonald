@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+{% block actions %}
+    <div style="text-align: left;">
+		<a href="{{url_for('main')}}" title="Esci" class="btn btn-default" type="button">&laquo; Esci</a>
+        <a href="#" onclick="submitForm();" title="Salva" class="btn btn-success" type="button">
+            <span class="glyphicon glyphicon-floppy-disk"></span> Salva
+        </a>
+    </div>
+{% endblock %}
+{% block body %}
+	<h3 class="page-header">Anagrafica</h3>
+	<div class="panel-group">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                {{ ragsoc }} 
+            </div>
+            <div class="panel-body">
+				<form method="post" id="form1">
+					<input type="hidden" name="id" readonly="readonly" value="{{ id }}" />
+					<div class="form-group {{ 'has-error has-feedback' if 'ragsoc' in errors else '' }}">
+						<label for="ragsoc">Ragione sociale</label>
+						<input type="text" class="form-control" name="ragsoc" value="{{ ragsoc }}" />
+					</div>
+					<div class="form-group {{ 'has-error has-feedback' if 'p_iva' in errors else '' }}">
+						<label for="p_iva">Partita Iva</label>
+						<input type="text" class="form-control" name="p_iva" value="{{ p_iva }}" />
+					</div>
+					<div class="form-group {{ 'has-error has-feedback' if 'cod_fisc' in errors else '' }}">
+						<label for="cod_fisc">Codice Fiscale</label>
+						<input type="text" class="form-control" name="cod_fisc" value="{{ cod_fisc }}" />
+					</div>
+					<div class="form-group {{ 'has-error has-feedback' if 'indirizzo' in errors else '' }}">
+						<label for="indirizzo">Indirizzo</label>
+						<input type="text" class="form-control" name="indirizzo" value="{{ indirizzo }}" />
+					</div>
+					<div class="form-group {{ 'has-error has-feedback' if 'citta' in errors else '' }}">
+						<label for="citta">Citta</label>
+						<input type="text" class="form-control" name="citta" value="{{ citta }}" />
+					</div>
+					<div class="form-group {{ 'has-error has-feedback' if 'cap' in errors else '' }}">
+						<label for="cap">CAP</label>
+						<input type="text" class="form-control" name="cap" value="{{ cap }}" />
+					</div>
+					<div class="form-group {{ 'has-error has-feedback' if 'prov' in errors else '' }}">
+						<label for="prov">Provincia</label>
+						<input type="text" class="form-control" name="prov" value="{{ prov }}" />
+					</div>
+					<div class="form-group {{ 'has-error has-feedback' if 'tel' in errors else '' }}">
+						<label for="tel">Telefono</label>
+						<input type="text" class="form-control" name="tel" value="{{ tel }}" />
+					</div>
+					<div class="form-group {{ 'has-error has-feedback' if 'mf' in errors else '' }}">
+						<label for="mf">Misuratore fiscale</label>
+						<input type="text" class="form-control" name="mf" value="{{ mf }}" />
+					</div>
+					<div class="form-group {{ 'has-error has-feedback' if 'fax' in errors else '' }}">
+						<label for="fax">Fax</label>
+						<input type="text" class="form-control" name="fax" value="{{ fax }}" />
+					</div>
+					<div class="form-group {{ 'has-error has-feedback' if 'email' in errors else '' }}">
+						<label for="email">Email</label>
+						<div class="input-group">
+							<span class="input-group-addon" id="basic-addon2">@</span>
+							<input type="email" class="form-control" name="email" aria-describedby="basic-addon2" value="{{ email }}" />
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>	
+  
+  <script type="text/javascript">
+  function submitForm() {
+    if(confirm('Salvare i dati?')) {
+		$("#form1").submit();
+	}
+  }
+  </script>
+ {% endblock %}

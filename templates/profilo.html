@@ -1,6 +1,14 @@
 {% extends "layout.html" %}
+{% block actions %}
+    <div style="text-align: left;">
+		<a href="{{url_for('main')}}" title="Esci" class="btn btn-default" type="button">&laquo; Esci</a>
+        <a href="#" onclick="submitForm();" title="Salva" class="btn btn-success" type="button">
+            <span class="glyphicon glyphicon-floppy-disk"></span> Salva
+        </a>
+    </div>
+{% endblock %}
 {% block body %}
-  <h3 class="page-header">Profilo</h3>
+  <h3 class="page-header">Profilo Utente</h3>
   <!-- <div> -->
 	<!-- <a href="#" type="button" class="btn btn-default btn-md">Cambio Password</a> -->
   <!-- </div><br /> -->
@@ -13,7 +21,7 @@
         <li>{{ v }}</li>
     {% endfor %}
 	<div class="panel-body">
-	  <form method="POST" action="{{ url_for('profilo') }}">
+	  <form method="POST" id="form1" action="{{ url_for('profilo') }}">
         <input type="hidden" name="id" readonly="readonly" value="{{ id }}" />
 	    <div class="form-group">
 	      <label for="username">Nome Utente</label>
@@ -39,10 +47,16 @@
 	      <label for="confpwd">Conferma Password</label>
 	      <input type="password" class="form-control" name="confpwd" value="" />
 	    </div>
-	    <a href="{{ url_for('main') }}" type="button" class="btn btn-default btn-md">&laquo; Indietro</a>
-		<input type="submit" class="btn btn-success btn-md" value="Salva" />
 	  </form>
 	</div>
       </div>
     </div>
+	
+	<script type="text/javascript">
+	function submitForm() {
+		if(confirm('Salvare i dati?')) {
+			$("#form1").submit();
+		}
+	}
+	</script>
 {% endblock %}

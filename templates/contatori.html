@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block actions %}
+    <div style="text-align: left;">
+    </div>
+{% endblock %}
+{% block body %}
+  <h3 class="page-header">Gestione contatori</h3>
+  <ul class="nav nav-pills nav-stacked">
+  {% for a in anni %}
+	<li><a href="{{url_for('contatori_per_anno', anno=a)}}">{{a}}</a></li>
+  {% endfor %}
+  </ul>
+{% endblock %}

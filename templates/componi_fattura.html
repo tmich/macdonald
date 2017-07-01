@@ -129,7 +129,7 @@
       </div>
       <div class="actions" style="text-align:left;padding-left:16px;margin-top: 50px;">
         <input type="submit" class="btn btn-success" name="salva_fattura" value="Salva" formnovalidate />
-		<a href="{{url_for('annulla_fattura')}}" class="btn btn-default">Annulla</a>
+		<a onclick="return confirm('Annullare l\'inserimento della fattura?');" href="{{url_for('annulla_fattura')}}" class="btn btn-default">Annulla</a>
       </div>
     </div>
     <!-- <div class="panel panel-default"> -->
@@ -148,27 +148,29 @@
         
     $input.typeahead({
       source: function(query, process) {
-	return $.getJSON(
-	  "/prodotti.json",
-	  function (data) {
-	    var newData = [];
-	    $.each(data, function() {
-	      tdescr = $.trim(this.descr);
-	      sprz = String(this.prezzo);
-	      cod = String(this.codice);
-	      aliq = String(this.aliq);
-	      dict = {id: this.artid, name: tdescr, price: sprz, cod : cod, aliq : aliq}
-	      newData.push(dict);
-	    });
-	    return process(newData);
-	  });
+		return $.getJSON(
+		  "/prodotti.json",
+		  function (data) {
+			var newData = [];
+			$.each(data, function() {
+			  sprz = String(this.prezzo);
+			  tdescr = $.trim(this.descr);
+			  cod = String(this.codice);
+			  aliq = String(this.aliq);
+			  alias = tdescr + ' (' + sprz + ')'
+			  dict = {id: this.artid, descr : tdescr, name: alias, price: sprz, cod : cod, aliq : aliq}
+			  newData.push(dict);
+			});
+			return process(newData);
+		  });
       },
       afterSelect : function(current) {
-	if(current) {
-	  $('#prz').val(current.price);
-	  $('#aliq').val(current.aliq);
-	  $('#codart').val(current.cod);
-	}
+		if(current) {
+		  $('#prz').val(current.price);
+		  $('#aliq').val(current.aliq);
+		  $('#codart').val(current.cod);
+		  $input.val(current.descr);
+		}
       },
       items	: 6,
       autoSelect: false
@@ -179,9 +181,9 @@
       var cod = '';
       var aliq = 22;
       if($input.val() == '') {     
-	$('#prz').val(prz);
-	$('#aliq').val(aliq);
-	$('#codart').val(cod);
+		$('#prz').val(prz);
+		$('#aliq').val(aliq);
+		$('#codart').val(cod);
       }
     });
   </script>

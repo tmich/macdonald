@@ -12,7 +12,7 @@ from models import db, Anagrafica, Cliente, Prodotto, Fattura, VoceFattura, Invi
 from forms import FormNuovaFattura, FormAggiungiVoce, FormNuovaFattura, FormCliente, FormProdotto, FormProfilo, FormDate, FormDateFatture
 import jsonpickle
 from smtplib import SMTPException, SMTPAuthenticationError, SMTPRecipientsRefused
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, func, distinct
 #from dateutil.parser import parse
 
 app = Flask(__name__)
@@ -363,13 +363,13 @@ def articoli_json():
 @app.route('/invio', methods=['GET'])
 def fatture_da_inviare():
   fatture_da_inviare=db.session.query(InvioFattura).filter_by(data_invio=None).all()
-  return render_template('fatture_da_inviare.html', fatture_da_inviare=fatture_da_inviare, cnt=len(fatture_da_inviare))
+  return render_template('fatture_da_inviare.html', fatture_da_inviare=fatture_da_inviare, cnt=len(fatture_da_inviare), current='fatture_da_inviare')
   
 @login_required
 @app.route('/fatture_inviate', methods=['GET'])
 def fatture_inviate():
   fatture_inviate=db.session.query(InvioFattura).filter(InvioFattura.data_invio != None).all()
-  return render_template('fatture_inviate.html', fatture_inviate=fatture_inviate, cnt=len(fatture_inviate))
+  return render_template('fatture_inviate.html', fatture_inviate=fatture_inviate, cnt=len(fatture_inviate), current='fatture_inviate')
 
 @login_required
 @app.route('/invia_tutte', methods=['GET'])
@@ -412,8 +412,8 @@ def invia_tutte():
 	fatture_da_inviare=db.session.query(InvioFattura).filter_by(data_invio=None).all()
 	return render_template('fatture_da_inviare.html', fatture_da_inviare=fatture_da_inviare, cnt=len(fatture_da_inviare), errors=errors)
 
-@login_required
 @app.route('/invio_fatt/<int:idfatt>', methods=['GET'])
+@login_required
 def invia_fattura(idfatt):
 	fatt = db.session.query(Fattura).get(idfatt)
 	invio_fatt=InvioFattura(fatt, fatt.cliente.email)
@@ -441,8 +441,36 @@ def annulla_invio(id):
   #db.session.commit()
   #dest = request.args.get('next')
   #return redirect(dest)
+  
+@app.route('/fatture_da_stampare', methods=['GET'])
+@login_required
+def fatture_da_stampare():
+	fatture_da_stampare = db.session.query(Fattura).filter(Fattura.stampato==0).order_by(Fattura.num)
+	return render_template('fatture_da_stampare.html', fatture_da_stampare=fatture_da_stampare, cnt=fatture_da_stampare.count())
 
+@app.route('/stampa_tutte', methods=['GET'])
+@login_required
+def stampa_tutte():
+	fatture_da_stampare = db.session.query(Fattura).filter(Fattura.stampato==0)
+	min_righe=10
+	stringone=""
+	anag = db.session.query(Anagrafica).get(1)
+	for fattura in fatture_da_stampare:
+		n_righe = max(len(fattura.voci), min_righe) - min(len(fattura.voci), min_righe)
+		stringone = stringone + render_template('fattura_pdf.html', fattura=fattura, n_righe=n_righe, ragsoc=anag.ragsoc, descr=anag.descr, indirizzo=anag.indirizzo, mf=anag.mf)
+		fattura.stampato=1
+	
+	pdf=create_pdf(stringone)
+	response=make_response(pdf.getvalue())
+	response.headers['Content-Type'] = 'application/pdf'
+	response.headers['Content-Disposition'] = 'inline; filename=stampa_fatture.pdf'
+		
+	db.session.commit()
+
+	return response
+	
 @app.route('/stampa_fatt/<int:idfatt>', methods=['GET'])
+@login_required
 def stampa_fattura(idfatt):
   fatt = db.session.query(Fattura).get(idfatt)
   min_righe=10
@@ -455,14 +483,14 @@ def stampa_fattura(idfatt):
   response.headers['Content-Disposition'] = 'inline; filename=fattura.pdf'
   return response
 
-@login_required
 @app.route('/vfattura/<int:idfatt>', methods=['GET'])
+@login_required
 def vis_fattura(idfatt):
   fatt = db.session.query(Fattura).get(idfatt)
   return render_template('vfattura.html',fattura=fatt)
 
-@login_required
 @app.route('/nuova_fattura/<int:id_cliente>', methods=['GET','POST'])
+@login_required
 def nuova_fattura(id_cliente):
   errors=[]
   n_scontr1=0
@@ -490,9 +518,9 @@ def nuova_fattura(id_cliente):
 	  
   return render_template('nuova_fattura.html', cliente=cli, datafattura=datetime.date.today(), numfattura=numfatt, errors=errors)
 
-@login_required
 @app.route('/cambia_cliente_fattura/<int:idfatt>')
 @app.route('/cambia_cliente_fattura/<int:idfatt>/<int:idcli>')
+@login_required
 def cambia_cliente_fattura(idfatt,idcli=0):
 	if(idcli == 0):
 		session['id_fattura_cambio_cliente'] = idfatt
@@ -505,8 +533,8 @@ def cambia_cliente_fattura(idfatt,idcli=0):
 			session['fatt']=jsonpickle.encode(objf)
 			return redirect(url_for('componi_fattura'))
 
-@login_required
 @app.route('/modifica_fattura/<int:id>')
+@login_required
 def modifica_fattura(id):
   session['fatt']=None
   session.pop('fatt')
@@ -524,8 +552,8 @@ def modifica_fattura(id):
 def format_float(fl, separator='.'):
   return '{0:.2f}'.format(fl)  
   
-@login_required
 @app.route('/componi_fattura', methods=['GET','POST'])
+@login_required
 def componi_fattura():
   if(not 'fatt' in session):
 	abort(404)
@@ -612,7 +640,7 @@ def annulla_fattura():
   id_cliente = objf.id_cliente
   session['fatt']=None
   session.pop('fatt')
-  return redirect(url_for('vis_fattura', idfatt=id_fatt))
+  return redirect(url_for('cliente', id=id_cliente))
 
 def salva_fattura(f):
   objf=jsonpickle.decode(session['fatt'])
@@ -675,10 +703,10 @@ def lista_fatture():
 		f=FormDate(request.form)
 		if f.valido():
 			fatture = db.session.query(Fattura).filter(Fattura.data.between(f.data_inizio, f.data_fine)).order_by(Fattura.num)
-			return render_template('lista_fatture.html', fatture=fatture, data_inizio=f.data_inizio, data_fine=f.data_fine)
+			return render_template('lista_fatture.html', fatture=fatture, data_inizio=f.data_inizio, data_fine=f.data_fine, cnt=fatture.count())
 		else:
 			errors=f.errors
-	return render_template('form_date.html', errors=errors, titolo='Lista fatture', data_inizio=datetime.datetime.today(), data_fine=datetime.datetime.today())
+	return render_template('form_date.html', errors=errors, titolo='Lista fatture', data_inizio=datetime.datetime.today(), data_fine=datetime.datetime.today(), cnt=0, current='lista_fatture')
 
 @app.route('/ristampa_fatture', methods=['GET', 'POST'])
 def ristampa_fatture():
@@ -710,8 +738,88 @@ def ristampa_fatture():
 			return response
 		else:
 			errors=f.errors
-	return render_template('form_date_fatture.html', errors=errors, titolo='Ristampa fatture', data_inizio=yesterday, data_fine=today, anno=datetime.datetime.today().year)
+	return render_template('form_date_fatture.html', errors=errors, titolo='Ristampa fatture', data_inizio=yesterday, data_fine=today, anno=datetime.datetime.today().year, current='ristampa_fatture')
+
+@app.route('/contatori', methods=['GET'])
+@login_required
+def contatori():
+	#sql = text('select distinct(year(data)) from fattura')
+	result = db.session.query(distinct(func.year(Fattura.data))).order_by(func.year(Fattura.data).desc())
+	#result = db.engine.execute(sql)
+	anni = []
+	for row in result:
+		anni.append(row[0])
+	#print(anni, file=sys.stderr)
+	return render_template('contatori.html', anni=anni, current='contatori')
+	#return 'ook'
+
+@app.route('/contatori/<int:anno>', methods=['GET', 'POST'])
+@login_required
+def contatori_per_anno(anno):
+	ultima_fattura = db.session.query(func.max(Fattura.num)).filter(func.year(Fattura.data)==anno).scalar()
+	ultima_fattura_stampata = db.session.query(func.max(Fattura.num)).filter(and_(func.year(Fattura.data)==anno, Fattura.stampato==1)).scalar()
+	
+	if request.method=='POST':
+		f=request.form
+		ufs=int(f.get('ufs', 0))
 		
+		if(ufs < ultima_fattura_stampata):
+			fatture = fatt=db.session.query(Fattura).filter(and_(func.year(Fattura.data)==anno, Fattura.num > ufs))
+			for fatt in fatture:
+				print(fatt.num, file=sys.stderr)
+				fatt.stampato=0
+		else:
+			fatture = fatt=db.session.query(Fattura).filter(and_(func.year(Fattura.data)==anno, Fattura.num > ultima_fattura_stampata, Fattura.num <= ufs))
+			for fatt in fatture:
+				print(fatt.num, file=sys.stderr)
+				fatt.stampato=1
+		db.session.commit()
+		flash('Contatori aggiornati correttamente', 'success')
+		ultima_fattura_stampata = db.session.query(func.max(Fattura.num)).filter(and_(func.year(Fattura.data)==anno, Fattura.stampato==1)).scalar()
+	
+	return render_template('contatori_per_anno.html', anno=anno, ultima_fattura=int(ultima_fattura), ultima_fattura_stampata=int(ultima_fattura_stampata), current='contatori')
+
+@app.route('/anagrafica', methods=['GET', 'POST'])
+@login_required
+def anagrafica():
+	anag=db.session.query(Anagrafica).first()
+	if request.method == 'POST':
+		f=request.form
+		id=f['id']
+		ragsoc=f['ragsoc']
+		p_iva=f['p_iva']
+		cod_fisc=f['cod_fisc']
+		indirizzo=f['indirizzo']
+		citta=f['citta']
+		cap=f['cap']
+		prov=f['prov']
+		tel=f['tel']
+		mf=f['mf']
+		fax=f['fax']
+		email=f['email']
+		
+		anag.ragsoc=ragsoc
+		anag.p_iva=p_iva
+		anag.cod_fisc=cod_fisc
+		anag.indirizzo=indirizzo
+		anag.cap=cap
+		anag.prov=prov
+		anag.tel=tel
+		anag.mf=mf
+		anag.fax=fax
+		anag.email=email
+		
+		db.session.commit()
+		flash('Anagrafica aggiornata', 'success')
+	
+	return render_template('anagrafica.html', id=anag.id, ragsoc=anag.ragsoc, p_iva=anag.p_iva, cod_fisc=anag.cod_fisc, indirizzo=anag.indirizzo, citta=anag.citta, cap=anag.cap, prov=anag.prov, tel=anag.tel, mf=anag.mf, fax=anag.fax, email=anag.email)
+
+# @app.route('/anagrafica', methods=['POST'])
+# @login_required
+# def salva_anagrafica():
+	# anag=db.session.query(Anagrafica).first()
+	# return render_template('anagrafica.html', id=anag.id, ragsoc=anag.ragsoc, p_iva=anag.p_iva, cod_fisc=anag.cod_fisc, indirizzo=anag.indirizzo, citta=anag.citta, cap=anag.cap, prov=anag.prov, tel=anag.tel, mf=anag.mf, fax=anag.fax, email=anag.email)
+	
 # jinja2 filters
 @app.template_filter('dt')
 def _jinja2_filter_date(date, fmt=None):
@@ -722,5 +830,6 @@ def _jinja2_filter_date(date, fmt=None):
 
 if __name__ == "__main__":
   #app.run(host='93.186.254.106', port=80)
-  app.run(host='93.186.254.106', port=5000)
+  #app.run(host='93.186.254.106', port=5000)
+  app.run(host='192.168.56.2', port=5000)
   #app.run()

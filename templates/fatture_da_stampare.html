@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% set current="fatture_da_stampare" %}
+{% block actions %}
+    <div style="text-align: left;">
+		<a href="{{ url_for('main') }}" class="btn btn-default">&laquo; Indietro</a>
+        <a href="{{url_for('stampa_tutte')}}" target="_blank" class="btn btn-success {{'disabled' if cnt == 0 else '' }}">
+            <span class="glyphicon glyphicon-print"></span> Stampa <span class="badge">{{cnt}}</span></a>
+    </div>
+{% endblock %}
+{% block body %}
+  <h3 class="page-header">Fatture da stampare</h3>
+  
+    <div class="table-responsive">
+    {% if cnt > 0 %}
+      <table class="table table-striped">
+		<tr>
+		  <th>Fatt. n</th>
+		  <th>Data</th>
+		  <th>Cliente</th>
+		  <!-- <th>Email</th> -->
+		  <th>Importo</th>
+		</tr>
+		{% for fattura in fatture_da_stampare %}
+		  <tr>
+			<td>{{fattura.num}}</td>
+			<td>{{fattura.data|dt('%d/%m/%Y')}}</td>
+			<td>{{fattura.cliente.ragsoc}}</td>
+			<!-- <td>{{fattura.cliente.email}}</td> -->
+			<td>{{'%0.2f' % fattura.totale()|float}}</td>
+		  </tr>
+		{% endfor %}
+      </table>
+    {% else %}
+      <p>Nessuna fattura da stampare</p>
+    {% endif %}
+  </div>
+{% endblock %}
