@@ -380,10 +380,18 @@ def invia_tutte():
 	errors = []
   
 	for inv in fatture_da_inviare:
-		subject = "Fattura n. %d" % inv.fattura.num
+		subject = "Fattura n. %d del %s" % (inv.fattura.num, inv.fattura.data.strftime("%d/%m/%Y"))
 		recipient = inv.email
 		mail_to_be_sent = Message(subject=subject, recipients=[recipient])
-		mail_to_be_sent.body = "In allegato la fattura. Saluti."  
+		body = 		  "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"
+		body = body + "e-mail: aldomd@inwind.it\n"
+		body = body + "########################\n"
+		body = body + "ORARIO NEGOZIO: 9.00/13.00 -.- 15.30/17.00\n"
+		body = body + "SABATO: chiuso\n"
+		body = body + "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n"
+		body = body + "Alleghiamo alla presente ns. fattura.\nCogliamo l'occasione per inviare cordiali saluti.\n\n"
+		body = body + "Cartoleria Macdonald Vittorio & C. snc\n"
+		mail_to_be_sent.body = body
 		n_righe = max(len(inv.fattura.voci), min_righe) - min(len(inv.fattura.voci), min_righe)
 		pdf=create_pdf(render_template('fattura_pdf.html', fattura=inv.fattura, n_righe=n_righe))
 		mail_to_be_sent.attach("fattura.pdf", "application/pdf", pdf.getvalue())
