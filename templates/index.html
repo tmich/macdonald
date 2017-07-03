@@ -1,14 +1,64 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h1 class="page-header">Gestione fatturazione clienti</h1>
-  <div class="jumbotron">
-    <h1>Macdonald</h1> 
-    {% if g.user==None %}
-	<p>Inserisci le tue credenziali in alto per accedere alla tua area riservata.</p> 
-	{% else %}
-	<p>Benvenuto nella tua area riservata per la gestione dei clienti e della fatturazione</p> 
-	<p>Esplora le funzionalità presenti nel menu a sinistra</p>
-	{% endif %}
-  </div>
+  <h3 class="page-header">Home page</h3>
+  <!-- <div class="jumbotron"> -->
+    <!-- <h1>Macdonald</h1>  -->
+    <!-- {% if g.user==None %} -->
+	<!-- <p>Inserisci le tue credenziali in alto per accedere alla tua area riservata.</p>  -->
+	<!-- {% else %} -->
+	<!-- <p>Benvenuto nella tua area riservata per la gestione dei clienti e della fatturazione</p>  -->
+	<!-- <p>Esplora le funzionalità presenti nel menu a sinistra</p> -->
+	<!-- {% endif %} -->
+  <!-- </div> -->
+  {% if g.user!=None %}
+	  <div class="row">
+		<div class="col-lg-3 col-md-6">
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					<div class="row">
+						<div class="col-xs-3">
+							<i class="glyphicon glyphicon-envelope" style="font-size: 5em;"></i>
+						</div>
+						<div class="col-xs-9 text-right">
+							<div class="huge" style="font-size: 3em;">{{ n_fatture_da_inviare }}</div>
+							<div>fatture da inviare</div>
+						</div>
+					</div>
+				</div>
+				<a href="{{url_for('fatture_da_inviare')}}">
+					<div class="panel-footer">
+						<span class="pull-left">Dettagli</span>
+						<span class="pull-right"><i class="glyphicon glyphicon-circle-arrow-right"></i></span>
+						<div class="clearfix"></div>
+					</div>
+				</a>
+			</div>
+		</div>
+		<div class="col-lg-3 col-md-6">
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					<div class="row">
+						<div class="col-xs-3">
+							<i class="glyphicon glyphicon-print" style="font-size: 5em;"></i>
+						</div>
+						<div class="col-xs-9 text-right">
+							<div class="huge" style="font-size: 3em;">{{ n_fatture_da_stampare }}</div>
+							<div>fatture da stampare</div>
+						</div>
+					</div>
+				</div>
+				<a href="{{url_for('fatture_da_stampare')}}">
+					<div class="panel-footer">
+						<span class="pull-left">Dettagli</span>
+						<span class="pull-right"><i class="glyphicon glyphicon-circle-arrow-right"></i></span>
+						<div class="clearfix"></div>
+					</div>
+				</a>
+			</div>
+		</div>
+	  </div>
+	{%else%}
+		<p>Inserisci le tue credenziali in alto per accedere alla tua area riservata.</p>
+	{%endif%}
 {% endblock %}
  

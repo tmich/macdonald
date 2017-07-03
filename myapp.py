@@ -42,7 +42,9 @@ def load_user():
 
 @app.route("/")
 def main():
-  return render_template('index.html', utente=g.user)
+	n_fatture_da_inviare = db.session.query(InvioFattura).filter(InvioFattura.data_invio==None).count()
+	n_fatture_da_stampare = db.session.query(Fattura).filter(Fattura.stampato==0).count()
+	return render_template('index.html', n_fatture_da_inviare=n_fatture_da_inviare, n_fatture_da_stampare=n_fatture_da_stampare, current='home')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
