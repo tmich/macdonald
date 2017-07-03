@@ -35,7 +35,8 @@
 	    <td>{{inv.fattura.num}}</td>
 	    <td>{{inv.fattura.data|dt('%d/%m/%Y')}}</td>
 	    <td>{{inv.fattura.cliente.ragsoc}}</td>
-	    <td>{{inv.email}}</td>
+	    <td>{{inv.email}}&nbsp;&nbsp;&nbsp;<a href="#" onclick="modificaEmail({{inv.id}});" title="modifica" data-toggle="modal" data-target="#myModal">
+			<span class="glyphicon glyphicon-pencil"></span></a></td>
 	    <td>{{'%0.2f' % inv.fattura.totale()|float}}</td>
 	    <td><a onclick="return confirm('Sei sicuro di voler annullare l\'invio della fattura?');" 
 				href="{{url_for('annulla_invio', id=inv.id)}}">Annulla</a></td>
@@ -46,4 +47,37 @@
       <p>Nessuna fattura da inviare</p>
     {% endif %}
   </div>
+  
+ <!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">Modifica email di invio</h4>
+			</div>
+			<form action="{{url_for('modifica_email_invio', next=request.url_rule)}}" method="POST">
+				<div class="modal-body">		   
+					<label for="email">Email:</label>
+					<input class="form-control" id="txtEmail" type="email" name="email" />
+					<input type="hidden" id="txtId" name="id" />
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Annulla</button>
+					<input type="submit" class="btn btn-success" value="Conferma" />
+				</div>
+		  </form>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script type=text/javascript>
+function modificaEmail(idInvio) {
+	$('#txtId').val(idInvio);
+}
+
+$('#myModal').on('shown.bs.modal', function() {
+  $('#txtEmail').focus();
+})
+</script>
 {% endblock %}

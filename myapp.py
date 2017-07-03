@@ -836,6 +836,18 @@ def elimina_inviate():
 	db.session.commit()
 	flash("Invii eliminati", "success")
 	return redirect(request.args.get('next'));
+
+@app.route('/modifica_email_invio', methods=['POST'])
+@login_required
+def modifica_email_invio():
+	f=request.form
+	id=f['id']
+	email=f['email']
+	inv=db.session.query(InvioFattura).get(id)
+	inv.email=email
+	db.session.commit()
+	flash("Modifica effettuata", "success")
+	return redirect(request.args.get('next'));
 	
 # jinja2 filters
 @app.template_filter('dt')
