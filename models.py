@@ -78,6 +78,7 @@ class Fattura(db.Model):
     self.data = data
     self.num = num
     self.canc = 0
+    self.stampato = 0
 	
   @property
   def scontrini(self):
