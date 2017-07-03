@@ -822,11 +822,20 @@ def anagrafica():
 	
 	return render_template('anagrafica.html', id=anag.id, ragsoc=anag.ragsoc, p_iva=anag.p_iva, cod_fisc=anag.cod_fisc, indirizzo=anag.indirizzo, citta=anag.citta, cap=anag.cap, prov=anag.prov, tel=anag.tel, mf=anag.mf, fax=anag.fax, email=anag.email)
 
-# @app.route('/anagrafica', methods=['POST'])
-# @login_required
-# def salva_anagrafica():
-	# anag=db.session.query(Anagrafica).first()
-	# return render_template('anagrafica.html', id=anag.id, ragsoc=anag.ragsoc, p_iva=anag.p_iva, cod_fisc=anag.cod_fisc, indirizzo=anag.indirizzo, citta=anag.citta, cap=anag.cap, prov=anag.prov, tel=anag.tel, mf=anag.mf, fax=anag.fax, email=anag.email)
+@app.route('/elimina_inviate', methods=['POST'])
+@login_required
+def elimina_inviate():
+	f=request.form
+	# for k in f:
+		# print("%s=%s\n" % (k, f[k]), file=sys.stderr)
+	ids = f.getlist("da_eliminare")
+	for id in ids:
+		# print("%s\n" % (id), file=sys.stderr)
+		inv=db.session.query(InvioFattura).get(id)
+		db.session.delete(inv)
+	db.session.commit()
+	flash("Invii eliminati", "success")
+	return redirect(request.args.get('next'));
 	
 # jinja2 filters
 @app.template_filter('dt')
