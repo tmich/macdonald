@@ -3,7 +3,7 @@
 {% block actions %}
     <div style="text-align: left;">
 		<a href="{{ url_for('main') }}" class="btn btn-default">&laquo; Indietro</a>
-        <a href="{{url_for('stampa_tutte')}}" target="_blank" class="btn btn-success {{'disabled' if cnt == 0 else '' }}">
+        <a href="{{url_for('stampa_tutte')}}" target="_blank" class="pull-right btn btn-success {{'disabled' if cnt == 0 else '' }}">
             <span class="glyphicon glyphicon-print"></span> Stampa <span class="badge">{{cnt}}</span></a>
     </div>
 {% endblock %}

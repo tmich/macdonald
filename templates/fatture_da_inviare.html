@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 {% block actions %}
-    <div style="text-align: left;">
+    <div>
         <a href="{{ url_for('main') }}" class="btn btn-default">&laquo; Indietro</a>
-        <a href="{{url_for('invia_tutte')}}" class="btn btn-success {{'disabled' if fatture_da_inviare|count == 0 else '' }}">
+        <a href="{{url_for('invia_tutte')}}" class="pull-right btn btn-success {{'disabled' if fatture_da_inviare|count == 0 else '' }}">
             <span class="glyphicon glyphicon-envelope"></span> Invia <span class="badge">{{fatture_da_inviare|count}}</span></a>
     </div>
 {% endblock %}
@@ -35,7 +35,7 @@
 	    <td>{{inv.fattura.num}}</td>
 	    <td>{{inv.fattura.data|dt('%d/%m/%Y')}}</td>
 	    <td>{{inv.fattura.cliente.ragsoc}}</td>
-	    <td>{{inv.email}}&nbsp;&nbsp;&nbsp;<a href="#" onclick="modificaEmail({{inv.id}});" title="modifica" data-toggle="modal" data-target="#myModal">
+	    <td>{{inv.email}}&nbsp;&nbsp;&nbsp;<a href="#" onclick="modificaEmail({{inv.fattura.num}}, '{{inv.fattura.data|dt()}}', {{inv.id}}, '{{inv.fattura.cliente.ragsoc}}', '{{inv.email}}');" title="modifica" data-toggle="modal" data-target="#myModal">
 			<span class="glyphicon glyphicon-pencil"></span></a></td>
 	    <td>{{'%0.2f' % inv.fattura.totale()|float}}</td>
 	    <td><a onclick="return confirm('Sei sicuro di voler annullare l\'invio della fattura?');" 
@@ -57,8 +57,9 @@
 				<h4 class="modal-title">Modifica email di invio</h4>
 			</div>
 			<form action="{{url_for('modifica_email_invio', next=request.url_rule)}}" method="POST">
-				<div class="modal-body">		   
-					<label for="email">Email:</label>
+				<div class="modal-body">		
+					<p>Fattura n&deg; <span id="fattnum"></span> del <span id="fattdata"></span> intestata a <span id="ragione_sociale"></span></p>
+					<label for="email">Email di invio:</label>
 					<input class="form-control" id="txtEmail" type="email" name="email" />
 					<input type="hidden" id="txtId" name="id" />
 				</div>
@@ -72,8 +73,12 @@
 </div><!-- /.modal -->
 
 <script type=text/javascript>
-function modificaEmail(idInvio) {
+function modificaEmail(num, data, idInvio, ragsoc, email) {
+	$('#ragione_sociale').text(ragsoc);
+	$('#fattnum').text(num);
+	$('#fattdata').text(data);
 	$('#txtId').val(idInvio);
+	$('#txtEmail').val(email);
 }
 
 $('#myModal').on('shown.bs.modal', function() {
