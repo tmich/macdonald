@@ -20,7 +20,7 @@
     .far {
       border-right: 1px solid black;
     }  
-    
+	
     td {
       text-align: right; 
       border-bottom: none;
@@ -35,6 +35,12 @@
       border: none;
       text-align: left;
     }
+	
+	.btop {
+		border-top: 1px solid black;
+		border-bottom: none;
+		border-left: none;
+	}
     
     .tot {
       border-top: 1px solid black;
@@ -65,15 +71,17 @@
               </span>
             </td>
             <td>
-                <span style="font-size: 10pt;">
+                <span style="font-size: 9pt;">
                 Spett.le<br />
                 {{ fattura.cliente.ragsoc }}<br />
                 {{ fattura.cliente.indirizzo }} {{ fattura.cliente.cap }} {{ fattura.cliente.citta }}<br />
-                {% if fattura.cliente.p_iva != None %}
-                  p. iva {{ fattura.cliente.p_iva }} / 
+                C.F. {{ fattura.cliente.cod_fisc }}
+				{% if fattura.cliente.p_iva != None %}
+                  &nbsp;-&nbsp;P.I. {{ fattura.cliente.p_iva }}
                 {% endif %}
-                CF: {{ fattura.cliente.cod_fisc }}<br />
-                tel. {{ fattura.cliente.tel if fattura.cliente.tel != None else ''  }}
+                <br />
+                tel {{ fattura.cliente.tel if fattura.cliente.tel != None else ''  }}<br />
+				email {{ fattura.cliente.email }}
                 </span>
             </td>
           </tr>
@@ -84,76 +92,78 @@
 	  <tr>
 	    <td class="void" style="font-size: 10pt;">Fattura n&deg; {{fattura.num}} del {{fattura.data|dt('%d/%m/%Y')}}</td>
 	    <td class="void" style="font-size: 10pt;">
-	    E-mail: {{ fattura.cliente.email }}<br/>
-	    Scontrino n. {{ fattura.scontrini }}<br />
-        MF: {{ mf }}
+	    Scontrin{{'o' if fattura.n_scontrini() == 1 else 'i'}} n. {{ fattura.scontrini }}&nbsp;&nbsp;MF: {{ mf }}
 	    </td>
 	  </tr>
 	</table>
       </div>
       <div>
-		<table class="fattura" style="border-collapse:collapse;" cellpadding="2">
-		  <tr>
-			<td class="hd" style="text-align: left;" width="58%">Descrizione</td>
-			<td class="hd" width="5%">Qt&agrave;</td>
-			<td class="hd" width="8%">Prezzo</td>
-			<td class="hd" width="5%">%</td>
-			<td class="hd" width="8%">Impon.</td>
-			<td class="hd" width="8%">Iva</td>
-			<td class="hd far" width="8%">Tot. &euro;</td>
-		  </tr>
-		  {% for v in fattura.voci %}
-			{% set prz = '%0.2f' % v.prezzo|float %}
-			{% set tot_imp = '%0.2f' % v.imponibile()|float %}
-			{% set tot_iva = '%0.2f' % v.iva()|float %}
-			{% set tot = '%0.2f' % v.totale()|float %}
-			<tr>
-			  <td style="text-align: left;">{{ v.descr }}</td>
-			  <td>{{ v.qta }}</td>
-			  <td>{{ prz|replace(".",",") }}</td>
-			  <td>{{ "%d"|format(v.aliq) }}</td>
-			  <td>{{ tot_imp|replace(".",",") }}</td>
-			  <td>{{ tot_iva|replace(".",",") }}</td>
-			  <td class="far">{{ tot|replace(".",",") }}</td>
-			</tr>
-		  {% endfor %}
-		  {% for i in range(0,n_righe) %}
-			<tr>
-			  <td>&nbsp;</td>
-			  <td>&nbsp;</td>
-			  <td>&nbsp;</td>
-			  <td>&nbsp;</td>
-			  <td>&nbsp;</td>
-			  <td>&nbsp;</td>
-			  <td class="far">&nbsp;</td>
-			</tr>
-		  {% endfor %}
+		<table class="fattura" style="border-collapse:collapse;" cellpadding="1">
+			<thead>
+				<tr>
+					<td class="hd" style="text-align: left;" width="58%">Descrizione</td>
+					<td class="hd" width="5%">Qt&agrave;</td>
+					<td class="hd" width="8%">Prezzo</td>
+					<td class="hd" width="5%">%</td>
+					<td class="hd" width="8%">Impon.</td>
+					<td class="hd" width="8%">Iva</td>
+					<td class="hd far" width="8%">Tot. &euro;</td>
+				</tr>
+			</thead>
+			<tbody>
+				{% for v in fattura.voci %}
+					{% set prz = '%0.2f' % v.prezzo|float %}
+					{% set tot_imp = '%0.2f' % v.imponibile()|float %}
+					{% set tot_iva = '%0.2f' % v.iva()|float %}
+					{% set tot = '%0.2f' % v.totale()|float %}
+					<tr>
+					  <td style="text-align: left;">{{ v.descr }}</td>
+					  <td>{{ v.qta }}</td>
+					  <td>{{ prz|replace(".",",") }}</td>
+					  <td>{{ "%d"|format(v.aliq) }}</td>
+					  <td>{{ tot_imp|replace(".",",") }}</td>
+					  <td>{{ tot_iva|replace(".",",") }}</td>
+					  <td class="far">{{ tot|replace(".",",") }}</td>
+					</tr>
+				{% endfor %}
+				{% for i in range(0,n_righe) %}
+					<tr>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td class="far">&nbsp;</td>
+					</tr>
+				{% endfor %}
 		  
-		  <tr>
-			<td class="last">&nbsp;</td>
-			<td class="last">&nbsp;</td>
-			<td>&nbsp;</td>
-			<td>&nbsp;</td>
-			<td>&nbsp;</td>
-			<td>&nbsp;</td>
-			<td class="far">&nbsp;</td>
-		  </tr>
+		  <!-- <tr> -->
+			<!-- <td class="last">&nbsp;</td> -->
+			<!-- <td class="last">&nbsp;</td> -->
+			<!-- <td>&nbsp;</td> -->
+			<!-- <td>&nbsp;</td> -->
+			<!-- <td>&nbsp;</td> -->
+			<!-- <td>&nbsp;</td> -->
+			<!-- <td class="far">&nbsp;</td> -->
+		  <!-- </tr> -->
 		  
-		  {% set impf = '%0.2f' % fattura.imponibile()|float %}
-		  {% set ivaf = '%0.2f' % fattura.iva()|float %}
-		  {% set totf = '%0.2f' % fattura.totale()|float %}
-		  <tr>
-			<td class="void" colspan="2">&nbsp;</td>
-			<td class="tot" colspan="2">Totale</td>
-			<td class="tot">{{ impf|replace(".",",") }}</td>
-			<td class="tot">{{ ivaf|replace(".",",") }}</td>
-			<td class="tot far">&nbsp;</td>
-		  </tr>
-		  <tr>
-			<td class="void" colspan="4">&nbsp;</td>
-			<td class="tot" colspan="2">TOTALE FATTURA</td>
-			<td class="tot far">{{ totf|replace(".",",") }}</td>
-		  </tr>
+			{% set impf = '%0.2f' % fattura.imponibile()|float %}
+			{% set ivaf = '%0.2f' % fattura.iva()|float %}
+			{% set totf = '%0.2f' % fattura.totale()|float %}
+			<tr>
+				<td class="btop" colspan="2">&nbsp;</td>
+				<td class="tot" colspan="2">Totale</td>
+				<td class="tot">{{ impf|replace(".",",") }}</td>
+				<td class="tot">{{ ivaf|replace(".",",") }}</td>
+				<td class="tot far">&nbsp;</td>
+			</tr>
+			<tr>
+				<td class="void" colspan="4">&nbsp;</td>
+				<td class="tot" colspan="2">TOTALE FATTURA</td>
+				<td class="tot far">{{ totf|replace(".",",") }}</td>
+			</tr>
+		  </tbody>
 		</table>
       </div>
 	  <br />

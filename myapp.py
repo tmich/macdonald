@@ -377,7 +377,7 @@ def fatture_inviate():
 @app.route('/invia_tutte', methods=['GET'])
 def invia_tutte():
 	fatture_da_inviare=db.session.query(InvioFattura).filter_by(data_invio=None).all()
-	min_righe=10
+	#min_righe=10
 	dest = request.args.get('next')
 	errors = []
   
@@ -394,8 +394,9 @@ def invia_tutte():
 		body = body + "Alleghiamo alla presente ns. fattura.\nCogliamo l'occasione per inviare cordiali saluti.\n\n"
 		body = body + "Cartoleria Macdonald Vittorio & C. snc\n"
 		mail_to_be_sent.body = body
-		n_righe = max(len(inv.fattura.voci), min_righe) - min(len(inv.fattura.voci), min_righe)
-		pdf=create_pdf(render_template('fattura_pdf.html', fattura=inv.fattura, n_righe=n_righe))
+		# n_righe = max(len(inv.fattura.voci), min_righe) - min(len(inv.fattura.voci), min_righe)
+		# pdf=create_pdf(render_template('fattura_pdf.html', fattura=inv.fattura, n_righe=n_righe))
+		pdf=create_pdf(prepara_pdf(inv.fattura))
 		mail_to_be_sent.attach("fattura.pdf", "application/pdf", pdf.getvalue())
 	
 		try:
@@ -466,8 +467,9 @@ def stampa_tutte():
 	stringone=""
 	anag = db.session.query(Anagrafica).get(1)
 	for fattura in fatture_da_stampare:
-		n_righe = max(len(fattura.voci), min_righe) - min(len(fattura.voci), min_righe)
-		stringone = stringone + render_template('fattura_pdf.html', fattura=fattura, n_righe=n_righe, ragsoc=anag.ragsoc, descr=anag.descr, indirizzo=anag.indirizzo, mf=anag.mf)
+		# n_righe = max(len(fattura.voci), min_righe) - min(len(fattura.voci), min_righe)
+		# stringone = stringone + render_template('fattura_pdf.html', fattura=fattura, n_righe=n_righe, ragsoc=anag.ragsoc, descr=anag.descr, indirizzo=anag.indirizzo, mf=anag.mf)
+		stringone = stringone + prepara_pdf(fattura)
 		fattura.stampato=1
 	
 	pdf=create_pdf(stringone)
@@ -483,16 +485,20 @@ def stampa_tutte():
 @login_required
 def stampa_fattura(idfatt):
   fatt = db.session.query(Fattura).get(idfatt)
-  min_righe=10
-  n_righe = max(len(fatt.voci), min_righe) - min(len(fatt.voci), min_righe)
-  anag = db.session.query(Anagrafica).get(1)
-
-  pdf=create_pdf(render_template('fattura_pdf.html', fattura=fatt, n_righe=n_righe, ragsoc=anag.ragsoc, descr=anag.descr, indirizzo=anag.indirizzo, mf=anag.mf))
+  pdf=create_pdf(prepara_pdf(fatt))
   response=make_response(pdf.getvalue())
   response.headers['Content-Type'] = 'application/pdf'
   response.headers['Content-Disposition'] = 'inline; filename=fattura.pdf'
   return response
 
+def prepara_pdf(fatt):
+  min_righe=12
+  #righe_vuote = max(len(fatt.voci), min_righe) - min(len(fatt.voci), min_righe)
+  righe_vuote = min_righe - len(fatt.voci)
+  anag = db.session.query(Anagrafica).get(1)
+  pdf=render_template('fattura_pdf.html', fattura=fatt, n_righe=righe_vuote, ragsoc=anag.ragsoc, descr=anag.descr, indirizzo=anag.indirizzo, mf=anag.mf)
+  return pdf
+  
 @app.route('/vfattura/<int:idfatt>', methods=['GET'])
 @login_required
 def vis_fattura(idfatt):
@@ -738,8 +744,9 @@ def ristampa_fatture():
 			stringone=""
 			anag = db.session.query(Anagrafica).get(1)
 			for fatt in fatture:
-				n_righe = max(len(fatt.voci), min_righe) - min(len(fatt.voci), min_righe)
-				stringone = stringone + render_template('fattura_pdf.html', fattura=fatt, n_righe=n_righe, ragsoc=anag.ragsoc, descr=anag.descr, indirizzo=anag.indirizzo, mf=anag.mf)
+				#n_righe = max(len(fatt.voci), min_righe) - min(len(fatt.voci), min_righe)
+				#stringone = stringone + render_template('fattura_pdf.html', fattura=fatt, n_righe=n_righe, ragsoc=anag.ragsoc, descr=anag.descr, indirizzo=anag.indirizzo, mf=anag.mf)
+				stringone = stringone + prepara_pdf(fatt)
 			
 			pdf=create_pdf(stringone)
 			response=make_response(pdf.getvalue())
