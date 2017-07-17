@@ -10,7 +10,7 @@ class Config(object):
   MAIL_USE_TLS=True
   MAIL_DEFAULT_SENDER=('Cartoleria Macdonald', 'aldomd@inwind.it')
   MAIL_USERNAME = 'aldomd@inwind.it'
-  MAIL_PASSWORD = 'ALDOMAC03'
+  MAIL_PASSWORD = 'MACDONALD04'	#'ALDOMAC03'
   BABEL_DEFAULT_LOCALE = 'it'
   
 class ProductionConfig(Config):
