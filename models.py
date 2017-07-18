@@ -168,6 +168,30 @@ class InvioFattura(db.Model):
   def __init__ (self, fattura, email):
 	self.fattura_id=fattura.id
 	self.email=email
+	
+class EmailConfig(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  username = db.Column(db.String(80))
+  password = db.Column(db.String(80))
+  nome = db.Column(db.String(120))
+  email = db.Column(db.String(120))
+  server = db.Column(db.String(80))
+  porta = db.Column(db.Integer)
+  ssl = db.Column(db.Boolean)
+  tls = db.Column(db.Boolean)
+  attivo = db.Column(db.Boolean)
+  
+  def __init__(self, username, password, nome, server, email, porta, ssl=False, tls=True, attivo=True):
+	self.username = username
+	self.password = password
+	self.nome = nome
+	self.server = server
+	self.email = email
+	self.porta = porta
+	self.ssl = ssl
+	self.tls = tls
+	self.attivo = attivo
+
 
 class User(db.Model):
   id = db.Column(db.Integer, primary_key=True)

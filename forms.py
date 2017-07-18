@@ -258,26 +258,26 @@ class FormCliente(object):
 		if(self.ragsoc == ''):
 			self.errors['ragsoc'] = "manca la ragione sociale"
 
-		if(self.indirizzo == ''):
-			self.errors['indirizzo'] = "manca l'indirizzo"
+		# if(self.indirizzo == ''):
+			# self.errors['indirizzo'] = "manca l'indirizzo"
 
-		if(self.cap == ''):
-			self.errors['cap'] = "manca il cap"
+		# if(self.cap == ''):
+			# self.errors['cap'] = "manca il cap"
 
-		if(self.citta == ''):
-			self.errors['citta'] = "manca la citt&agrave;"
+		# if(self.citta == ''):
+			# self.errors['citta'] = "manca la citt&agrave;"
 
-		if(self.piva == ''):
-			self.errors['piva'] = "manca la partita iva"
+		# if(self.piva == ''):
+			# self.errors['piva'] = "manca la partita iva"
 
-		if(self.cfisc == ''):
-			self.errors['cfisc'] = "manca il codice fiscale"			
+		# if(self.cfisc == ''):
+			# self.errors['cfisc'] = "manca il codice fiscale"			
 
-		if(self.telefono == ''):
-			self.errors['telefono'] = "manca il telefono"
+		# if(self.telefono == ''):
+			# self.errors['telefono'] = "manca il telefono"
 
-		if(self.email == ''):
-			self.errors['email'] = "manca l'email"			
+		# if(self.email == ''):
+			# self.errors['email'] = "manca l'email"			
 
 		return len(self.errors.keys())==0
 		

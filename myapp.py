@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_babel import Babel, format_datetime, format_date
 from decimal import Decimal
 from pdfs import create_pdf
-from models import db, Anagrafica, Cliente, Prodotto, Fattura, VoceFattura, InvioFattura, User, FatturaSequence, ObjFatt, ObjVoce
+from models import db, Anagrafica, Cliente, Prodotto, Fattura, VoceFattura, InvioFattura, User, FatturaSequence, ObjFatt, ObjVoce, EmailConfig
 from forms import FormNuovaFattura, FormAggiungiVoce, FormNuovaFattura, FormCliente, FormProdotto, FormProfilo, FormDate, FormDateFatture
 import jsonpickle
 from smtplib import SMTPException, SMTPAuthenticationError, SMTPRecipientsRefused
@@ -18,7 +18,7 @@ from sqlalchemy import and_, or_, func, distinct
 app = Flask(__name__)
 app.config.from_object('config.DevelopmentConfig')
 app.static_folder = 'static' 
-mail_ext = Mail(app)
+#mail_ext = Mail(app)
 #db = SQLAlchemy(app)
 db.init_app(app)
 babel = Babel(app)
@@ -374,46 +374,94 @@ def fatture_inviate():
   return render_template('fatture_inviate.html', fatture_inviate=fatture_inviate, cnt=len(fatture_inviate), current='fatture_inviate')
 
 @login_required
+@app.route('/imposta_email', methods=['GET', 'POST'])
+def imposta_email():
+	conf = db.session.query(EmailConfig).filter_by(attivo=True).first()
+	
+	if(request.method=='POST'):
+		f=request.form
+		id=f['id']
+		email=f['email']
+		nome=f['nome']
+		username=f['username']
+		password=f['password']
+		server=f['server']
+		porta=int(f.get('porta', 0))
+		ssl=f.get('ssl', '') == 'on'
+		tls=f.get('tls', '') == 'on'
+		
+		conf = EmailConfig.query.get(id)
+		conf.email=email
+		conf.nome=nome
+		conf.username=username
+		conf.password=password
+		conf.server=server
+		conf.porta=porta
+		conf.ssl=ssl
+		conf.tls=tls
+		
+		db.session.commit()
+		flash('Impostazioni modificate correttamente', 'success')
+		
+	return render_template('imposta_email.html', conf=conf, current='imposta_email')
+
+  
+@login_required
 @app.route('/invia_tutte', methods=['GET'])
 def invia_tutte():
 	fatture_da_inviare=db.session.query(InvioFattura).filter_by(data_invio=None).all()
 	#min_righe=10
 	dest = request.args.get('next')
 	errors = []
-  
-	for inv in fatture_da_inviare:
-		subject = "Fattura n. %d del %s" % (inv.fattura.num, inv.fattura.data.strftime("%d/%m/%Y"))
-		recipient = inv.email
-		mail_to_be_sent = Message(subject=subject, recipients=[recipient])
-		body = 		  "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"
-		body = body + "e-mail: aldomd@inwind.it\n"
-		body = body + "########################\n"
-		body = body + "ORARIO NEGOZIO: 9.00/13.00 -.- 15.30/17.00\n"
-		body = body + "SABATO: chiuso\n"
-		body = body + "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n"
-		body = body + "Alleghiamo alla presente ns. fattura.\nCogliamo l'occasione per inviare cordiali saluti.\n\n"
-		body = body + "Cartoleria Macdonald Vittorio & C. snc\n"
-		mail_to_be_sent.body = body
-		# n_righe = max(len(inv.fattura.voci), min_righe) - min(len(inv.fattura.voci), min_righe)
-		# pdf=create_pdf(render_template('fattura_pdf.html', fattura=inv.fattura, n_righe=n_righe))
-		pdf=create_pdf(prepara_pdf(inv.fattura))
-		mail_to_be_sent.attach("fattura.pdf", "application/pdf", pdf.getvalue())
 	
-		try:
-			mail_ext.send(mail_to_be_sent)
-			inv.data_invio=datetime.datetime.now()
-			inv.esito=0
-		except SMTPAuthenticationError:
-			errors.append('Fattura %d: errore nell\'autenticazione con il server di posta' % inv.fattura.num)
-			inv.esito=1
-		except SMTPRecipientsRefused:
-			errors.append("Fattura %d: impossibile inviare all'indirizzo specificato"% inv.fattura.num)
-			inv.esito=2
-		except SMTPException, e:
-			errors.append('Fattura %d: errore non specificato' % inv.fattura.num)
-			inv.esito=3
-			
-		db.session.commit()
+	# leggo la configurazione dal db
+	conf = db.session.query(EmailConfig).filter_by(attivo=True).first()
+	app.config.update(
+		MAIL_USE_SSL = conf.ssl,
+		MAIL_USE_TLS = conf.tls,
+		MAIL_SERVER = conf.server,
+		MAIL_PORT = conf.porta,
+		MAIL_DEFAULT_SENDER = (str(conf.nome), str(conf.email)),
+		MAIL_USERNAME = str(conf.username),
+		MAIL_PASSWORD = str(conf.password)
+	)
+	mail = Mail(app)
+	
+	with mail.connect() as conn:
+		for inv in fatture_da_inviare:
+			subject = "Fattura n. %d del %s" % (inv.fattura.num, inv.fattura.data.strftime("%d/%m/%Y"))
+			recipient = inv.email
+			mail_to_be_sent = Message(subject=subject, recipients=[recipient])
+			body = 		  "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"
+			body = body + "e-mail: aldomd@inwind.it\n"
+			body = body + "########################\n"
+			body = body + "ORARIO NEGOZIO: 9.00/13.00 -.- 15.30/17.00\n"
+			body = body + "SABATO: chiuso\n"
+			body = body + "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n"
+			body = body + "Alleghiamo alla presente ns. fattura.\nCogliamo l'occasione per inviare cordiali saluti.\n\n"
+			body = body + "Cartoleria Macdonald Vittorio & C. snc\n"
+			mail_to_be_sent.body = body
+			# n_righe = max(len(inv.fattura.voci), min_righe) - min(len(inv.fattura.voci), min_righe)
+			# pdf=create_pdf(render_template('fattura_pdf.html', fattura=inv.fattura, n_righe=n_righe))
+			pdf=create_pdf(prepara_pdf(inv.fattura))
+			mail_to_be_sent.attach("fattura.pdf", "application/pdf", pdf.getvalue())
+		
+			try:
+				#mail.send(mail_to_be_sent)
+				conn.send(mail_to_be_sent)
+				inv.data_invio=datetime.datetime.now()
+				inv.esito=0
+			except SMTPAuthenticationError:
+				errors.append('Fattura %d: errore nell\'autenticazione con il server di posta' % inv.fattura.num)
+				inv.esito=1
+			except SMTPRecipientsRefused:
+				errors.append("Fattura %d: impossibile inviare all'indirizzo specificato"% inv.fattura.num)
+				inv.esito=2
+			except SMTPException, e:
+				errors.append('Fattura %d: errore non specificato' % inv.fattura.num)
+				inv.esito=3
+				
+			db.session.commit()
 
 	if(len(errors) == 0):
 		flash('Fatture inviate correttamente', 'success')
@@ -866,6 +914,18 @@ def _jinja2_filter_date(date, fmt=None):
   else:
 	return format_date(date, 'medium')
 
+#def create_app():
+#    app = flask.Flask("app")
+#    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
+#    #app.register_blueprint(api)
+#    db.init_app(app)
+#    with app.app_context():
+        # Extensions like Flask-SQLAlchemy now know what the "current" app
+        # is while within this block. Therefore, you can now run........
+#        db.create_all()
+
+#    return app
+	
 if __name__ == "__main__":
   app.run(host='93.186.254.106', port=80)
   #app.run(host='93.186.254.106', port=5000)

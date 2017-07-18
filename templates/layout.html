@@ -65,6 +65,7 @@
 	{% else %}
 	  <ul class="nav navbar-nav navbar-right">
 	    <li><a href="{{ url_for('anagrafica') }}">Anagrafica azienda</a></li>
+	    <li><a href="{{ url_for('imposta_email') }}">e-mail</a></li>
 	    <li><a href="{{ url_for('profilo') }}">Profilo utente</a></li>
 	    <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span> Esci ({{ g.user.username }})</a></li>
 	  </ul>
