@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+{% block actions %}
+    <div>
+		<a href="{{url_for('main')}}" title="Esci" class="btn btn-default" type="button">&laquo; Esci</a>
+        <a href="#" onclick="submitForm();" title="Salva" class="btn btn-success" type="button">
+            <span class="glyphicon glyphicon-floppy-disk"></span> Salva
+        </a>
+		{% if not nuovo %}
+		<div class="pull-right">
+			<a href="{{ url_for('nuovo_profilo_email') }}" class="btn btn-success" title="Nuovo profilo">
+				<span class="glyphicon glyphicon-plus-sign"></span> Nuovo profilo
+			</a>
+			<a href="{{ url_for('elimina_profilo_email', id=profilo.id) }}" 
+				class="btn btn-danger {{'disabled' if ultimo else ''}}"
+				onclick="return confirm('Eliminare il profilo email {{ profilo.email }}?');" title="Elimina">
+				<span class="glyphicon glyphicon-minus-sign"></span> Elimina
+			</a>
+		</div>
+		{% endif %}
+    </div>
+{% endblock %}
+{% block body %}
+	<h3 class="page-header">{% if not nuovo %}Profili e-mail {% else %} Nuovo profilo e-mail {% endif %}</h3>
+	{% if not nuovo %}
+	<ul class="nav nav-tabs">
+		{% for p in profili %}
+			<li class="{{ 'active' if p.id == profilo.id else '' }}">
+				<a href="{{ url_for('profilo_email', id=p.id) }}">{{ p.email }}</a>
+			</li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+	<div class="panel-body">
+		<form method="post" action="{{ url_for('salva_profilo_email') }}" id="form1">
+			<input type="hidden" name="id" readonly="readonly" value="{{ profilo.id if not nuovo else 0 }}" />
+			<!-- <div class="form-group"> -->
+				<!-- <input type="checkbox" name="attivo" {% if not nuovo and profilo.attivo %} checked disabled {% endif %} /> -->
+				<!-- <label>Imposta come profilo predefinito</label> -->
+			<!-- </div> -->
+			<div class="form-group {{ 'has-error has-feedback' if 'email' in errors else '' }}">
+				<label for="email">Indirizzo e-mail</label>
+				<input type="email" class="form-control" name="email" value="{{ profilo.email if not nuovo else '' }}" />
+			</div>
+			<div class="form-group {{ 'has-error has-feedback' if 'nome' in errors else '' }}">
+				<label for="nome">Nome visualizzato</label>
+				<input type="text" class="form-control" name="nome" value="{{ profilo.nome if not nuovo else '' }}" />
+			</div>
+			<div class="form-group {{ 'has-error has-feedback' if 'username' in errors else '' }}">
+				<label for="username">Username</label>
+				<input type="text" class="form-control" name="username" value="{{ profilo.username if not nuovo else '' }}" />
+			</div>
+			<div class="form-group {{ 'has-error has-feedback' if 'password' in errors else '' }}">
+				<label for="password">Password</label>
+				<input type="password" class="form-control" name="password" value="{{ profilo.password if not nuovo else '' }}" />
+			</div>
+			<div class="form-group {{ 'has-error has-feedback' if 'server' in errors else '' }}">
+				<label for="server">Server di invio</label>
+				<input type="text" class="form-control" name="server" value="{{ profilo.server if not nuovo else '' }}" />
+			</div>
+			<div class="form-group {{ 'has-error has-feedback' if 'porta' in errors else '' }}">
+				<label for="porta">Porta</label>
+				<input type="number" min="1" max="65535" step="1" class="form-control" name="porta" 
+					value="{{ profilo.porta if not nuovo else '' }}" />
+			</div>
+			<div class="form-group">
+				<input type="checkbox" name="ssl" {% if not nuovo and profilo.ssl %} checked {% endif %} />
+				<label>SSL</label>
+			</div>
+			<div class="form-group">
+				<input type="checkbox" name="tls" {% if not nuovo and profilo.tls %} checked {% endif %} />
+				<label>TLS</label>
+			</div>
+		</form>
+	</div>
+
+	<script type="text/javascript">
+	function submitForm() {
+		if(confirm('Salvare i dati?')) {
+			$("#form1").submit();
+		}
+	}
+	</script>
+{%endblock%}

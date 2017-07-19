@@ -15,14 +15,23 @@ from smtplib import SMTPException, SMTPAuthenticationError, SMTPRecipientsRefuse
 from sqlalchemy import and_, or_, func, distinct
 #from dateutil.parser import parse
 
-app = Flask(__name__)
-app.config.from_object('config.DevelopmentConfig')
-app.static_folder = 'static' 
-#mail_ext = Mail(app)
-#db = SQLAlchemy(app)
-db.init_app(app)
-babel = Babel(app)
+def create_app():
+	app = Flask(__name__)
+	app.config.from_object('config.DevelopmentConfig')
+	app.static_folder = 'static' 
+	#mail_ext = Mail(app)
+	#db = SQLAlchemy(app)
+	db.init_app(app)
+	babel = Babel(app)
+	#with app.app_context():
+		#Extensions like Flask-SQLAlchemy now know what the "current" app
+		#is while within this block. Therefore, you can now run........
+		#db.create___all()
 
+	return app
+
+app = create_app()
+	
 def login_required(f):
 	@wraps(f)
 	def decorated_function(*args, **kwargs):
@@ -72,6 +81,13 @@ def logout():
 	session.pop('uid')
   return redirect(url_for('main'))
  
+def is_number(s):
+	try:
+		int(s)
+		return True
+	except ValueError:
+		return False
+ 
 @app.route('/clienti', methods=['GET'])
 @app.route('/clienti/<int:page>')
 @login_required
@@ -87,8 +103,14 @@ def clienti(page=0):
 	
 	if('qry_cliente' in session):
 		q = session.get('qry_cliente')
-		cnt = db.session.query(Cliente).filter(Cliente.ragsoc.like('%'+q+'%')).order_by('ragsoc').count()
-		clienti = db.session.query(Cliente).filter(Cliente.ragsoc.like('%'+q+'%')).order_by('ragsoc').offset(offset).limit(pagenum)
+	
+		filter1 = Cliente.p_iva == str(q)
+		filter2 = Cliente.ragsoc.like('%'+q+'%')
+		filter3 = Cliente.cod_fisc.like(q+'%')
+		
+		qry = db.session.query(Cliente).filter(or_(filter1, filter2, filter3)).order_by('ragsoc')
+		cnt = qry.count()
+		clienti = qry.offset(offset).limit(pagenum)
 	else:
 		clienti = db.session.query(Cliente).order_by('ragsoc').offset(offset).limit(pagenum)
 		
@@ -365,7 +387,8 @@ def articoli_json():
 @app.route('/invio', methods=['GET'])
 def fatture_da_inviare():
   fatture_da_inviare=db.session.query(InvioFattura).filter_by(data_invio=None).all()
-  return render_template('fatture_da_inviare.html', fatture_da_inviare=fatture_da_inviare, cnt=len(fatture_da_inviare), current='fatture_da_inviare')
+  profili_email=db.session.query(EmailConfig).all()
+  return render_template('fatture_da_inviare.html', fatture_da_inviare=fatture_da_inviare, cnt=len(fatture_da_inviare), profili_email=profili_email, current='fatture_da_inviare')
   
 @login_required
 @app.route('/fatture_inviate', methods=['GET'])
@@ -373,23 +396,48 @@ def fatture_inviate():
   fatture_inviate=db.session.query(InvioFattura).filter(InvioFattura.data_invio != None).all()
   return render_template('fatture_inviate.html', fatture_inviate=fatture_inviate, cnt=len(fatture_inviate), current='fatture_inviate')
 
+# @login_required
+# @app.route('/profili_email', methods=['GET'])
+# def profili_email():
+	# profili = db.session.query(EmailConfig) #.filter_by(attivo=True).first()	
+	# return render_template('profili_email.html', profili=profili)
+
 @login_required
-@app.route('/imposta_email', methods=['GET', 'POST'])
-def imposta_email():
-	conf = db.session.query(EmailConfig).filter_by(attivo=True).first()
+@app.route('/profilo_email/', methods=['GET'])
+@app.route('/profilo_email/<int:id>', methods=['GET'])
+def profilo_email(id=0):
+	profili = db.session.query(EmailConfig)
+	n_profili=db.session.query(EmailConfig).count()
+
+	if(id > 0):
+		profilo = profili.get(id)
+	else:
+		profilo = profili.first()	# filter_by(attivo=True)
 	
-	if(request.method=='POST'):
-		f=request.form
-		id=f['id']
-		email=f['email']
-		nome=f['nome']
-		username=f['username']
-		password=f['password']
-		server=f['server']
-		porta=int(f.get('porta', 0))
-		ssl=f.get('ssl', '') == 'on'
-		tls=f.get('tls', '') == 'on'
-		
+	return render_template('profilo_email.html', profili=profili.all(), profilo=profilo, ultimo=n_profili == 1)
+
+@login_required
+@app.route('/profilo_email/new', methods=['GET'])
+def nuovo_profilo_email():
+	return render_template('profilo_email.html', nuovo=True)
+	
+@login_required
+@app.route('/profilo_email', methods=['POST'])
+def salva_profilo_email():
+	f=request.form
+	id=int(f.get('id', 0))
+	email=f['email']
+	nome=f['nome']
+	username=f['username']
+	password=f['password']
+	server=f['server']
+	porta=int(f.get('porta', 0))
+	ssl=f.get('ssl', '') == 'on'
+	tls=f.get('tls', '') == 'on'
+	
+	print('%s: %d' % ('salva_profilo_email', id), file=sys.stderr)
+	
+	if(id > 0):
 		conf = EmailConfig.query.get(id)
 		conf.email=email
 		conf.nome=nome
@@ -399,23 +447,38 @@ def imposta_email():
 		conf.porta=porta
 		conf.ssl=ssl
 		conf.tls=tls
+		msg='Profilo email modificato correttamente'
+	else:
+		conf = EmailConfig(username, password, nome, server, email, porta, ssl, tls)
+		db.session.add(conf)
+		msg='Nuovo profilo email creato'
 		
-		db.session.commit()
-		flash('Impostazioni modificate correttamente', 'success')
-		
-	return render_template('imposta_email.html', conf=conf, current='imposta_email')
+	db.session.commit()
+	flash(msg, 'success')
+	return redirect(url_for('profilo_email'))
 
-  
 @login_required
-@app.route('/invia_tutte', methods=['GET'])
+@app.route('/profilo_email/del/<int:id>', methods=['GET'])
+def elimina_profilo_email(id):
+	profilo = db.session.query(EmailConfig).get(id)
+	db.session.delete(profilo)
+	db.session.commit()
+	flash('Profilo email eliminato', 'danger')
+	return redirect(url_for('profilo_email'))
+	
+@login_required
+@app.route('/invia_tutte', methods=['POST'])
 def invia_tutte():
+	form=request.form
+	profilo_id=form['profilo']
+
 	fatture_da_inviare=db.session.query(InvioFattura).filter_by(data_invio=None).all()
 	#min_righe=10
 	dest = request.args.get('next')
 	errors = []
 	
-	# leggo la configurazione dal db
-	conf = db.session.query(EmailConfig).filter_by(attivo=True).first()
+	# leggo il profilo email selezionato dal db
+	conf = db.session.query(EmailConfig).get(profilo_id) #filter_by(attivo=True).first()
 	app.config.update(
 		MAIL_USE_SSL = conf.ssl,
 		MAIL_USE_TLS = conf.tls,
@@ -467,9 +530,10 @@ def invia_tutte():
 		flash('Fatture inviate correttamente', 'success')
 	else:
 		flash('Alcune fatture non sono state inviate', 'warning')
-		
-	fatture_da_inviare=db.session.query(InvioFattura).filter_by(data_invio=None).all()
-	return render_template('fatture_da_inviare.html', fatture_da_inviare=fatture_da_inviare, cnt=len(fatture_da_inviare), errors=errors)
+	
+	return redirect(url_for('fatture_da_inviare'))
+	#fatture_da_inviare=db.session.query(InvioFattura).filter_by(data_invio=None).all()
+	#return render_template('fatture_da_inviare.html', fatture_da_inviare=fatture_da_inviare, cnt=len(fatture_da_inviare), errors=errors)
 
 @app.route('/invio_fatt/<int:idfatt>', methods=['GET'])
 @login_required
@@ -913,18 +977,6 @@ def _jinja2_filter_date(date, fmt=None):
 	return date.strftime(fmt)  #format_date(date, fmt)
   else:
 	return format_date(date, 'medium')
-
-#def create_app():
-#    app = flask.Flask("app")
-#    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
-#    #app.register_blueprint(api)
-#    db.init_app(app)
-#    with app.app_context():
-        # Extensions like Flask-SQLAlchemy now know what the "current" app
-        # is while within this block. Therefore, you can now run........
-#        db.create_all()
-
-#    return app
 	
 if __name__ == "__main__":
   app.run(host='93.186.254.106', port=80)

@@ -4,7 +4,7 @@
     <form method="POST" action="{{ url_for('cerca_cliente') }}" class="form-inline" id="formCercaClienti">  
         <div class="input-group col-md-5">
             <input type="text" class="form-control input-md" name="query" value="{{ query if query else '' }}" 
-                placeholder="cerca per nominativo" />
+                placeholder="cerca per nominativo, partita iva o c. fiscale" />
             <span class="input-group-btn">
                 <button class="btn btn-info btn-md" type="button" 
                         onclick="document.getElementById('formCercaClienti').submit();">

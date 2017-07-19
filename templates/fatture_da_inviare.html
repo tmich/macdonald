@@ -2,7 +2,7 @@
 {% block actions %}
     <div>
         <a href="{{ url_for('main') }}" class="btn btn-default">&laquo; Indietro</a>
-        <a href="{{url_for('invia_tutte')}}" class="pull-right btn btn-success {{'disabled' if fatture_da_inviare|count == 0 else '' }}">
+        <a href="#" onclick="submitForm();" class="pull-right btn btn-success {{'disabled' if fatture_da_inviare|count == 0 else '' }}">
             <span class="glyphicon glyphicon-envelope"></span> Invia <span class="badge">{{fatture_da_inviare|count}}</span></a>
     </div>
 {% endblock %}
@@ -19,6 +19,17 @@
 	  </div>
   {% endif %}
   
+  <form id="form1" action="{{url_for('invia_tutte', next=request.url_rule)}}" method="POST">
+	  <div>
+		<label>Profilo email: </label>
+		<select class="form-control" name="profilo" id="profilo">
+			{% for p in profili_email %}
+				<option value="{{ p.id }}">{{p.email}}</option>
+			{% endfor %}
+		</select>
+	  </div>
+  </form>
+  <br />
   <div class="table-responsive">
     {% if cnt > 0 %}
       <table class="table table-striped">
@@ -84,5 +95,13 @@ function modificaEmail(num, data, idInvio, ragsoc, email) {
 $('#myModal').on('shown.bs.modal', function() {
   $('#txtEmail').focus();
 })
+
+function submitForm() {
+	var profilo = $('#profilo').find(":selected").text();
+	
+	if(confirm('Inviare le fatture tramite ' + profilo + '?')) {
+		$("#form1").submit();
+	}
+}
 </script>
 {% endblock %}
