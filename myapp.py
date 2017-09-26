@@ -294,6 +294,17 @@ def cerca_prodotto(page=0):
 @login_required
 def nuovo_prodotto():
   return render_template('prodotto.html', id=0)
+  
+@app.route('/elimina_prodotto/<int:id>')
+@login_required
+def elimina_prodotto(id):
+  #return render_template('prodotto.html', id=0)
+  p = Prodotto.query.get(id)
+  db.session.delete(p)
+  db.session.commit()
+  flash('Articolo eliminato', 'success')
+  
+  return redirect(url_for('prodotti'))
 
 @app.route('/salva_prodotto', methods=['POST'])
 @login_required
