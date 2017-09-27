@@ -347,6 +347,49 @@ def salva_prodotto():
 
 	return redirect(url_for('prodotto', id=p.id))
 	
+@app.route('/utenti', methods=['GET', 'POST'])
+@app.route('/utenti/<int:id>', methods=['GET', 'POST'])
+@login_required
+def utenti(id=0):
+	if id==0:
+		id=g.user.id
+		username=g.user.username
+		nome=g.user.nome
+		email=g.user.email
+	else:
+		u=User.query.get(id)
+		if not u:
+			return redirect(url_for('utenti'))
+		id=u.id
+		username=u.username
+		nome=u.nome
+		email=u.email
+		
+	errors=dict()
+	utenti = User.query.all()
+	
+	if request.method == 'POST':
+		f = FormProfilo(request.form)
+		id=f.user_id
+		username=f.username
+		nome=f.nome
+		email=f.email
+		
+		if f.valido():
+			u = User.query.get(f.user_id)
+			u.nome = f.nome
+			u.email = f.email
+			
+			if f.password_cambiata:
+				u.password = f.nuova_pwd
+				
+			db.session.commit()
+			
+			flash('Profilo utente aggiornato', 'success')
+		else:
+			errors = f.errors
+	return render_template('utenti.html', id=id, username=username, nome=nome, email=email, errors=errors, utenti=utenti, current='utenti')
+
 @app.route('/profilo', methods=['GET', 'POST'])
 @login_required
 def profilo():

@@ -85,7 +85,9 @@
 			<ul class="nav nav-sidebar nav-collapse">
 				<li style="border-bottom: 1px solid #e7e7e7;" class="{{ 'active' if current=='home' else '' }}"><a href="{{ url_for('main') }}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
 				<li style="border-bottom: 1px solid #e7e7e7;" class="{{ 'active' if current=='clienti' else '' }}"><a href="{{ url_for('clienti') }}"><span class="glyphicon glyphicon-user"></span> Clienti</a></li>
-				<li style="border-bottom: 1px solid #e7e7e7;" class="{{ 'active' if current=='prodotti' else '' }}"><a href="{{ url_for('prodotti') }}"><span class="glyphicon glyphicon-barcode"></span> Articoli</a></li>
+				{% if g.user.is_admin() %}
+					<li style="border-bottom: 1px solid #e7e7e7;" class="{{ 'active' if current=='prodotti' else '' }}"><a href="{{ url_for('prodotti') }}"><span class="glyphicon glyphicon-barcode"></span> Articoli</a></li>
+				{% endif %}
 				<li style="border-bottom: 1px solid #e7e7e7;"><a data-toggle="collapse" href="#collapse2"><span class="glyphicon glyphicon-envelope"></span> Invio fatture  <span class="caret"></span></a></li>
 					<ul id="collapse2" class="nav nav-sidebar panel-collapse collapse {{ 'in' if current in ['fatture_da_inviare', 'fatture_inviate', 'invio_fatture'] else '' }}">
 						<li class="{{ 'active' if current=='fatture_da_inviare' else '' }}" style="margin-left: 30px; border-bottom: 1px solid #e7e7e7;"><a href="{{ url_for('fatture_da_inviare') }}">Fatture da inviare</a></li>
@@ -100,10 +102,10 @@
 				{% if g.user.is_admin() %}
 					<li style="border-bottom: 1px solid #e7e7e7;" class="{{ 'active' if current=='contatori' else '' }}"><a href="{{ url_for('contatori') }}"><span class="glyphicon glyphicon-list-alt"></span> Contatori</a></li>
 					<li style="border-bottom: 1px solid #e7e7e7;"><a data-toggle="collapse" href="#collapse3"><span class="glyphicon glyphicon-wrench"></span> Impostazioni  <span class="caret"></span></a></li>
-						<ul id="collapse3" class="nav nav-sidebar panel-collapse collapse {{ 'in' if current in ['anagrafica', 'profilo_email', 'profilo'] else '' }}">
+						<ul id="collapse3" class="nav nav-sidebar panel-collapse collapse {{ 'in' if current in ['anagrafica', 'profilo_email', 'utenti'] else '' }}">
 							<li class="{{ 'active' if current=='anagrafica' else '' }}" style="margin-left: 30px; border-bottom: 1px solid #e7e7e7;"><a href="{{ url_for('anagrafica') }}">Anagrafica azienda</a></li>
 							<li class="{{ 'active' if current=='profilo_email' else '' }}" style="margin-left: 30px; border-bottom: 1px solid #e7e7e7;"><a href="{{ url_for('profilo_email') }}">Profili e-mail</a></li>
-							<li class="{{ 'active' if current=='profilo' else '' }}" style="margin-left: 30px; border-bottom: 1px solid #e7e7e7;"><a href="{{ url_for('profilo') }}">Profilo utente</a></li>
+							<li class="{{ 'active' if current=='utenti' else '' }}" style="margin-left: 30px; border-bottom: 1px solid #e7e7e7;"><a href="{{ url_for('utenti') }}">Utenti</a></li>
 						</ul>
 					</li>
 				{% endif %}

@@ -1,19 +1,59 @@
 {% extends "layout.html" %}
+{% block actions %}
+    <div style="text-align: left;">
+		<a href="{{url_for('main')}}" title="Esci" class="btn btn-default" type="button">&laquo; Esci</a>
+        <a href="#" onclick="submitForm();" title="Salva" class="btn btn-success" type="button">
+            <span class="glyphicon glyphicon-floppy-disk"></span> Salva
+        </a>
+    </div>
+{% endblock %}
 {% block body %}
-  <ul class=entries>
-  {% for utente in utenti %}
-    <li><h2>{{ utente.username }}</h2>{{ utente.nome|safe }}
-  {% else %}
-    <li><em>Nessun utente.</em>
+  <h3 class="page-header">Utenti</h3>
+  {% for k,v in errors.items() %}
+    <li>{{ v }}</li>
   {% endfor %}
-  </ul>
-  
-  <ul>
-  {% for azienda in aziende %}
-    <li><h2>{{ azienda.ragione_sociale }}</h2>{{ azienda.descrizione|safe }}
-  {% else %}
-    <li><em>Nessuna azienda.</em>
-  {% endfor %}
-  </ul>
-  
+	<ul class="nav nav-tabs">
+		{% for u in utenti %}
+			<li class="{{ 'active' if id == u.id else '' }}">
+				<a href="{{ url_for('utenti', id=u.id) }}">{{ u.nome }}</a>
+			</li>
+		{% endfor %}
+	</ul>
+	<div class="panel-body">
+	  <form method="POST" id="form1" action="{{ url_for('utenti') }}">
+        <input type="hidden" name="id" readonly="readonly" value="{{ id }}" />
+	    <div class="form-group">
+	      <label for="username">Nome Utente</label>
+	      <input type="text" class="form-control" name="username" readonly="readonly" value="{{ username }}" />
+	    </div>
+	    <div class="form-group {{ 'has-error has-feedback' if 'nome' in errors else '' }}">
+	      <label for="nome">Nome</label>
+	      <input type="text" class="form-control" name="nome" value="{{ nome }}" />
+	    </div>
+	    <div class="form-group {{ 'has-error has-feedback' if 'email' in errors else '' }}">
+	      <label for="email">Email</label>
+	      <input type="email" class="form-control" name="email" value="{{ email }}" />
+	    </div>
+        <div class="form-group {{ 'has-error has-feedback' if 'password' in errors else '' }}">
+	      <label for="password">Password attuale</label>
+	      <input type="password" class="form-control" name="password" value="" />
+	    </div>
+        <div class="form-group {{ 'has-error has-feedback' if 'nuovapwd' in errors else '' }}">
+	      <label for="nuovapwd">Nuova Password</label>
+	      <input type="password" class="form-control" name="nuovapwd" value="" />
+	    </div>
+        <div class="form-group">
+	      <label for="confpwd">Conferma Password</label>
+	      <input type="password" class="form-control" name="confpwd" value="" />
+	    </div>
+	  </form>
+	</div>
+	
+	<script type="text/javascript">
+	function submitForm() {
+		if(confirm('Salvare i dati?')) {
+			$("#form1").submit();
+		}
+	}
+	</script>
 {% endblock %}
