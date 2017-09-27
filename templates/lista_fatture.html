@@ -44,8 +44,8 @@
 				<th width="10%">Data fatt.</th>
 				<th width="5%">Nro</th>
 				<th width="5%">Scontr.</th>
-				<th width="50%">Ragione Sociale</th>
-				<th width="20%">Email</th>
+				<th width="40%">Ragione Sociale</th>
+				<th width="30%">Email</th>
 				<th width="10%">Importo</th>
 			</tr>
 			{% for f in fatture %}
@@ -55,7 +55,7 @@
 				<td>{{ f.scontrini }}</td>
 				<td>{{ f.cliente.ragsoc }}</td>
 				<td>{{ f.cliente.email }}</td>
-				<td>{{ '%0.2f' % f.totale()|float }}</td>
+				<td style="text-align: right;">{{ '%0.2f' % f.totale()|float }}</td>
 			</tr>
 			{% endfor %}
 		</table>
