@@ -376,7 +376,7 @@ def profilo():
 			flash('Profilo utente aggiornato', 'success')
 		else:
 			errors = f.errors
-	return render_template('profilo.html', id=id, username=username, nome=nome, email=email, errors=errors)
+	return render_template('profilo.html', id=id, username=username, nome=nome, email=email, errors=errors, current='profilo')
   
 @app.route('/fatture_cliente/<int:id>/<int:page>')
 @login_required
@@ -425,12 +425,12 @@ def profilo_email(id=0):
 	else:
 		profilo = profili.first()	# filter_by(attivo=True)
 	
-	return render_template('profilo_email.html', profili=profili.all(), profilo=profilo, ultimo=n_profili == 1)
+	return render_template('profilo_email.html', profili=profili.all(), profilo=profilo, ultimo=n_profili == 1, current='profilo_email')
 
 @login_required
 @app.route('/profilo_email/new', methods=['GET'])
 def nuovo_profilo_email():
-	return render_template('profilo_email.html', nuovo=True)
+	return render_template('profilo_email.html', nuovo=True, current='profilo_email')
 	
 @login_required
 @app.route('/profilo_email', methods=['POST'])
@@ -466,7 +466,7 @@ def salva_profilo_email():
 		
 	db.session.commit()
 	flash(msg, 'success')
-	return redirect(url_for('profilo_email'))
+	return redirect(url_for('profilo_email', current='profilo_email'))
 
 @login_required
 @app.route('/profilo_email/del/<int:id>', methods=['GET'])
@@ -475,7 +475,7 @@ def elimina_profilo_email(id):
 	db.session.delete(profilo)
 	db.session.commit()
 	flash('Profilo email eliminato', 'danger')
-	return redirect(url_for('profilo_email'))
+	return redirect(url_for('profilo_email', current='profilo_email'))
 	
 @login_required
 @app.route('/invia_tutte', methods=['POST'])
@@ -952,7 +952,7 @@ def anagrafica():
 		db.session.commit()
 		flash('Anagrafica aggiornata', 'success')
 	
-	return render_template('anagrafica.html', id=anag.id, ragsoc=anag.ragsoc, p_iva=anag.p_iva, cod_fisc=anag.cod_fisc, indirizzo=anag.indirizzo, citta=anag.citta, cap=anag.cap, prov=anag.prov, tel=anag.tel, mf=anag.mf, fax=anag.fax, email=anag.email)
+	return render_template('anagrafica.html', id=anag.id, ragsoc=anag.ragsoc, p_iva=anag.p_iva, cod_fisc=anag.cod_fisc, indirizzo=anag.indirizzo, citta=anag.citta, cap=anag.cap, prov=anag.prov, tel=anag.tel, mf=anag.mf, fax=anag.fax, email=anag.email, current='anagrafica')
 
 @app.route('/elimina_inviate', methods=['POST'])
 @login_required

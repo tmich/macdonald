@@ -1,6 +1,12 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h3 class="page-header">Le tue attivit&agrave;</h3>
+  <h3 class="page-header">
+	{% if g.user == None %}
+		Benvenuto, inserisci le credenziali.
+	{% else %}
+		Le tue attivit&agrave;
+	{% endif %}
+  </h3>
   <!-- <div class="jumbotron"> -->
     <!-- <h1>Macdonald</h1>  -->
     <!-- {% if g.user==None %} -->

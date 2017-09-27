@@ -67,12 +67,12 @@
 	    <button type="submit" class="btn btn-success">Accedi</button>
 	  </form>  
 	{% else %}
-	  <ul class="nav navbar-nav navbar-right">
-	    <li><a href="{{ url_for('anagrafica') }}">Anagrafica azienda</a></li>
-	    <li><a href="{{ url_for('profilo_email') }}">E-mail</a></li>
-	    <li><a href="{{ url_for('profilo') }}">Profilo utente</a></li>
-	    <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span> Esci ({{ g.user.username }})</a></li>
-	  </ul>
+	  <!-- <ul class="nav navbar-nav navbar-right"> -->
+	    <!-- <li><a href="{{ url_for('anagrafica') }}">Anagrafica azienda</a></li> -->
+	    <!-- <li><a href="{{ url_for('profilo_email') }}">E-mail</a></li> -->
+	    <!-- <li><a href="{{ url_for('profilo') }}">Profilo utente</a></li> -->
+	    <!-- <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span> Esci ({{ g.user.username }})</a></li> -->
+	  <!-- </ul> -->
 	{% endif %}
       </div><!--/.navbar-collapse -->
     </div>
@@ -99,7 +99,15 @@
 					</ul>
 				{% if g.user.is_admin() %}
 					<li style="border-bottom: 1px solid #e7e7e7;" class="{{ 'active' if current=='contatori' else '' }}"><a href="{{ url_for('contatori') }}"><span class="glyphicon glyphicon-list-alt"></span> Contatori</a></li>
+					<li style="border-bottom: 1px solid #e7e7e7;"><a data-toggle="collapse" href="#collapse3"><span class="glyphicon glyphicon-wrench"></span> Impostazioni  <span class="caret"></span></a></li>
+						<ul id="collapse3" class="nav nav-sidebar panel-collapse collapse {{ 'in' if current in ['anagrafica', 'profilo_email', 'profilo'] else '' }}">
+							<li class="{{ 'active' if current=='anagrafica' else '' }}" style="margin-left: 30px; border-bottom: 1px solid #e7e7e7;"><a href="{{ url_for('anagrafica') }}">Anagrafica azienda</a></li>
+							<li class="{{ 'active' if current=='profilo_email' else '' }}" style="margin-left: 30px; border-bottom: 1px solid #e7e7e7;"><a href="{{ url_for('profilo_email') }}">Profili e-mail</a></li>
+							<li class="{{ 'active' if current=='profilo' else '' }}" style="margin-left: 30px; border-bottom: 1px solid #e7e7e7;"><a href="{{ url_for('profilo') }}">Profilo utente</a></li>
+						</ul>
+					</li>
 				{% endif %}
+				<li style="margin-top: 50px;"><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span> Esci ({{ g.user.username }})</a></li>
 			</ul>
 			{% endif %}
 		</div>  
