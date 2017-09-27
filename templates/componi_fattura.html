@@ -119,7 +119,7 @@
 		value="{{prezzo if prezzo > 0 else ''}}" />
 	</div>
 	<div class="input-group col-xs-2 {{ 'has-error has-feedback' if 'aliq' in errors else '' }}">
-	      <input id="aliq" type="number" min="0.0" step="1" class="form-control" name="aliq" value="{{aliq}}" placeholder="IVA" />
+	      <input id="aliq" type="number" min="0.0" step="1" class="form-control" name="aliq" value="{{'22' if aliq == '' else aliq}}" placeholder="IVA" />
 	</div>
 	<div class="input-group col-xs-1">
 	  <input type="submit" class="btn btn-info" name="aggiungi_voce" value="{{'Modifica' if idx_voce > 0 else 'Aggiungi'}}" />
@@ -147,12 +147,18 @@
     </form>
   </div>
   <script type="text/javascript">
+	
+	/*$( document ).ready(function() {
+		$("#qta").focus();
+		alert('document ready!');
+	});*/
+	
     var $input = $("#descr");
         
     $input.typeahead({
       source: function(query, process) {
 		return $.getJSON(
-		  "/prodotti.json",
+		  "prodotti.json",
 		  function (data) {
 			var newData = [];
 			$.each(data, function() {
@@ -178,7 +184,7 @@
       items	: 6,
       autoSelect: false
     });
-    
+	
     $input.change(function() {
       var prz = 0.0;
       var cod = '';
@@ -189,5 +195,6 @@
 		$('#codart').val(cod);
       }
     });
+	
   </script>
 {% endblock %}
