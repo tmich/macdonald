@@ -4,6 +4,10 @@
         <a href="{{ url_for('main') }}" class="btn btn-default">&laquo; Esci</a>
         &nbsp;&nbsp;&nbsp;&nbsp;Record trovati: <span class="badge">{{ cnt }}</span>
 		<a href="#" id="btnElimina" onclick="return submitForm();" class="btn btn-danger disabled pull-right">Elimina&nbsp;<span class="badge" id="selezionati">0</span></a>
+		<div class="input-group col-md-auto pull-right">
+			<a href="#" onclick="window.print(); return false;" class="btn btn-success">
+				<span class="glyphicon glyphicon-print"></span> Stampa</a>&nbsp;&nbsp;&nbsp;
+		</div>
     </div>
 {% endblock %}
 {% block body %}
@@ -19,7 +23,7 @@
 	  </div>
   {% endif %}
   
-  <div class="table-responsive">
+  <div class="table-responsive hidden-print">
     {% if cnt > 0 %}
       <form id="form1" action="{{url_for('elimina_inviate', next=request.url_rule)}}" method="POST">
 		  <table class="table table-striped">
@@ -49,6 +53,30 @@
       <p>Nessuna fattura inviata</p>
     {% endif %}
   </div>
+  
+  <div class="visible-print-block" style="font-size: 7pt;">
+		<table border="0" style="border-collapse:collapse;">
+			<tr>
+				<th width="5%">Fatt. n</th>
+				<th width="10%">Data Invio</th>
+				<th width="40%">Cliente</th>
+				<th width="35%">Email</th>
+				<th width="5%">Importo</th>
+				<th width="5%">&nbsp;</th>
+			</tr>
+			{% for inv in fatture_inviate %}
+			  <tr>
+				<td>{{inv.fattura.num}}</td>
+				<td>{{inv.data_invio|dt('%d/%m/%Y')}}</td>
+				<td>{{inv.fattura.cliente.ragsoc}}</td>
+				<td>{{inv.email}}</td>
+				<td>{{'%0.2f' % inv.fattura.totale()|float}}</td>
+				<td><span class="glyphicon {{'glyphicon-ok' if inv.esito == '0' else 'glyphicon-remove'}}">&nbsp;</span></td>
+			  </tr>
+			{% endfor %}
+		</table>
+	</div>
+  
   <script type="text/javascript">
 	function submitForm() {
 		if(confirm('Eliminare gli invii selezionati?')) {
