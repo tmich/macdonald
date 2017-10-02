@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_babel import Babel, format_datetime, format_date
 from decimal import Decimal
 from pdfs import create_pdf
-from models import db, Anagrafica, Cliente, Prodotto, Fattura, VoceFattura, InvioFattura, User, FatturaSequence, ObjFatt, ObjVoce, EmailConfig
+from models import db, Anagrafica, Cliente, Prodotto, Fattura, VoceFattura, InvioFattura, User, FatturaSequence, ObjFatt, ObjVoce, EmailConfig, Messaggio
 from forms import FormNuovaFattura, FormAggiungiVoce, FormNuovaFattura, FormCliente, FormProdotto, FormProfilo, FormDate, FormDateFatture
 import jsonpickle
 from smtplib import SMTPException, SMTPAuthenticationError, SMTPRecipientsRefused
@@ -442,7 +442,8 @@ def articoli_json():
 def fatture_da_inviare():
   fatture_da_inviare=db.session.query(InvioFattura).filter_by(data_invio=None).all()
   profili_email=db.session.query(EmailConfig).all()
-  return render_template('fatture_da_inviare.html', fatture_da_inviare=fatture_da_inviare, cnt=len(fatture_da_inviare), profili_email=profili_email, current='fatture_da_inviare')
+  messaggi = db.session.query(Messaggio).filter_by(attivo=True)
+  return render_template('fatture_da_inviare.html', fatture_da_inviare=fatture_da_inviare, cnt=len(fatture_da_inviare), profili_email=profili_email, messaggi=messaggi, current='fatture_da_inviare')
   
 @login_required
 @app.route('/fatture_inviate', methods=['GET'])
@@ -549,15 +550,18 @@ def invia_tutte():
 			subject = "Fattura n. %d del %s" % (inv.fattura.num, inv.fattura.data.strftime("%d/%m/%Y"))
 			recipient = inv.email
 			mail_to_be_sent = Message(subject=subject, recipients=[recipient])
-			body = 		  "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"
-			body = body + "e-mail: aldomd@inwind.it\n"
-			body = body + "########################\n"
-			body = body + "ORARIO NEGOZIO: 9.00/13.00 -.- 15.30/17.00\n"
-			body = body + "SABATO: chiuso\n"
-			body = body + "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n"
-			body = body + "Alleghiamo alla presente ns. fattura.\nCogliamo l'occasione per inviare cordiali saluti.\n\n"
-			body = body + "Cartoleria Macdonald Vittorio & C. snc\n"
-			mail_to_be_sent.body = body
+			# body = 		  "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"
+			# body = body + "e-mail: aldomd@inwind.it\n"
+			# body = body + "########################\n"
+			# body = body + "ORARIO NEGOZIO: 9.00/13.00 -.- 15.30/17.00\n"
+			# body = body + "SABATO: chiuso\n"
+			# body = body + "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n"
+			# body = body + "Alleghiamo alla presente ns. fattura.\nCogliamo l'occasione per inviare cordiali saluti.\n\n"
+			# body = body + "Cartoleria Macdonald Vittorio & C. snc\n"
+			msg_id = form['messaggio']
+			m = Messaggio.query.get(msg_id)
+			mail_to_be_sent.body = m.testo
+			mail_to_be_sent.html = m.testo
 			# n_righe = max(len(inv.fattura.voci), min_righe) - min(len(inv.fattura.voci), min_righe)
 			# pdf=create_pdf(render_template('fattura_pdf.html', fattura=inv.fattura, n_righe=n_righe))
 			pdf=create_pdf(prepara_pdf(inv.fattura))
@@ -923,6 +927,53 @@ def ristampa_fatture():
 			errors=f.errors
 	return render_template('form_date_fatture.html', errors=errors, titolo='Ristampa fatture', data_inizio=yesterday, data_fine=today, anno=datetime.datetime.today().year, current='ristampa_fatture')
 
+@app.route('/messaggi/new', methods=['GET', 'POST'])
+@login_required
+def nuovo_messaggio():
+	if request.method=='GET':
+		return render_template('nuovo_messaggio.html', id=0, current='messaggi')
+	else:
+		f=request.form
+		nome=f['nome']
+		testo=f['testo']
+		msg=Messaggio(nome, testo)
+		db.session.add(msg)
+		db.session.commit()
+		flash('creato nuovo messaggio', 'success')
+		return redirect(url_for('messaggi'))
+		
+	
+@app.route('/messaggi', methods=['GET', 'POST'])
+@app.route('/messaggi/<int:id>', methods=['GET', 'POST'])
+@login_required
+def messaggi(id=0):
+	messaggi = db.session.query(Messaggio).filter_by(attivo=True)
+	if request.method == 'GET':
+		if id==0:
+			msg=Messaggio(nome='',testo='')
+		else:
+			msg=db.session.query(Messaggio).get(id)
+	else:
+		f = request.form
+		id = f['id']
+		msg=db.session.query(Messaggio).get(id)
+		msg.nome = f['nome']
+		msg.testo = f['testo']
+		db.session.commit()
+		flash('Messaggio salvato con successo', 'success')
+		
+	return render_template('messaggi.html', messaggi=messaggi, id=id, testo=msg.testo, nome=msg.nome, current='messaggi')
+
+@app.route('/elimina_messaggio/<int:id>', methods=['GET'])
+def elimina_messaggio(id):
+	msg=db.session.query(Messaggio).get(id)
+	db.session.delete(msg)
+	db.session.commit()
+	flash('Messaggio eliminato', 'success')
+		
+	return redirect(url_for('messaggi'))
+	
+
 @app.route('/contatori', methods=['GET'])
 @login_required
 def contatori():
@@ -1022,7 +1073,7 @@ def modifica_email_invio():
 	inv.email=email
 	db.session.commit()
 	flash("Modifica effettuata", "success")
-	return redirect(request.args.get('next'));
+	return redirect(url_for('fatture_da_inviare'));
 	
 # jinja2 filters
 @app.template_filter('dt')

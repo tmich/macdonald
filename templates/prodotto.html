@@ -33,7 +33,7 @@
 	    </div>
 	    <div class="form-group {{ 'has-error has-feedback' if 'aliquota' in errors else '' }}">
 	      <label for="aliquota">Aliquota</label>
-	      <input type="text" class="form-control" name="aliquota" value="{{ aliq }}" />
+	      <input type="text" class="form-control" name="aliquota" value="{{ aliq if aliq else '22' }}" />
 	    </div>
 	    <div class="form-group {{ 'has-error has-feedback' if 'prezzo' in errors else '' }}">
 	      <label for="prezzo">Prezzo</label>
@@ -41,8 +41,10 @@
 	    </div>
 	    <a href="{{ url_for('prodotti') }}" type="button" class="btn btn-default btn-md">&laquo; Indietro</a>
 	    <input type="submit" class="btn btn-success btn-md" value="Salva" />
-	    <a href="{{ url_for('elimina_prodotto', id=id) }}" type="button" class="btn btn-danger btn-md"
+	    {% if id != 0 %}
+	    	<a href="{{ url_for('elimina_prodotto', id=id) }}" type="button" class="btn btn-danger btn-md"
 			onclick="return confirm('Sei sicuro di voler eliminare l\'articolo?');">Elimina</a>
+	    {% endif %}
 	  </form>
 	</div>
       </div>

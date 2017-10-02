@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+{% block scripts %}
+	<script>
+		tinymce.init({ 
+			selector:'textarea',
+			language_url : "{{ url_for('static', filename='tinymce/it.js') }}"
+		});
+	</script>
+{% endblock %}
+{% block actions %}
+	<div class="form-inline">
+		<div class="input-group col-md-5">
+			<a href="{{url_for('messaggi')}}" title="Esci" class="btn btn-default" type="button">&laquo; Esci</a>&nbsp;
+			<a href="#" onclick="submitForm();" title="Salva" class="btn btn-success" type="button">
+				<span class="glyphicon glyphicon-floppy-disk"></span> Salva
+			</a>
+		</div>
+	</div>
+{% endblock %}
+{% block body %}
+	<div>
+		<h3 class="page-header">Crea nuovo messaggio</h3>
+		<div>
+			<form action="{{ url_for('nuovo_messaggio') }}" method=POST id="form1">
+				<input type=hidden name="id" value=0>
+				<label>Nome: </label>
+				<input type=text class="form-control" name="nome"> <br />
+				<label>Testo: </label>
+				<textarea class="form-control" id="testo" name="testo" rows="15" cols="100"></textarea>
+			</form>
+		</div>
+	</div>
+	<script type="text/javascript">
+		function submitForm() {
+			$("#form1").submit();
+		}
+	</script>
+{% endblock %}

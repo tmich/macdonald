@@ -6,6 +6,17 @@
             <span class="glyphicon glyphicon-envelope"></span> Invia <span class="badge">{{fatture_da_inviare|count}}</span></a>
     </div>
 {% endblock %}
+{% block scripts %}
+	<script>
+		tinymce.init({ 
+			selector:'textarea',
+			toolbar: false,	
+			menubar: false,
+			readonly : 1,
+			language_url : "{{ url_for('static', filename='tinymce/it.js') }}"
+		});
+	</script>
+{% endblock %}
 {% block body %}
   <h3 class="page-header">Fatture da inviare</h3>
   
@@ -25,6 +36,15 @@
 		<select class="form-control" name="profilo" id="profilo">
 			{% for p in profili_email %}
 				<option value="{{ p.id }}">{{p.email}}</option>
+			{% endfor %}
+		</select>
+	  </div>
+	  <br />
+	  <div>
+		<label>Messaggio: </label>&nbsp;<a href="#" title="visualizza" data-toggle="modal" onclick="visualizzaTesto();"><span class="glyphicon glyphicon-eye-open"></span> anteprima</a>
+		<select class="form-control" name="messaggio" id="messaggio">
+			{% for m in messaggi %}
+				<option value="{{ m.id }}">{{ m.nome }}</option>
 			{% endfor %}
 		</select>
 	  </div>
@@ -83,6 +103,28 @@
 	</div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+<!-- Modal -->
+{% for m in messaggi %}
+	<div class="modal fade" id="mdlTesto{{m.id}}" tabindex="-1" role="dialog">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title">{{ m.nome }}</h4>
+				</div>
+				
+				<div class="modal-body">		
+					<textarea class="form-control" id="testo" name="testo" rows="15" readonly="readonly" cols="100">{{ m.testo }}</textarea>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Chiudi</button>
+				</div>
+			  
+			</div><!-- /.modal-content -->
+		</div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
+{% endfor %}
+
 <script type=text/javascript>
 function modificaEmail(num, data, idInvio, ragsoc, email) {
 	$('#ragione_sociale').text(ragsoc);
@@ -90,6 +132,11 @@ function modificaEmail(num, data, idInvio, ragsoc, email) {
 	$('#fattdata').text(data);
 	$('#txtId').val(idInvio);
 	$('#txtEmail').val(email);
+}
+
+function visualizzaTesto() {
+	var id = $( "#messaggio" ).val();
+	$("#mdlTesto" + id).modal();
 }
 
 $('#myModal').on('shown.bs.modal', function() {

@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+{% block scripts %}
+	<script>
+		tinymce.init({ 
+			selector:'textarea',
+			language_url : "{{ url_for('static', filename='tinymce/it.js') }}"
+		});
+	</script>
+{% endblock %}
+{% block actions %}
+	<div class="form-inline">
+		<div class="input-group col-md-5">
+			<a href="{{url_for('messaggi')}}" title="Esci" class="btn btn-default" type="button">&laquo; Esci</a>&nbsp;
+			<a href="#" onclick="submitForm();" title="Salva" class="btn btn-success {{'disabled' if id==0 else ''}}" type="button">
+				<span class="glyphicon glyphicon-floppy-disk"></span> Salva
+			</a>
+		</div>
+		<div class="input-group col-md-auto pull-right">
+			<a href="{{ url_for('nuovo_messaggio') }}" class="btn btn-success {{'disabled' if id!=0 else ''}}" title="Nuovo">
+				<span class="glyphicon glyphicon-plus-sign"></span> Nuovo
+			</a>&nbsp;
+			<div class="pull-right">
+				<a href="{{ url_for('elimina_messaggio', id=id) }}" type="button" class="btn btn-danger btn-md {{'disabled' if id==0 else ''}}"
+					onclick="return confirm('Sei sicuro di voler eliminare il messaggio?');">
+					<span class="glyphicon glyphicon-remove"></span> Elimina
+				</a>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+{% block body %}
+	<div>
+		<h3 class="page-header">Gestione messaggi</h3>
+		<label>Messaggio da modificare: </label>
+		<div class="btn-group">
+			<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				Seleziona... <span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu">
+			{% for m in messaggi %}
+				<li><a href="{{ url_for('messaggi', id=m.id) }}">{{ m.nome }}</a></li>
+			{% endfor %}
+			</ul>
+		</div>
+		{% if id != 0 %}
+		<br /><br /><br />
+		<div>
+			<form id="form1" method='POST' action="{{ url_for('messaggi') }}">
+				<input type=hidden name='id' value="{{ id }}">
+				<label>Nome: </label>
+				<input type=text class="form-control" name='nome' value="{{ nome }}"> <br />
+				<label>Testo: </label>
+				<textarea class="form-control" name='testo' rows="15" cols="100">{{ testo }}</textarea>
+			</form>
+		</div>
+		{% endif %}
+	</div>
+    <script type="text/javascript">
+  function submitForm() {
+    $("#form1").submit();
+  }
+  </script>
+{% endblock %}

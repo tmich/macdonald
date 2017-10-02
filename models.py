@@ -215,7 +215,21 @@ class User(db.Model):
 
   def __repr__(self):
 	  return '<User %r>' % self.username
+
+class Messaggio(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	nome = db.Column(db.String(80))
+	testo = db.Column(db.String(2000))
+	attivo = db.Column(db.Integer)
+	predefinito = db.Column(db.Integer)
 	
+	def __init__(self, nome, testo, attivo=1, predefinito=0):
+		self.id = 0
+		self.nome = nome
+		self.testo = testo
+		self.attivo = attivo
+		self.predefinito = predefinito
+	  
 class FatturaSequence():
   def next_val(self, year):
 	num = 0
