@@ -30,20 +30,28 @@
 {% endblock %}
 {% block body %}
 	<div>
-		<h3 class="page-header">Gestione messaggi</h3>
-		<label>Messaggio da modificare: </label>
-		<div class="btn-group">
-			<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-				Seleziona... <span class="caret"></span>
-			</button>
-			<ul class="dropdown-menu">
-			{% for m in messaggi %}
-				<li><a href="{{ url_for('messaggi', id=m.id) }}">{{ m.nome }}</a></li>
-			{% endfor %}
-			</ul>
+		<h3 class="page-header">Messaggi predefiniti</h3>
+		<!-- <label>Messaggio da modificare: </label> -->
+		<!-- <div class="btn-group"> -->
+			<!-- <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> -->
+				<!-- Seleziona... <span class="caret"></span> -->
+			<!-- </button> -->
+			<!-- <ul class="dropdown-menu"> -->
+			<!-- {% for m in messaggi %} -->
+				<!-- <li><a href="{{ url_for('messaggi', id=m.id) }}">{{ m.nome }}</a></li> -->
+			<!-- {% endfor %} -->
+			<!-- </ul> -->
+		<!-- </div> -->
+		<div class="list-group">
+		{% for m in messaggi %}
+			<a class="list-group-item {{'active' if id==m.id else ''}}" href="{{ url_for('messaggi', id=m.id) }}">
+				<h4 class="list-group-item-heading">{{ m.nome }}</h4>
+				<p class="list-group-item-text">{{ m.testo }}</p>
+			</a>
+		{% endfor %}
 		</div>
 		{% if id != 0 %}
-		<br /><br /><br />
+		<br />
 		<div>
 			<form id="form1" method='POST' action="{{ url_for('messaggi') }}">
 				<input type=hidden name='id' value="{{ id }}">
