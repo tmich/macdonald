@@ -3,6 +3,10 @@
 	<script>
 		tinymce.init({ 
 			selector:'textarea',
+			height: 500,
+			theme: 'modern',
+			plugins: 'textcolor',
+			toolbar1: 'formatselect | bold italic strikethrough forecolor backcolor | link | alignleft aligncenter alignright alignjustify  | numlist bullist outdent indent  | removeformat',
 			language_url : "{{ url_for('static', filename='tinymce/it.js') }}"
 		});
 	</script>
@@ -46,7 +50,7 @@
 		{% for m in messaggi %}
 			<a class="list-group-item {{'active' if id==m.id else ''}}" href="{{ url_for('messaggi', id=m.id) }}">
 				<h4 class="list-group-item-heading">{{ m.nome }}</h4>
-				<p class="list-group-item-text">{{ m.testo }}</p>
+				<p class="list-group-item-text">{{ m.testo | truncate(100, False) }}</p>
 			</a>
 		{% endfor %}
 		</div>
