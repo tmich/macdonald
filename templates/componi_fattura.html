@@ -102,7 +102,7 @@
 	<a name="form"></a>
 	<input type="hidden" name="id_cliente" value="{{ cliente.id }}" />
 	<input type="hidden" name="idx_voce" value="{{ idx_voce }}" />
-	<div class="input-group col-xs-1 {{ 'has-error has-feedback' if 'qta' in errors else '' }}">
+	<div class="input-group col-xs-2 {{ 'has-error has-feedback' if 'qta' in errors else '' }}">
 	      <input id="qta" type="number" class="form-control" name="qta" min="1" value="{{qta if qta > 0 else ''}}" 
 		placeholder="qta" />
 	</div>
@@ -118,7 +118,7 @@
 	      <input id="prz" type="text" class="form-control" name="prz" min="0.0" step="0.01" placeholder="prezzo" 
 		value="{{prezzo if prezzo > 0 else ''}}" />
 	</div>
-	<div class="input-group col-xs-2 {{ 'has-error has-feedback' if 'aliq' in errors else '' }}">
+	<div class="input-group col-xs-1 {{ 'has-error has-feedback' if 'aliq' in errors else '' }}">
 	      <input id="aliq" type="number" min="0.0" step="1" class="form-control" name="aliq" value="{{'22' if aliq == '' else aliq}}" placeholder="IVA" />
 	</div>
 	<div class="input-group col-xs-1">
