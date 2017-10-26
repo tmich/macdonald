@@ -32,7 +32,7 @@ class Cliente(db.Model):
   citta = db.Column(db.String(120))
   cap = db.Column(db.String(10))
   prov = db.Column(db.String(2))
-  tel = db.Column(db.String(20))
+  tel = db.Column(db.String(50))
   fax = db.Column(db.String(20))
   email = db.Column(db.String(120))
   canc = db.Column(db.Integer)
