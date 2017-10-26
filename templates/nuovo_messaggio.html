@@ -3,6 +3,11 @@
 	<script>
 		tinymce.init({ 
 			selector:'textarea',
+			toolbar: 'formatselect | fontsizeselect | bold italic strikethrough forecolor backcolor | link | alignleft aligncenter alignright alignjustify  | numlist bullist outdent indent  | removeformat',
+			height: 500,
+			theme: 'modern',
+			plugins: 'textcolor',
+			fontsize_formats: "8pt 10pt 12pt 14pt 18pt 24pt 36pt",			
 			language_url : "{{ url_for('static', filename='tinymce/it.js') }}"
 		});
 	</script>
