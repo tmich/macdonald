@@ -104,7 +104,7 @@
 	<input type="hidden" name="idx_voce" value="{{ idx_voce }}" />
 	<div class="input-group col-xs-2 {{ 'has-error has-feedback' if 'qta' in errors else '' }}">
 	      <input id="qta" type="number" class="form-control" name="qta" min="1" value="{{qta if qta > 0 else ''}}" 
-		placeholder="qta" />
+		placeholder="qta" autofocus />
 	</div>
 	<div class="input-group col-xs-1" style="display:none;">
 	      <input id="codart" type="text" class="form-control" name="codart" value="{{codart}}" 
