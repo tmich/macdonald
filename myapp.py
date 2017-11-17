@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_babel import Babel, format_datetime, format_date
 from decimal import Decimal
 from pdfs import create_pdf
-from models import db, Anagrafica, Cliente, Prodotto, Fattura, VoceFattura, InvioFattura, User, FatturaSequence, ObjFatt, ObjVoce, EmailConfig, Messaggio
+from models import db, Anagrafica, Cliente, Prodotto, Fattura, VoceFattura, InvioFattura, User, FatturaSequence, ObjFatt, ObjVoce, EmailConfig, Messaggio, ListaDistribuzione, MembroListaDistribuzione
 from forms import FormNuovaFattura, FormAggiungiVoce, FormNuovaFattura, FormCliente, FormProdotto, FormProfilo, FormDate, FormDateFatture
 import jsonpickle
 from smtplib import SMTPException, SMTPAuthenticationError, SMTPRecipientsRefused
@@ -100,7 +100,7 @@ def clienti(page=0):
 	
 	if('id_fattura_cambio_cliente' in session):
 		selezionabile=True
-	
+		
 	if('qry_cliente' in session):
 		q = session.get('qry_cliente')
 	
@@ -1074,6 +1074,85 @@ def modifica_email_invio():
 	db.session.commit()
 	flash("Modifica effettuata", "success")
 	return redirect(url_for('fatture_da_inviare'));
+
+@app.route('/ricerca_clienti', methods=['GET', 'POST'])
+@login_required
+def ricerca_clienti():
+	pagenum = 50
+	page = int(request.args.get('page', 0))
+	offset = page * pagenum
+	cnt = db.session.query(Cliente).count()
+	q = None
+	
+	if 'next' not in request.args:
+		abort(404)
+	
+	next = request.args.get('next')
+
+	if 'new' in request.args:
+		if 'qry_cliente' in session:
+			session.pop('qry_cliente')
+	
+	if(request.method == 'POST'):
+		f = request.form
+		q = f['query']
+		session['qry_cliente'] = q
+	else:
+		if 'qry_cliente' in session:
+			q = session['qry_cliente']
+		
+	if q != None:
+		filter1 = Cliente.p_iva == str(q)
+		filter2 = Cliente.ragsoc.like('%'+q+'%')
+		filter3 = Cliente.cod_fisc.like(q+'%')
+		
+		qry = db.session.query(Cliente).filter(or_(filter1, filter2, filter3)).order_by('ragsoc')
+		cnt = qry.count()
+		clienti = qry.offset(offset).limit(pagenum)
+	else:
+		# if 'qry_cliente' in session:
+			# session.pop('qry_cliente')
+		clienti = db.session.query(Cliente).order_by('ragsoc').offset(offset).limit(pagenum)
+		
+	last_page = cnt / pagenum
+	return render_template('ricerca_clienti.html', clienti=clienti, page=page, cnt=cnt, last_page=last_page, query=q, next=next)
+
+@app.route('/liste_distribuzione', methods=['GET'])
+@login_required
+def liste_distribuzione():
+  liste=db.session.query(ListaDistribuzione).filter_by(canc=0).all()
+  return render_template('liste_distribuzione.html', liste=liste, cnt=len(liste), current='liste')
+  
+@app.route('/lista_distribuzione/<int:id>', methods=['GET', 'POST'])
+@login_required
+def lista_distribuzione(id):
+  lista=db.session.query(ListaDistribuzione).get(id)
+  session['id_lista']=lista.id
+  return render_template('lista_distribuzione.html', id=lista.id, nome=lista.nome, cnt=len(lista.membri), membri=lista.membri, current='liste')
+	
+@app.route('/ricerca_cliente_lista/<int:id_lista>', methods=['GET'])
+@login_required
+def ricerca_cliente_lista(id_lista):
+	session['id_lista']=id_lista
+	return redirect(url_for('clienti'));
+
+@app.route('/aggiungi_membro/<int:id_cliente>')
+@login_required
+def aggiungi_membro(id_cliente):
+	if 'id_lista' not in session:
+		abort(404)
+
+	id_lista=session['id_lista']
+	lista=db.session.query(ListaDistribuzione).get(id_lista)
+	cliente=db.session.query(Cliente).get(id_cliente)
+
+	# if lista.membri.filter_by(id=cliente.id).count() :
+	membro=MembroListaDistribuzione(cliente_id=id_cliente,lista_id=id_lista,email=cliente.email)
+	db.session.add(membro)
+	db.session.commit()
+
+	session.pop('id_lista')
+	return redirect(url_for('lista_distribuzione', id=id_lista))
 	
 # jinja2 filters
 @app.template_filter('dt')

@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+{% block actions %}
+    <form method="POST" action="{{ url_for('ricerca_clienti', next=next) }}" class="form-inline" id="formCercaClienti">  
+        <div class="input-group col-md-5">
+            <input type="text" class="form-control input-md" name="query" value="{{ query if query else '' }}" 
+                placeholder="cerca per nominativo, partita iva o c. fiscale" />
+            <span class="input-group-btn">
+                <button class="btn btn-info btn-md" type="button" 
+                        onclick="document.getElementById('formCercaClienti').submit();">
+                    <i class="glyphicon glyphicon-search"></i>
+                </button>
+            </span>
+        </div>
+        <div class="input-group col-md-3">
+            Record trovati: <span class="badge">{{ cnt }}</span>&nbsp;&nbsp;&nbsp;
+			{% if query %}
+                <a href="{{ url_for('ricerca_clienti', next=next, new=1) }}" class="btn btn-xs btn-danger">
+                    <span class="glyphicon glyphicon-remove"></span> Annulla ricerca
+                </a>
+            {% endif %}
+        </div>
+        <div class="input-group col-md-auto pull-right">
+            <div class="pull-right">
+                <!-- <a href="{{ url_for('componi_fattura') }}" class="btn btn-sm btn-danger" title="Annulla selezione"> -->
+                    <!-- <span class="glyphicon glyphicon-remove"></span> Annulla selezione -->
+                <!-- </a> -->
+            </div>
+        </div>
+    </form>
+{% endblock %}
+{% block body %}
+  <h3 class="page-header">Clienti</h3>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <tr>
+		<th>rag. sociale</th>
+		<th>cod. fiscale</th>
+		<th>P.IVA</th>
+		<th>indirizzo</th>
+		<th>tel</th>
+		<th>email</th>
+	  </tr>
+	{% for cliente in clienti %}
+	  <tr>
+		<td><a href="{{ url_for(next, id_cliente=cliente.id) }}" title='Scheda Cliente'>{{ cliente.ragsoc }}</a></td>
+		<td>{{ cliente.cod_fisc }}</td>
+		<td>{{ cliente.p_iva }}</td>
+		<td>{{ cliente.indirizzo }}</td>
+		<td>{{ cliente.tel }}</td>
+		<td>{{ cliente.email }}</td>
+	  </tr>
+	{% else %}
+		<li><em>Nessun cliente.</em>
+		  {% endfor %}
+	  </table>
+    </div>
+      <ul class="pager">
+        {% if page > 0 %}
+        <li><a href="{{url_for('ricerca_clienti', next=next, page=page-1) }}">Pag. precedente</a></li>
+        {% endif %}
+        {% if page < last_page %}
+        <li><a href="{{url_for('ricerca_clienti', next=next, page=page+1) }}">Pag. successiva</a></li>
+        {% endif %}
+      </ul>
+    <p align="center">Pagina {{ page+1 }} di {{ last_page+1 }}</p>
+  
+{% endblock %}

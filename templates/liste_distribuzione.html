@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block actions %}
+   <div style="text-align: left;">
+        <a href="{{ url_for('main') }}" class="btn btn-default">&laquo; Esci</a>
+        &nbsp;&nbsp;&nbsp;&nbsp;Record trovati: <span class="badge">{{ cnt }}</span>
+		<!-- <a href="#" id="btnElimina" onclick="return submitForm();" class="btn btn-danger disabled pull-right">Elimina&nbsp;<span class="badge" id="selezionati">0</span></a> -->
+		<div class="input-group col-md-auto pull-right">
+			<a href="#" onclick="window.print(); return false;" class="btn btn-success">
+				<span class="glyphicon glyphicon-print"></span> Stampa</a>&nbsp;&nbsp;&nbsp;
+		</div>
+    </div>
+{% endblock %}
+{% block body %}
+	<h3 class="page-header">Liste di distribuzione</h3>
+	<div class="table-responsive hidden-print">
+		<table border="0" class="table table-striped">
+			<tr>
+				<!-- <th width="5%">ID</th> -->
+				<th width="80%">Nome</th>
+				<th width="20%">Creata il</th>
+			</tr>
+			{% for ld in liste %}
+			<tr>
+				<!-- <td>{{ld.id}}</td> -->
+				<td><a href="{{ url_for('lista_distribuzione', id=ld.id) }}">{{ld.nome}}</a></td>
+				<td>{{ld.data_creazione|dt}}</td>
+			</tr>
+			{% endfor %}
+		</table>
+	</div>
+{% endblock %}

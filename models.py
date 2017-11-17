@@ -1,7 +1,7 @@
 ## models.py
 from __future__ import print_function
 from flask_sqlalchemy import SQLAlchemy
-import sys
+import sys, datetime
 from decimal import Decimal
 from flask.json import jsonify
 
@@ -168,6 +168,25 @@ class InvioFattura(db.Model):
   def __init__ (self, fattura, email):
 	self.fattura_id=fattura.id
 	self.email=email
+
+
+class ListaDistribuzione(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  nome = db.Column(db.String(120))
+  data_creazione = db.Column(db.DateTime, default=datetime.datetime.utcnow) 
+  canc = db.Column(db.Integer, default=0)
+  membri = db.relationship('MembroListaDistribuzione', cascade="save-update, merge, delete")
+
+
+class MembroListaDistribuzione(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'))
+  cliente = db.relationship('Cliente',
+			    backref = db.backref('membro', lazy='dynamic'))
+  lista_id = db.Column(db.Integer, db.ForeignKey('lista_distribuzione.id'))
+  email = db.Column(db.String(120))
+  canc = db.Column(db.Integer, default=0)
+  
 	
 class EmailConfig(db.Model):
   id = db.Column(db.Integer, primary_key=True)

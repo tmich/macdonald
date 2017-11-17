@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% block actions %}
+   <div style="text-align: left;">
+        <a href="{{ url_for('main') }}" class="btn btn-default">&laquo; Esci</a>
+        &nbsp;&nbsp;&nbsp;&nbsp;Record trovati: <span class="badge">{{ cnt }}</span>
+		<!-- <a href="#" id="btnElimina" onclick="return submitForm();" class="btn btn-danger disabled pull-right">Elimina&nbsp;<span class="badge" id="selezionati">0</span></a> -->
+		<div class="input-group col-md-auto pull-right">
+			<!-- <a href="#" onclick="window.print(); return false;" class="btn btn-default"> -->
+				<!-- <span class="glyphicon glyphicon-print"></span> Stampa</a>&nbsp;&nbsp;&nbsp; -->
+			<a href="{{ url_for('ricerca_clienti', next='aggiungi_membro', new=1) }}" class="btn btn-success">
+				<span class="glyphicon glyphicon-plus"></span> Aggiungi</a>&nbsp;&nbsp;&nbsp;
+		</div>
+    </div>
+{% endblock %}
+{% block body %}
+	<h3 class="page-header">Dettaglio lista di distribuzione</h3>
+	<div class="table-responsive hidden-print">
+		<div class="form-group {{ 'has-error has-feedback' if 'nome' in errors else '' }}">
+			<label for="nome">nome</label>
+			<input type="text" class="form-control" name="nome" value="{{ nome }}" />
+		</div>
+		<table border="0" class="table table-striped">
+			<tr>
+				<th width="50%">Nome</th>
+				<th width="45%">Email</th>
+				<th >&nbsp;</th>
+			</tr>
+			{% for m in membri %}
+			<tr>
+				<td>{{ m.cliente.ragsoc }}</a></td>
+				<td>{{ m.email }}</td>
+				<td width="5%">Canc</td>
+			</tr>
+			{% endfor %}
+		</table>
+	</div>
+{% endblock %}
