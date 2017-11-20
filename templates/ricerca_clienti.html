@@ -1,8 +1,11 @@
 {% extends "layout.html" %}
 {% block actions %}
-    <form method="POST" action="{{ url_for('ricerca_clienti', next=next) }}" class="form-inline" id="formCercaClienti">  
+    <form method="POST" action="{{ url_for('ricerca_clienti', next=next, **args) }}" class="form-inline" id="formCercaClienti">  
+        <div class="input-group col-md-1">
+			<a href="{{ done }}/{{ done_arg }}" class="btn btn-default">&laquo; Esci</a>
+		</div>
         <div class="input-group col-md-5">
-            <input type="text" class="form-control input-md" name="query" value="{{ query if query else '' }}" 
+			<input type="text" class="form-control input-md" name="query" value="{{ query if query else '' }}" 
                 placeholder="cerca per nominativo, partita iva o c. fiscale" />
             <span class="input-group-btn">
                 <button class="btn btn-info btn-md" type="button" 
@@ -14,16 +17,13 @@
         <div class="input-group col-md-3">
             Record trovati: <span class="badge">{{ cnt }}</span>&nbsp;&nbsp;&nbsp;
 			{% if query %}
-                <a href="{{ url_for('ricerca_clienti', next=next, new=1) }}" class="btn btn-xs btn-danger">
+                <a href="{{ url_for('ricerca_clienti', next=next, new=1, **args) }}" class="btn btn-xs btn-danger">
                     <span class="glyphicon glyphicon-remove"></span> Annulla ricerca
                 </a>
             {% endif %}
         </div>
         <div class="input-group col-md-auto pull-right">
             <div class="pull-right">
-                <!-- <a href="{{ url_for('componi_fattura') }}" class="btn btn-sm btn-danger" title="Annulla selezione"> -->
-                    <!-- <span class="glyphicon glyphicon-remove"></span> Annulla selezione -->
-                <!-- </a> -->
             </div>
         </div>
     </form>
@@ -42,7 +42,7 @@
 	  </tr>
 	{% for cliente in clienti %}
 	  <tr>
-		<td><a href="{{ url_for(next, id_cliente=cliente.id) }}" title='Scheda Cliente'>{{ cliente.ragsoc }}</a></td>
+		<td><a href="{{ url_for(next, id_cliente=cliente.id, **args) }}" title='Scheda Cliente'>{{ cliente.ragsoc }}</a></td>
 		<td>{{ cliente.cod_fisc }}</td>
 		<td>{{ cliente.p_iva }}</td>
 		<td>{{ cliente.indirizzo }}</td>
@@ -56,10 +56,10 @@
     </div>
       <ul class="pager">
         {% if page > 0 %}
-        <li><a href="{{url_for('ricerca_clienti', next=next, page=page-1) }}">Pag. precedente</a></li>
+        <li><a href="{{url_for('ricerca_clienti', next=next, page=page-1, **args) }}">Pag. precedente</a></li>
         {% endif %}
         {% if page < last_page %}
-        <li><a href="{{url_for('ricerca_clienti', next=next, page=page+1) }}">Pag. successiva</a></li>
+        <li><a href="{{url_for('ricerca_clienti', next=next, page=page+1, **args) }}">Pag. successiva</a></li>
         {% endif %}
       </ul>
     <p align="center">Pagina {{ page+1 }} di {{ last_page+1 }}</p>

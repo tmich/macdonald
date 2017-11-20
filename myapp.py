@@ -13,7 +13,7 @@ from forms import FormNuovaFattura, FormAggiungiVoce, FormNuovaFattura, FormClie
 import jsonpickle
 from smtplib import SMTPException, SMTPAuthenticationError, SMTPRecipientsRefused
 from sqlalchemy import and_, or_, func, distinct
-#from dateutil.parser import parse
+from threading import Thread
 
 def create_app():
 	app = Flask(__name__)
@@ -550,25 +550,14 @@ def invia_tutte():
 			subject = "Fattura n. %d del %s" % (inv.fattura.num, inv.fattura.data.strftime("%d/%m/%Y"))
 			recipient = inv.email
 			mail_to_be_sent = Message(subject=subject, recipients=[recipient])
-			# body = 		  "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"
-			# body = body + "e-mail: aldomd@inwind.it\n"
-			# body = body + "########################\n"
-			# body = body + "ORARIO NEGOZIO: 9.00/13.00 -.- 15.30/17.00\n"
-			# body = body + "SABATO: chiuso\n"
-			# body = body + "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n"
-			# body = body + "Alleghiamo alla presente ns. fattura.\nCogliamo l'occasione per inviare cordiali saluti.\n\n"
-			# body = body + "Cartoleria Macdonald Vittorio & C. snc\n"
 			msg_id = form['messaggio']
 			m = Messaggio.query.get(msg_id)
 			mail_to_be_sent.body = m.testo
 			mail_to_be_sent.html = m.testo
-			# n_righe = max(len(inv.fattura.voci), min_righe) - min(len(inv.fattura.voci), min_righe)
-			# pdf=create_pdf(render_template('fattura_pdf.html', fattura=inv.fattura, n_righe=n_righe))
 			pdf=create_pdf(prepara_pdf(inv.fattura))
 			mail_to_be_sent.attach("fattura.pdf", "application/pdf", pdf.getvalue())
 		
 			try:
-				#mail.send(mail_to_be_sent)
 				conn.send(mail_to_be_sent)
 				inv.data_invio=datetime.datetime.now()
 				inv.esito=0
@@ -590,8 +579,6 @@ def invia_tutte():
 		flash('Alcune fatture non sono state inviate', 'warning')
 	
 	return redirect(url_for('fatture_da_inviare'))
-	#fatture_da_inviare=db.session.query(InvioFattura).filter_by(data_invio=None).all()
-	#return render_template('fatture_da_inviare.html', fatture_da_inviare=fatture_da_inviare, cnt=len(fatture_da_inviare), errors=errors)
 
 @app.route('/invio_fatt/<int:idfatt>', methods=['GET'])
 @login_required
@@ -601,8 +588,6 @@ def invia_fattura(idfatt):
 	db.session.add(invio_fatt)
 	db.session.commit()
 	flash('Invio fattura prenotato con successo', 'success')
-	#dest = request.args.get('next')
-	#return redirect(dest)
 	return redirect(url_for('vis_fattura', idfatt=fatt.id))
 
 @app.route('/annulla_invio/<int:id>')
@@ -613,16 +598,7 @@ def annulla_invio(id):
 	db.session.commit()
 	flash('Invio annullato', 'success')
 	return redirect(url_for('fatture_da_inviare'))
-  
-#@login_required
-#@app.route('/dfattura/<int:idfatt>', methods=['GET'])
-#def del_fattura(idfatt):
-  #fatt = db.session.query(Fattura).get(idfatt)
-  #db.session.delete(fatt)
-  #db.session.commit()
-  #dest = request.args.get('next')
-  #return redirect(dest)
-  
+ 
 @app.route('/fatture_da_stampare', methods=['GET'])
 @login_required
 def fatture_da_stampare():
@@ -1087,11 +1063,17 @@ def ricerca_clienti():
 	if 'next' not in request.args:
 		abort(404)
 	
-	next = request.args.get('next')
-
-	if 'new' in request.args:
+	args = request.args.copy()
+	
+	next = args.pop('next')
+	
+	if 'new' in args:
+		args.pop('new')
 		if 'qry_cliente' in session:
 			session.pop('qry_cliente')
+			
+	if 'page' in args:
+		args.pop('page')
 	
 	if(request.method == 'POST'):
 		f = request.form
@@ -1115,44 +1097,154 @@ def ricerca_clienti():
 		clienti = db.session.query(Cliente).order_by('ragsoc').offset(offset).limit(pagenum)
 		
 	last_page = cnt / pagenum
-	return render_template('ricerca_clienti.html', clienti=clienti, page=page, cnt=cnt, last_page=last_page, query=q, next=next)
+	
+	return render_template('ricerca_clienti.html', done=request.args['done'], done_arg=request.args['done_arg'], referrer=request.referrer, clienti=clienti, page=page, cnt=cnt, last_page=last_page, query=q, next=next, args=args)
 
 @app.route('/liste_distribuzione', methods=['GET'])
 @login_required
 def liste_distribuzione():
   liste=db.session.query(ListaDistribuzione).filter_by(canc=0).all()
   return render_template('liste_distribuzione.html', liste=liste, cnt=len(liste), current='liste')
+ 
+@app.route('/rinomina_lista_distribuzione/<int:id>', methods=['POST'])
+@login_required
+def rinomina_lista_distribuzione(id):
+	lista=db.session.query(ListaDistribuzione).get(id)
+	f=request.form
+	nuovo_nome = f['nome']
+	if nuovo_nome.strip() == '':
+		flash("Inserire il nome della lista", "danger")
+		return redirect(url_for('lista_distribuzione', id=id))
+	lista.nome=nuovo_nome
+	db.session.commit()
+	flash('Lista rinominata in %s' % lista.nome, 'success')
+	return redirect(url_for('lista_distribuzione', id=id))
+
+@app.route('/lista_distribuzione', methods=['GET', 'POST'])
+@login_required
+def nuova_lista_distribuzione():
+	if request.method=='GET':
+		return render_template('nuova_lista_distribuzione.html', current='liste')
+	else:
+		f=request.form
+		nuovo_nome = f['nome']
+		if nuovo_nome.strip() == '':	
+			flash("Inserire il nome della lista", "danger")
+			return redirect(url_for('nuova_lista_distribuzione'))
+		l=ListaDistribuzione(nome=nuovo_nome)
+		db.session.add(l)
+		db.session.commit()
+		return redirect(url_for('lista_distribuzione', id=l.id))
+		
   
 @app.route('/lista_distribuzione/<int:id>', methods=['GET', 'POST'])
 @login_required
 def lista_distribuzione(id):
-  lista=db.session.query(ListaDistribuzione).get(id)
-  session['id_lista']=lista.id
-  return render_template('lista_distribuzione.html', id=lista.id, nome=lista.nome, cnt=len(lista.membri), membri=lista.membri, current='liste')
-	
-@app.route('/ricerca_cliente_lista/<int:id_lista>', methods=['GET'])
-@login_required
-def ricerca_cliente_lista(id_lista):
-	session['id_lista']=id_lista
-	return redirect(url_for('clienti'));
+	lista=db.session.query(ListaDistribuzione).get(id)
+	# session['id_lista']=lista.id
+	return render_template('lista_distribuzione.html', id=lista.id, nome=lista.nome, cnt=lista.membri.count(), membri=lista.membri, current='liste')
 
 @app.route('/aggiungi_membro/<int:id_cliente>')
 @login_required
 def aggiungi_membro(id_cliente):
-	if 'id_lista' not in session:
+	if 'id_lista' not in request.args:
 		abort(404)
 
-	id_lista=session['id_lista']
+	id_lista=request.args.get('id_lista')
 	lista=db.session.query(ListaDistribuzione).get(id_lista)
 	cliente=db.session.query(Cliente).get(id_cliente)
 
-	# if lista.membri.filter_by(id=cliente.id).count() :
-	membro=MembroListaDistribuzione(cliente_id=id_cliente,lista_id=id_lista,email=cliente.email)
-	db.session.add(membro)
-	db.session.commit()
+	if lista.membri.filter(MembroListaDistribuzione.cliente_id == id_cliente).count() == 0:
+		membro=MembroListaDistribuzione(cliente_id=id_cliente,lista_id=id_lista,email=cliente.email)
+		db.session.add(membro)
+		db.session.commit()
+		flash("%s aggiunto alla lista %s" % (cliente.ragsoc, lista.nome), 'success')
+	else:
+		flash("%s e' gia' presente nella lista %s" % (cliente.ragsoc, lista.nome), 'danger')
+	return redirect(request.referrer)
+	#return redirect(url_for('lista_distribuzione', id=id_lista))
 
-	session.pop('id_lista')
+@app.route('/rimuovi_membro/<int:id_membro>/<int:id_lista>')
+@login_required	
+def rimuovi_membro(id_membro, id_lista):
+	lista=db.session.query(ListaDistribuzione).get(id_lista)
+	if lista.membri.filter(MembroListaDistribuzione.id == id_membro).count() != 0:
+		membro = db.session.query(MembroListaDistribuzione).get(id_membro)
+		db.session.delete(membro)
+		db.session.commit()
 	return redirect(url_for('lista_distribuzione', id=id_lista))
+
+@app.route('/nuova_comunicazione')
+@login_required	
+def nuova_comunicazione():
+	liste=db.session.query(ListaDistribuzione).filter_by(canc=0).all()
+	messaggi = db.session.query(Messaggio).filter_by(attivo=True)
+	m=request.args.get('m', 0)
+	l=request.args.get('l', 0)
+	return render_template('nuova_comunicazione.html', liste=liste, messaggi=messaggi, mid=m,lid=l, current='nuova_comunicazione')
+
+@app.route('/anteprima_comunicazione', methods=['POST'])
+@login_required	
+def anteprima_comunicazione():
+	f=request.form
+	id_lista=int(f['lista'])
+	id_messaggio=int(f['messaggio'])
+	
+	if(id_messaggio==0):
+		flash('Scegliere un messaggio', 'danger')
+		return redirect(url_for('nuova_comunicazione', l=id_lista, m=id_messaggio))
+	
+	if(id_lista==0):
+		flash('Scegliere una lista', 'danger')
+		return redirect(url_for('nuova_comunicazione', l=id_lista, m=id_messaggio))
+	
+	profili=db.session.query(EmailConfig).all()
+	lista=db.session.query(ListaDistribuzione).get(id_lista)
+	messaggio=db.session.query(Messaggio).get(id_messaggio)
+	
+	return render_template('anteprima_comunicazione.html', profili_email=profili, lista=lista, messaggio=messaggio.testo, current='nuova_comunicazione')
+
+@app.route('/invio_comunicazione', methods=['POST'])
+@login_required	
+def invio_comunicazione():
+	print('invio_comunicazione', file=sys.stderr)
+	f=request.form
+	messaggio=f['messaggio']
+	oggetto=f['oggetto']
+	profilo_id=f['profilo']
+	id_lista=f['lista']
+	bcc=[]
+	lista=db.session.query(ListaDistribuzione).get(id_lista)
+	for m in lista.membri:
+		bcc.append(m.email)
+	
+	invia_email(oggetto=oggetto, profilo_id=profilo_id,destinatari=[],bcc=bcc,testo='',html=messaggio)
+	flash('Comunicazione inviata', 'success')
+	return redirect(url_for('main'))
+	
+# https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xi-email-support
+def invia_email_async(app, mail, msg):
+    with app.app_context():
+        mail.send(msg)
+	
+def invia_email(oggetto, profilo_id, destinatari, bcc, testo, html):
+	# leggo il profilo email selezionato dal db
+	conf = db.session.query(EmailConfig).get(profilo_id)
+	app.config.update(
+		MAIL_USE_SSL = conf.ssl,
+		MAIL_USE_TLS = conf.tls,
+		MAIL_SERVER = conf.server,
+		MAIL_PORT = conf.porta,
+		MAIL_DEFAULT_SENDER = (str(conf.nome), str(conf.email)),
+		MAIL_USERNAME = str(conf.username),
+		MAIL_PASSWORD = str(conf.password)
+	)
+	mail = Mail(app)
+	msg = Message(oggetto, sender=conf.email, recipients=destinatari, bcc=bcc)
+	msg.body = testo
+	msg.html = html
+	thr = Thread(target=invia_email_async, args=[app, mail, msg])
+	thr.start()
 	
 # jinja2 filters
 @app.template_filter('dt')

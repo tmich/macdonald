@@ -1,24 +1,25 @@
 {% extends "layout.html" %}
 {% block actions %}
    <div style="text-align: left;">
-        <a href="{{ url_for('main') }}" class="btn btn-default">&laquo; Esci</a>
+        <a href="{{ url_for('liste_distribuzione') }}" class="btn btn-default">&laquo; Esci</a>
         &nbsp;&nbsp;&nbsp;&nbsp;Record trovati: <span class="badge">{{ cnt }}</span>
-		<!-- <a href="#" id="btnElimina" onclick="return submitForm();" class="btn btn-danger disabled pull-right">Elimina&nbsp;<span class="badge" id="selezionati">0</span></a> -->
 		<div class="input-group col-md-auto pull-right">
-			<!-- <a href="#" onclick="window.print(); return false;" class="btn btn-default"> -->
-				<!-- <span class="glyphicon glyphicon-print"></span> Stampa</a>&nbsp;&nbsp;&nbsp; -->
-			<a href="{{ url_for('ricerca_clienti', next='aggiungi_membro', new=1) }}" class="btn btn-success">
+			<a href="{{ url_for('ricerca_clienti', next='aggiungi_membro', new=1, id_lista=id, done='lista_distribuzione', done_arg=id) }}" class="btn btn-success">
 				<span class="glyphicon glyphicon-plus"></span> Aggiungi</a>&nbsp;&nbsp;&nbsp;
 		</div>
     </div>
 {% endblock %}
 {% block body %}
-	<h3 class="page-header">Dettaglio lista di distribuzione</h3>
+	<h3 class="page-header">Modifica lista di distribuzione</h3>
 	<div class="table-responsive hidden-print">
-		<div class="form-group {{ 'has-error has-feedback' if 'nome' in errors else '' }}">
-			<label for="nome">nome</label>
-			<input type="text" class="form-control" name="nome" value="{{ nome }}" />
-		</div>
+		<form action="{{ url_for('rinomina_lista_distribuzione', id=id) }}" method="POST" id="frm-nome">
+			<div class="col-md-5 form-group {{ 'has-error has-feedback' if 'nome' in errors else '' }}">
+				<input type="text" class="form-control" name="nome" value="{{ nome }}" />
+			</div>
+			<div class="form-group col-md-2">
+				<a class="btn btn-sm btn-default" href="#" onclick="return rinomina();">Rinomina</a>
+			</div>
+		</form>
 		<table border="0" class="table table-striped">
 			<tr>
 				<th width="50%">Nome</th>
@@ -29,9 +30,18 @@
 			<tr>
 				<td>{{ m.cliente.ragsoc }}</a></td>
 				<td>{{ m.email }}</td>
-				<td width="5%">Canc</td>
+				<td width="5%">
+					<a onclick="return confirm('Eliminare {{ m.cliente.ragsoc }} dalla lista?');" href="{{ url_for('rimuovi_membro', id_lista=id, id_membro=m.id) }}" class="btn btn-xs btn-danger">
+				<span class="glyphicon glyphicon-minus"></span> Rimuovi</a></td>
 			</tr>
 			{% endfor %}
 		</table>
 	</div>
+	<script type="text/javascript">
+	function rinomina() {
+		var form=$("#frm-nome");
+		form.submit();
+		return true;
+	}
+	</script>
 {% endblock %}

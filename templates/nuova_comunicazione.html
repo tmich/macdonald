@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block actions %}
+	<div class="form-inline">  
+        <div class="input-group col-md-1">
+			<a href="{{ url_for('main') }}" class="btn btn-default">&laquo; Esci</a>
+		</div>
+        <div class="input-group col-md-auto pull-right">
+            <a href="#" onclick="return anteprima();" class="btn btn-success"><span class="glyphicon glyphicon-eye-open"></span> Prepara &raquo;</a>
+        </div>
+    </div>
+{% endblock %}
+{% block body %}
+	<div>
+		<h3 class="page-header">Nuova comunicazione</h3>
+		<form id="form2" method='POST' action="{{ url_for('anteprima_comunicazione') }}">
+			<label>Scegli il messaggio: </label>
+			<div class="form-group">
+				<select class="form-control" id="sel1" name="messaggio">
+					<option value="0">Seleziona...</option>
+					
+					{% for msg in messaggi %}
+						<option {{'selected' if mid|int == msg.id else ''}} value="{{msg.id}}">{{ msg.nome }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<label>Invia a lista: </label>
+			<div class="form-group">
+				<select class="form-control" id="sel2" name="lista">
+					<option value="0">Seleziona...</option>
+					{% for l in liste %}
+						<option value="{{l.id}}" {{'selected' if lid|int == l.id else ''}}>{{ l.nome }} ({{ l.membri.count() }} destinatari)</option>
+					{% endfor %}
+				</select>
+			</div>
+		</form>
+	</div>
+    <script type="text/javascript">
+	  function anteprima() {
+		$("#form2").submit();
+	  }
+	</script>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+{% block scripts %}
+	<script>
+		tinymce.init({ 
+			selector:'textarea',
+			toolbar: 'formatselect | fontsizeselect | bold italic strikethrough forecolor backcolor | link | alignleft aligncenter alignright alignjustify  | numlist bullist outdent indent  | removeformat',
+			height: 500,
+			theme: 'modern',
+			plugins: 'textcolor',
+			fontsize_formats: "8pt 10pt 12pt 14pt 18pt 24pt 36pt",			
+			language_url : "{{ url_for('static', filename='tinymce/it.js') }}"
+		});
+	</script>
+{% endblock %}
+{% block actions %}
+	<div class="form-inline">  
+        <div class="input-group col-md-1">
+			<a href="{{ url_for('main') }}" class="btn btn-default">&laquo; Esci</a>
+		</div>
+        <div class="input-group col-md-auto pull-right">
+            <a href="#" onclick="return invio();" class="btn btn-success"><span class="glyphicon glyphicon-send"></span> Invia</a>
+        </div>
+    </div>
+{% endblock %}
+{% block body %}
+	<div>
+		<form action="{{ url_for('invio_comunicazione') }}" method="POST" id="frm-invio">
+			<h3 class="page-header">Prepara l'invio</h3>
+			<div  class="col-md-12 form-group">
+				<label>Mittente: </label>
+				<select class="form-control" name="profilo" id="profilo">
+				{% for p in profili_email %}
+					<option value="{{ p.id }}">{{p.email}}</option>
+				{% endfor %}
+				</select>
+			</div>
+			<div class="col-md-12 form-group">
+				<label>Oggetto: </label>
+				<input class="form-control" type="text" name="oggetto" value="Comunicazione da Macdonald" />
+			</div>
+			<div class="col-md-1 form-group">
+				<label>Destinatari:</label>
+			</div>
+			<div class="col-md-11 form-group">
+				<input type="hidden" name="lista" value="{{ lista.id }}" />
+				{% for m in lista.membri %}<span class="badge">{{m.email}}</span>&nbsp;{% endfor %}
+			</div>
+			<div class="col-md-12 form-group">
+				<textarea class="form-control" name='messaggio' rows="15" cols="100">{{ messaggio }}</textarea>
+			</div>
+		</form>
+	</div>
+	<script type="text/javascript">
+		function invio() 
+		{
+			if(confirm('Inviare il messaggio?')) 
+			{
+				$("#frm-invio").submit();
+			}
+		}
+	</script>
+{% endblock %}

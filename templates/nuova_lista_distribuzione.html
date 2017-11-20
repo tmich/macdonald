@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block actions %}
+   <div style="text-align: left;">
+        <a href="{{ url_for('liste_distribuzione') }}" class="btn btn-default">&laquo; Esci</a>
+        <div class="input-group col-md-auto pull-right">
+			<a href="#" onclick="submitForm();" title="Salva e continua" class="btn btn-success" type="button">
+				<span class="glyphicon glyphicon-floppy-disk"></span> Salva e continua
+			</a>
+		</div>
+		
+    </div>
+{% endblock %}
+{% block body %}
+	<h3 class="page-header">Crea lista di distribuzione</h3>
+	<div class="table-responsive hidden-print">
+		<form action="{{ url_for('nuova_lista_distribuzione') }}" method="POST" id="frm-lista">
+			<div class="col-md-5 form-group {{ 'has-error has-feedback' if 'nome' in errors else '' }}">
+				<label>Nome:</label><input type="text" class="form-control" name="nome" value="{{ nome }}" />
+			</div>
+		</form>
+	</div>
+	<script type="text/javascript">
+	function submitForm() {
+		var form=$("#frm-lista");
+		form.submit();
+		return true;
+	}
+	</script>
+{% endblock %}

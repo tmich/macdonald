@@ -175,7 +175,9 @@ class ListaDistribuzione(db.Model):
   nome = db.Column(db.String(120))
   data_creazione = db.Column(db.DateTime, default=datetime.datetime.utcnow) 
   canc = db.Column(db.Integer, default=0)
-  membri = db.relationship('MembroListaDistribuzione', cascade="save-update, merge, delete")
+  membri = db.relationship('MembroListaDistribuzione', 
+	cascade="save-update, merge, delete",
+	lazy='dynamic')
 
 
 class MembroListaDistribuzione(db.Model):
