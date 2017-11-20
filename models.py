@@ -21,6 +21,15 @@ class Anagrafica(db.Model):
   mf = db.Column(db.String(20))
   fax = db.Column(db.String(20))
   email = db.Column(db.String(120))
+  data_inizio = db.Column(db.Date)
+  data_fine = db.Column(db.Date)
+  
+  def __init__(self):
+	canc = 0
+	
+  @property
+  def attiva(self):
+	return datetime.datetime.utcnow() >= self.data_inizio and datetime.datetime.utcnow() <= self.data_fine
 
 class Cliente(db.Model):
   id = db.Column(db.Integer, primary_key=True)
@@ -67,8 +76,11 @@ class Fattura(db.Model):
   n_scontr2 = db.Column(db.Integer)
   n_scontr3 = db.Column(db.Integer)
   cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'))
+  azienda_id = db.Column(db.Integer, db.ForeignKey('anagrafica.id'))
   cliente = db.relationship('Cliente',
 			    backref = db.backref('fatture', lazy='dynamic'))
+  azienda = db.relationship('Anagrafica',
+				backref = db.backref('fatture', lazy='dynamic'))
   voci = db.relationship('VoceFattura', cascade="save-update, merge, delete")
   canc = db.Column(db.Integer)
   stampato = db.Column(db.Integer)	## ALTER TABLE `fattura` ADD COLUMN `stampato` INT NOT NULL DEFAULT '0' AFTER `canc`;
@@ -302,6 +314,7 @@ class ObjFatt:
 	self.id_cliente=id_cliente
 	self.voci = []
 	self.id=id
+	self.id_azienda=get_azienda(dt).id
 	
   def aggiungi(self, voce):
 	self.voci.append(voce)
@@ -317,4 +330,9 @@ class ObjFatt:
 
   def totale(self):
 	return sum([v.totale() for v in self.voci])
-	
+
+def get_azienda(dt=None):
+	if dt is None:	
+		dt=datetime.date.today()
+	result = db.session.query(Anagrafica).filter(dt <= Anagrafica.data_fine).filter(dt >= Anagrafica.data_inizio).first()
+	return result	

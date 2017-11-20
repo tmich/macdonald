@@ -60,15 +60,15 @@
         <table border="1" cellpadding="5" class="header">
           <tr>
             <td>
-              <span style="font-size: 12pt;">
-              <b>{{ ragsoc }}</b><br />
-              <i>{{ descr }}</i><br />
-              </span>
-              <span style="font-size: 9pt;">
-              {{ indirizzo }}<br />
-              C.F. 07161420588 - P.I. 01706271002<br />
-              tel. 06-3728796
-              </span>
+				<span style="font-size: 12pt;">
+				<b>{{ fattura.azienda.ragsoc }}</b><br />
+				<i>{{ fattura.azienda.descr }}</i><br />
+				</span>
+				<span style="font-size: 9pt;">
+				{{ fattura.azienda.indirizzo }} - {{ fattura.azienda.cap }} {{ fattura.azienda.citta }}<br />
+				C.F. {{ fattura.azienda.cod_fisc }} - P.I. {{ fattura.azienda.p_iva }}<br />
+				tel. {{ fattura.azienda.tel }}
+				</span>
             </td>
             <td>
                 <span style="font-size: 9pt;">
@@ -92,7 +92,7 @@
 	  <tr>
 	    <td class="void" style="font-size: 10pt;">Fattura n&deg; {{fattura.num}} del {{fattura.data|dt('%d/%m/%Y')}}</td>
 	    <td class="void" style="font-size: 10pt;">
-	    Scontrin{{'o' if fattura.n_scontrini() == 1 else 'i'}} n. {{ fattura.scontrini }}&nbsp;&nbsp;MF: {{ mf }}
+	    Scontrin{{'o' if fattura.n_scontrini() == 1 else 'i'}} n. {{ fattura.scontrini }}&nbsp;&nbsp;MF: {{ fattura.azienda.mf }}
 	    </td>
 	  </tr>
 	</table>
@@ -137,20 +137,9 @@
 						<td class="far">&nbsp;</td>
 					</tr>
 				{% endfor %}
-		  
-		  <!-- <tr> -->
-			<!-- <td class="last">&nbsp;</td> -->
-			<!-- <td class="last">&nbsp;</td> -->
-			<!-- <td>&nbsp;</td> -->
-			<!-- <td>&nbsp;</td> -->
-			<!-- <td>&nbsp;</td> -->
-			<!-- <td>&nbsp;</td> -->
-			<!-- <td class="far">&nbsp;</td> -->
-		  <!-- </tr> -->
-		  
-			{% set impf = '%0.2f' % fattura.imponibile()|float %}
-			{% set ivaf = '%0.2f' % fattura.iva()|float %}
-			{% set totf = '%0.2f' % fattura.totale()|float %}
+				{% set impf = '%0.2f' % fattura.imponibile()|float %}
+				{% set ivaf = '%0.2f' % fattura.iva()|float %}
+				{% set totf = '%0.2f' % fattura.totale()|float %}
 			<tr>
 				<td class="btop" colspan="2">&nbsp;</td>
 				<td class="tot" colspan="2">Totale</td>

@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_babel import Babel, format_datetime, format_date
 from decimal import Decimal
 from pdfs import create_pdf
-from models import db, Anagrafica, Cliente, Prodotto, Fattura, VoceFattura, InvioFattura, User, FatturaSequence, ObjFatt, ObjVoce, EmailConfig, Messaggio, ListaDistribuzione, MembroListaDistribuzione
+from models import db, Anagrafica, Cliente, Prodotto, Fattura, VoceFattura, InvioFattura, User, FatturaSequence, ObjFatt, ObjVoce, EmailConfig, Messaggio, ListaDistribuzione, MembroListaDistribuzione, get_azienda
 from forms import FormNuovaFattura, FormAggiungiVoce, FormNuovaFattura, FormCliente, FormProdotto, FormProfilo, FormDate, FormDateFatture
 import jsonpickle
 from smtplib import SMTPException, SMTPAuthenticationError, SMTPRecipientsRefused
@@ -219,7 +219,6 @@ def nuovo_cliente():
 			db.session.add(cli)
 			db.session.commit()
 			flash('Anagrafica cliente creata', 'success')
-			#return redirect(url_for('clienti'))
 			return redirect(url_for('cliente', id=cli.id))			
 		else:
 			errors=form.errors
@@ -604,17 +603,14 @@ def annulla_invio(id):
 def fatture_da_stampare():
 	fatture_da_stampare = db.session.query(Fattura).filter(Fattura.stampato==0).order_by(Fattura.num)
 	return render_template('fatture_da_stampare.html', fatture_da_stampare=fatture_da_stampare, cnt=fatture_da_stampare.count())
-
+	
 @app.route('/stampa_tutte', methods=['GET'])
 @login_required
 def stampa_tutte():
 	fatture_da_stampare = db.session.query(Fattura).filter(Fattura.stampato==0)
 	min_righe=10
 	stringone=""
-	anag = db.session.query(Anagrafica).get(1)
 	for fattura in fatture_da_stampare:
-		# n_righe = max(len(fattura.voci), min_righe) - min(len(fattura.voci), min_righe)
-		# stringone = stringone + render_template('fattura_pdf.html', fattura=fattura, n_righe=n_righe, ragsoc=anag.ragsoc, descr=anag.descr, indirizzo=anag.indirizzo, mf=anag.mf)
 		stringone = stringone + prepara_pdf(fattura)
 		fattura.stampato=1
 	
@@ -639,10 +635,8 @@ def stampa_fattura(idfatt):
 
 def prepara_pdf(fatt):
   min_righe=12
-  #righe_vuote = max(len(fatt.voci), min_righe) - min(len(fatt.voci), min_righe)
   righe_vuote = min_righe - len(fatt.voci)
-  anag = db.session.query(Anagrafica).get(1)
-  pdf=render_template('fattura_pdf.html', fattura=fatt, n_righe=righe_vuote, ragsoc=anag.ragsoc, descr=anag.descr, indirizzo=anag.indirizzo, mf=anag.mf)
+  pdf=render_template('fattura_pdf.html', fattura=fatt, n_righe=righe_vuote)
   return pdf
   
 @app.route('/vfattura/<int:idfatt>', methods=['GET'])
@@ -822,6 +816,7 @@ def salva_fattura(f):
   fattura.n_scontr1=f.n_scontr1
   fattura.n_scontr2=f.n_scontr2
   fattura.n_scontr3=f.n_scontr3
+  fattura.azienda_id=objf.id_azienda
   
   for objv in objf.voci:
 	voce=VoceFattura(codart=objv.codart, descr=objv.descr, qta=objv.qta, prezzo=objv.prezzo, aliq=objv.aliq)
@@ -888,10 +883,7 @@ def ristampa_fatture():
 			#return render_template('lista_fatture.html', fatture=fatture, data_inizio=f.data_inizio, data_fine=f.data_fine)
 			min_righe=10
 			stringone=""
-			anag = db.session.query(Anagrafica).get(1)
 			for fatt in fatture:
-				#n_righe = max(len(fatt.voci), min_righe) - min(len(fatt.voci), min_righe)
-				#stringone = stringone + render_template('fattura_pdf.html', fattura=fatt, n_righe=n_righe, ragsoc=anag.ragsoc, descr=anag.descr, indirizzo=anag.indirizzo, mf=anag.mf)
 				stringone = stringone + prepara_pdf(fatt)
 			
 			pdf=create_pdf(stringone)
@@ -992,7 +984,7 @@ def contatori_per_anno(anno):
 @app.route('/anagrafica', methods=['GET', 'POST'])
 @login_required
 def anagrafica():
-	anag=db.session.query(Anagrafica).first()
+	anag=get_azienda()
 	if request.method == 'POST':
 		f=request.form
 		id=f['id']
