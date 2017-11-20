@@ -56,6 +56,7 @@
 	<tr>
 	  <th>Fatt. n</th>
 	  <th>Data</th>
+	  <th>Scontrini</th>
 	  <th>Cliente</th>
 	  <th>Email</th>
 	  <th>Importo</th>
@@ -65,6 +66,7 @@
 	  <tr>
 	    <td>{{inv.fattura.num}}</td>
 	    <td>{{inv.fattura.data|dt('%d/%m/%Y')}}</td>
+	    <td>{{inv.fattura.scontrini}}</td>
 	    <td>{{inv.fattura.cliente.ragsoc}}</td>
 	    <td>{{inv.email}}&nbsp;&nbsp;&nbsp;<a href="#" onclick="modificaEmail({{inv.fattura.num}}, '{{inv.fattura.data|dt()}}', {{inv.id}}, '{{inv.fattura.cliente.ragsoc}}', '{{inv.email}}');" title="modifica" data-toggle="modal" data-target="#myModal">
 			<span class="glyphicon glyphicon-pencil"></span></a></td>
