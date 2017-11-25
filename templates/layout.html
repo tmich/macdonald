@@ -106,9 +106,9 @@
 				{% if g.user.is_admin() %}
 					<li style="border-bottom: 1px solid #e7e7e7;"><a data-toggle="collapse" href="#collapse4"><span class="glyphicon glyphicon-bullhorn"></span> Comunicazioni  <span class="caret"></span></a></li>
 					<ul id="collapse4" class="nav nav-sidebar panel-collapse collapse {{ 'in' if current in ['liste', 'nuova_comunicazione', 'messaggi'] else '' }}">
-						<li class="{{ 'active' if current=='nuova_comunicazione' else '' }}" style="margin-left: 30px; border-bottom: 1px solid #e7e7e7;"><a href="{{ url_for('nuova_comunicazione') }}">Nuova comunicazione</a></li>
 						<li class="{{ 'active' if current=='messaggi' else '' }}" style="margin-left: 30px; border-bottom: 1px solid #e7e7e7;"><a href="{{ url_for('messaggi') }}">Messaggi</a></li>
 						<li class="{{ 'active' if current=='liste' else '' }}" style="margin-left: 30px; border-bottom: 1px solid #e7e7e7;"><a href="{{ url_for('liste_distribuzione') }}">Liste di distribuzione</a></li>
+						<li class="{{ 'active' if current=='nuova_comunicazione' else '' }}" style="margin-left: 30px; border-bottom: 1px solid #e7e7e7;"><a href="{{ url_for('nuova_comunicazione') }}">Nuova comunicazione</a></li>
 					</ul>
 					<li style="border-bottom: 1px solid #e7e7e7;" class="{{ 'active' if current=='contatori' else '' }}"><a href="{{ url_for('contatori') }}"><span class="glyphicon glyphicon-list-alt"></span> Contatori</a></li>
 					<li style="border-bottom: 1px solid #e7e7e7;"><a data-toggle="collapse" href="#collapse3"><span class="glyphicon glyphicon-wrench"></span> Impostazioni  <span class="caret"></span></a></li>
