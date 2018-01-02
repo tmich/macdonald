@@ -269,7 +269,10 @@ class FatturaSequence():
 	qry = "select max(num) from fattura where year(data) = %d" % year;
 	result = db.engine.execute(qry)
 	for row in result:
-	  num = row[0] + 1
+		if row[0]:
+			num = row[0] + 1
+		else:
+			num = 1
 	return num
 
 # classi per la memorizzazione in sessione delle fatture
