@@ -1,0 +1,74 @@
+<html>
+    <head>
+    <style>
+    @page {
+        size: a4 portrait;
+        margin: 2cm 1cm 1cm 1cm;
+    }
+    body { font-family: "Courier New", monospace; font-size: 8pt; }
+    
+    .header td {
+      text-align: left;
+    }
+    
+    .hd { 
+      border: 1px solid black; 
+      font-variant: normal;
+      text-align: right;
+    }
+    
+    .far {
+      border-right: 1px solid black;
+    }  
+	
+    td {
+      text-align: right; 
+      border-bottom: none;
+      border-left: 1px solid black;
+    }
+    
+    .last {
+      border-bottom: 1px solid black;
+    }
+    
+    .void {
+      border: none;
+      text-align: left;
+    }
+	
+	.btop {
+		border-top: 1px solid black;
+		border-bottom: none;
+		border-left: none;
+	}
+    
+    .tot {
+      border-top: 1px solid black;
+      border-bottom: 1px solid black;
+    }
+	
+	.fattura td {
+	  font-size: 9pt;
+	  vertical-align:bottom;
+	}
+    
+    </style>
+    </head>
+    <body>
+		{% block body %}
+		<div>
+			<h2>{{ c.ragsoc }}</h2>
+			<table border="1" cellpadding="5" class="header">
+				<tr><td>Codice:</td><td>{{ c.id }}</td></tr>
+				<tr><td>Nominativo/ragione sociale</td><td>{{ c.ragsoc }}</td></tr>
+				<tr><td>Indirizzo</td><td>{{ c.indirizzo }}</td></tr>
+				<tr><td>CAP</td><td>{{ c.cap }}</td></tr>
+				<tr><td>Citta</td><td>{{ c.citta }}</td></tr>
+				<tr><td>P. IVA</td><td>{{ c.p_iva }}</td></tr>
+				<tr><td>Telefono</td><td>{{ c.telefono }}</td></tr>
+				<tr><td>Email</td><td>{{ c.email }}</td></tr>
+			</table>
+        </div>
+		{% endblock %}
+	</body>
+</html>

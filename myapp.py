@@ -622,6 +622,16 @@ def stampa_tutte():
 	db.session.commit()
 
 	return response
+
+@app.route('/stampa_cliente/<int:idcliente>', methods=['GET'])
+@login_required
+def stampa_cliente(idcliente):
+  cliente = db.session.query(Cliente).get(idcliente)
+  pdf=create_pdf(render_template('cliente_pdf.html', c=cliente))
+  response=make_response(pdf.getvalue())
+  response.headers['Content-Type'] = 'application/pdf'
+  response.headers['Content-Disposition'] = 'inline; filename=AnagraficaCliente.pdf'
+  return response
 	
 @app.route('/stampa_fatt/<int:idfatt>', methods=['GET'])
 @login_required

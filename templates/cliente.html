@@ -6,6 +6,9 @@
 			<a href="{{ url_for('fatture_cliente', id=id, page=0) }}" title="Ricerca fatture" class="btn btn-default" type="button">
 				<span class="glyphicon glyphicon-search"></span> Ricerca fatture
 			</a>
+			<a href="{{ url_for('stampa_cliente', idcliente=id) }}" title="Stampa" target="_blank" class="btn btn-default">
+				<span class="glyphicon glyphicon-print"></span> Stampa
+			</a>
 		</div>
 		<div class="input-group col-md-auto pull-right">
 			<a href="{{ url_for('nuova_fattura', id_cliente=id) }}" title="Nuova fattura" class="btn btn-success" type="button">
