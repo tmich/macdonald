@@ -16,9 +16,10 @@
 		<table border="0" class="table table-striped">
 			<tr>
 				<!-- <th width="5%">ID</th> -->
-				<th width="50%">Nome</th>
+				<th width="40%">Nome</th>
 				<th width="25%">Membri</th>
 				<th width="25%">Creata il</th>
+				<th width="10%">&nbsp;</th>
 			</tr>
 			{% for ld in liste %}
 			<tr>
@@ -26,6 +27,8 @@
 				<td><a href="{{ url_for('lista_distribuzione', id=ld.id) }}">{{ld.nome}}</a></td>
 				<td>{{ld.membri.count()}}</td>
 				<td>{{ld.data_creazione|dt}}</td>
+				<td style="text-align:right;"><a class="btn btn-sm btn-danger" onclick="return confirm('Eliminare la lista?');" 
+						href="{{ url_for('elimina_lista_distribuzione', id=ld.id) }}"><span class="glyphicon glyphicon-trash"></span> Elimina</a></td>
 			</tr>
 			{% endfor %}
 		</table>

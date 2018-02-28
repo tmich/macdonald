@@ -1137,7 +1137,15 @@ def nuova_lista_distribuzione():
 		db.session.add(l)
 		db.session.commit()
 		return redirect(url_for('lista_distribuzione', id=l.id))
-		
+
+@app.route('/elimina_lista_distribuzione/<int:id>', methods=['GET'])		
+@login_required
+def elimina_lista_distribuzione(id):
+	lista=db.session.query(ListaDistribuzione).get(id)
+	db.session.delete(lista)
+	db.session.commit()
+	flash('Lista eliminata', 'success')
+	return redirect(url_for('liste_distribuzione'))
   
 @app.route('/lista_distribuzione/<int:id>', methods=['GET', 'POST'])
 @login_required
