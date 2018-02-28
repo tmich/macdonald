@@ -84,7 +84,7 @@
   
   <div class="container-fluid">
     <div class="row">
-		<div class="col-sm-3 col-md-2 sidebar">
+		<div class="col-sm-3 col-md-2 sidebar hidden-print">
 			{% if g.user != None %}
 			<ul class="nav nav-sidebar nav-collapse">
 				<li style="border-bottom: 1px solid #e7e7e7;" class="{{ 'active' if current=='home' else '' }}"><a href="{{ url_for('main') }}"><span class="glyphicon glyphicon-home"></span> Home</a></li>

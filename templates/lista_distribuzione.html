@@ -7,6 +7,10 @@
 			<a href="{{ url_for('ricerca_clienti', next='aggiungi_membro', new=1, id_lista=id, done='lista_distribuzione', done_arg=id) }}" class="btn btn-success">
 				<span class="glyphicon glyphicon-plus"></span> Aggiungi</a>&nbsp;&nbsp;&nbsp;
 		</div>
+		<div class="input-group col-md-auto pull-right">
+			<a href="#" onclick="window.print(); return false;" class="btn btn-default">
+				<span class="glyphicon glyphicon-print"></span> Stampa</a>&nbsp;&nbsp;&nbsp;
+		</div>
     </div>
 {% endblock %}
 {% block body %}
@@ -37,6 +41,23 @@
 			{% endfor %}
 		</table>
 	</div>
+	
+	<div class="visible-print-block" style="font-size: 9pt;">
+		<h4>{{ nome }}</h4>
+		<table border="0" class="table table-striped">
+			<tr>
+				<th width="50%">Nome</th>
+				<th width="45%">Email</th>
+			</tr>
+			{% for m in membri %}
+			<tr>
+				<td>{{ m.cliente.ragsoc }}</a></td>
+				<td>{{ m.email }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+	</div>
+	
 	<script type="text/javascript">
 	function rinomina() {
 		var form=$("#frm-nome");
