@@ -29,8 +29,8 @@
 				<td>{{ f.data|dt('%d/%m/%Y') }}</td>
 				<td>{{ f.num }}</td>
 				<td>{{ f.scontrini }}</td>
-				<td>{{ f.cliente.ragsoc }}</td>
-				<td>{{ f.cliente.email }}</td>
+				<td>{{ f.ragsoc }}</td>
+				<td>{{ f.email }}</td>
 				<td>{{ '%0.2f' % f.totale()|float }}</td>
 			</tr>
 			{% endfor %}
@@ -53,8 +53,8 @@
 				<td>{{ f.data|dt('%d/%m/%Y') }}</td>
 				<td>{{ f.num }}</td>
 				<td>{{ f.scontrini }}</td>
-				<td>{{ f.cliente.ragsoc }}</td>
-				<td>{{ f.cliente.email }}</td>
+				<td>{{ f.ragsoc }}</td>
+				<td>{{ f.email }}</td>
 				<td style="text-align: right;">{{ '%0.2f' % f.totale()|float }}</td>
 			</tr>
 			{% endfor %}

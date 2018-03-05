@@ -12,20 +12,20 @@
       <div class="panel-body">
         <div id="intestazione" style="text-align:left">
           <div>
-            <h4>{{ cliente.ragsoc }}</h4>
-            {{ cliente.indirizzo }} {{ cliente.cap }} {{ cliente.citta }}
+            <h4>{{ fatt.ragsoc }}</h4>
+            {{ fatt.indirizzo }} {{ fatt.cap }} {{ fatt.citta }}
           </div>
           <div>
-            <label>Partita IVA</label> {{ cliente.p_iva }}
+            <label>Partita IVA</label> {{ fatt.p_iva }}
           </div>
           <div>
-            <label>Codice Fiscale</label> {{ cliente.cod_fiscale }}
+            <label>Codice Fiscale</label> {{ fatt.cod_fisc }}
           </div>
           <div>
-            <label>Telefono</label> {{ cliente.telefono }}
+            <label>Telefono</label> {{ fatt.tel }}
           </div>
           <div>
-            <label>Email</label> {{ cliente.email }}
+            <label>Email</label> {{ fatt.email }}
           </div>
         </div>
         <a href="{{url_for('cambia_cliente_fattura', idfatt=idfatt, idcli=0)}}"><span class="glyphicon glyphicon-search"></span> Cambia</a>

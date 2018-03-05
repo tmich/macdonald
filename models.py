@@ -76,6 +76,16 @@ class Fattura(db.Model):
   n_scontr2 = db.Column(db.Integer)
   n_scontr3 = db.Column(db.Integer)
   cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'))
+  ragsoc = db.Column(db.String(120))
+  p_iva = db.Column(db.String(20))
+  cod_fisc = db.Column(db.String(20))
+  indirizzo = db.Column(db.String(120))
+  citta = db.Column(db.String(120))
+  cap = db.Column(db.String(10))
+  prov = db.Column(db.String(2))
+  tel = db.Column(db.String(50))
+  fax = db.Column(db.String(20))
+  email = db.Column(db.String(120))
   azienda_id = db.Column(db.Integer, db.ForeignKey('anagrafica.id'))
   cliente = db.relationship('Cliente',
 			    backref = db.backref('fatture', lazy='dynamic'))
@@ -308,13 +318,23 @@ class ObjVoce:
 	return tot
 
 class ObjFatt:
-  def __init__(self, num, n_scontr1, n_scontr2, n_scontr3, dt, id_cliente, id=0):
+  def __init__(self, num, n_scontr1, n_scontr2, n_scontr3, dt, id_cliente, ragsoc=None, p_iva=None, cod_fisc=None, indirizzo=None, citta=None, cap=None, prov=None, tel=None, fax=None, email=None, id=0):
 	self.num=num
 	self.n_scontr1=n_scontr1
 	self.n_scontr2=n_scontr2
 	self.n_scontr3=n_scontr3
 	self.dt=dt
 	self.id_cliente=id_cliente
+	self.ragsoc = ragsoc
+	self.p_iva = p_iva
+	self.cod_fisc = cod_fisc
+	self.indirizzo = indirizzo
+	self.citta = citta
+	self.cap = cap
+	self.prov = prov
+	self.tel = tel
+	self.fax = fax
+	self.email = email
 	self.voci = []
 	self.id=id
 	self.id_azienda=get_azienda(dt).id

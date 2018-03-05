@@ -73,15 +73,15 @@
             <td>
                 <span style="font-size: 9pt;">
                 Spett.le<br />
-                {{ fattura.cliente.ragsoc }}<br />
-                {{ fattura.cliente.indirizzo }} {{ fattura.cliente.cap }} {{ fattura.cliente.citta }}<br />
-                C.F. {{ fattura.cliente.cod_fisc }}
-				{% if fattura.cliente.p_iva != None %}
-                  &nbsp;-&nbsp;P.I. {{ fattura.cliente.p_iva }}
+                {{ fattura.ragsoc }}<br />
+                {{ fattura.indirizzo }} {{ fattura.cap }} {{ fattura.citta }}<br />
+                C.F. {{ fattura.cod_fisc }}
+				{% if fattura.p_iva != None %}
+                  &nbsp;-&nbsp;P.I. {{ fattura.p_iva }}
                 {% endif %}
                 <br />
-                tel {{ fattura.cliente.tel if fattura.cliente.tel != None else ''  }}<br />
-				email {{ fattura.cliente.email }}
+                tel {{ fattura.tel if fattura.tel != None else ''  }}<br />
+				email {{ fattura.email }}
                 </span>
             </td>
           </tr>

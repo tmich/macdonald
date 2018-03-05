@@ -40,7 +40,7 @@
 			  <tr>
 				<td>{{inv.fattura.num}}</td>
 				<td>{{inv.data_invio|dt('%d/%m/%Y')}}</td>
-				<td>{{inv.fattura.cliente.ragsoc}}</td>
+				<td>{{inv.fattura.ragsoc}}</td>
 				<td>{{inv.email}}</td>
 				<td>{{'%0.2f' % inv.fattura.totale()|float}}</td>
 				<td><span class="glyphicon {{'glyphicon-ok' if inv.esito == '0' else 'glyphicon-remove'}}">&nbsp;</span></td>
@@ -68,7 +68,7 @@
 			  <tr>
 				<td>{{inv.fattura.num}}</td>
 				<td>{{inv.data_invio|dt('%d/%m/%Y')}}</td>
-				<td>{{inv.fattura.cliente.ragsoc}}</td>
+				<td>{{inv.fattura.ragsoc}}</td>
 				<td>{{inv.email}}</td>
 				<td>{{'%0.2f' % inv.fattura.totale()|float}}</td>
 				<td><span class="glyphicon {{'glyphicon-ok' if inv.esito == '0' else 'glyphicon-remove'}}">&nbsp;</span></td>

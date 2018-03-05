@@ -583,7 +583,7 @@ def invia_tutte():
 @login_required
 def invia_fattura(idfatt):
 	fatt = db.session.query(Fattura).get(idfatt)
-	invio_fatt=InvioFattura(fatt, fatt.cliente.email)
+	invio_fatt=InvioFattura(fatt, fatt.email)
 	db.session.add(invio_fatt)
 	db.session.commit()
 	flash('Invio fattura prenotato con successo', 'success')
@@ -679,6 +679,17 @@ def nuova_fattura(id_cliente):
 	  # creo l'oggetto ObjFatt da memorizzare in sessione
 	  fatt=ObjFatt(numfatt,n_scontr1,n_scontr2,n_scontr3,dt,id_cliente)
 	  fatt.id_cliente=id_cliente
+	  fatt.ragsoc = cli.ragsoc
+	  fatt.p_iva = cli.p_iva
+	  fatt.cod_fisc = cli.cod_fisc
+	  fatt.indirizzo = cli.indirizzo
+	  fatt.citta = cli.citta
+	  fatt.cap = cli.cap
+	  fatt.prov = cli.prov
+	  fatt.tel = cli.tel
+	  fatt.fax = cli.fax
+	  fatt.email = cli.email
+	  
 	  session['fatt']=jsonpickle.encode(fatt)
 	  return redirect(url_for('componi_fattura'))
 	  
@@ -694,8 +705,20 @@ def cambia_cliente_fattura(idfatt,idcli=0):
 	else:
 		if 'id_fattura_cambio_cliente' in session:
 			id_fattura_cambio_cliente = session.pop('id_fattura_cambio_cliente')
+			cli=db.session.query(Cliente).get(idcli)
 			objf=jsonpickle.decode(session['fatt'])
 			objf.id_cliente = idcli
+			objf.ragsoc = cli.ragsoc
+			objf.p_iva = cli.p_iva
+			objf.cod_fisc = cli.cod_fisc
+			objf.indirizzo = cli.indirizzo
+			objf.citta = cli.citta
+			objf.cap = cli.cap
+			objf.prov = cli.prov
+			objf.tel = cli.tel
+			objf.fax = cli.fax
+			objf.email = cli.email
+			
 			session['fatt']=jsonpickle.encode(objf)
 			return redirect(url_for('componi_fattura'))
 
@@ -705,9 +728,21 @@ def modifica_fattura(id):
   session['fatt']=None
   session.pop('fatt')
   fattura=db.session.query(Fattura).get(id)
+  cli=fattura.cliente  
   
   # creo l'oggetto ObjFatt da memorizzare in sessione
   objf=ObjFatt(fattura.num,fattura.n_scontr1,fattura.n_scontr2,fattura.n_scontr3,fattura.data,fattura.cliente_id,id=fattura.id)
+  objf.ragsoc = fattura.ragsoc
+  objf.p_iva = fattura.p_iva
+  objf.cod_fisc = fattura.cod_fisc
+  objf.indirizzo = fattura.indirizzo
+  objf.citta = fattura.citta
+  objf.cap = fattura.cap
+  objf.prov = fattura.prov
+  objf.tel = fattura.tel
+  objf.fax = fattura.fax
+  objf.email = fattura.email
+  
   for v in fattura.voci:
 	objv=ObjVoce(qta=v.qta, codart=v.codart, descr=v.descr, aliq=v.aliq, prz=v.prezzo)
 	objf.aggiungi(objv)
@@ -770,7 +805,7 @@ def componi_fattura():
 		aliq=f.aliq
 		errors=f.errors
 		  
-  return render_template('componi_fattura.html',errors=errors,idfatt=fatt.id,datafattura=fatt.dt,numfatt=fatt.num,n_scontr1=fatt.n_scontr1,n_scontr2=fatt.n_scontr2,n_scontr3=fatt.n_scontr3,cliente=cli,imponibile=fatt.imponibile(),iva=fatt.iva(),totale=fatt.totale(),voci=fatt.voci,codart=codart,descr=descr,qta=qta,prezzo=prezzo,aliq=aliq,idx_voce=idx_voce)  
+  return render_template('componi_fattura.html',errors=errors,idfatt=fatt.id,datafattura=fatt.dt,numfatt=fatt.num,n_scontr1=fatt.n_scontr1,n_scontr2=fatt.n_scontr2,n_scontr3=fatt.n_scontr3,cliente=cli,imponibile=fatt.imponibile(),iva=fatt.iva(),totale=fatt.totale(),voci=fatt.voci,codart=codart,descr=descr,qta=qta,prezzo=prezzo,aliq=aliq,idx_voce=idx_voce,fatt=fatt)  
 
 def aggiungi_voce(f):
   objf=jsonpickle.decode(session['fatt'])
@@ -815,6 +850,7 @@ def salva_fattura(f):
 	# creo una nuova fattura
 	fattura = Fattura(cli, objf.dt, objf.num)
 	db.session.add(fattura)
+	
   else:
 	# modifico una fattura esistente
 	fattura = db.session.query(Fattura).get(objf.id)
@@ -822,6 +858,16 @@ def salva_fattura(f):
 	  db.session.delete(v)
   
   fattura.cliente_id=objf.id_cliente
+  fattura.ragsoc = objf.ragsoc
+  fattura.p_iva = objf.p_iva
+  fattura.cod_fisc = objf.cod_fisc
+  fattura.indirizzo = objf.indirizzo
+  fattura.citta = objf.citta
+  fattura.cap = objf.cap
+  fattura.prov = objf.prov
+  fattura.tel = objf.tel
+  fattura.fax = objf.fax
+  fattura.email = objf.email
   fattura.data=f.dtfatt
   fattura.n_scontr1=f.n_scontr1
   fattura.n_scontr2=f.n_scontr2
