@@ -28,20 +28,20 @@
       <div class="panel-body">
         <div id="intestazione" style="text-align:left">
           <div>
-            <h4>{{ fattura.ragsoc }}</h4>
-            {{ fattura.indirizzo }} {{ fattura.cap }} {{ fattura.citta }}
+            <h4>{{ fattura.cliente.ragsoc }}</h4>
+            {{ fattura.cliente.indirizzo }} {{ fattura.cliente.cap }} {{ fattura.cliente.citta }}
           </div>
           <div>
-            <label>Partita IVA</label> {{ fattura.p_iva }}
+            <label>Partita IVA</label> {{ fattura.cliente.p_iva }}
           </div>
           <div>
-            <label>Codice Fiscale</label> {{ fattura.cod_fisc }}
+            <label>Codice Fiscale</label> {{ fattura.cliente.cod_fisc }}
           </div>
           <div>
-            <label>Telefono</label> {{ fattura.tel }}
+            <label>Telefono</label> {{ fattura.cliente.tel }}
           </div>
           <div>
-            <label>Email</label> {{ fattura.email }}
+            <label>Email</label> {{ fattura.cliente.email }}
           </div>
         </div>
       </div>

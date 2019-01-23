@@ -67,8 +67,8 @@
 	    <td>{{inv.fattura.num}}</td>
 	    <td>{{inv.fattura.data|dt('%d/%m/%Y')}}</td>
 	    <td>{{inv.fattura.scontrini}}</td>
-	    <td>{{inv.fattura.ragsoc}}</td>
-	    <td>{{inv.email}}&nbsp;&nbsp;&nbsp;<a href="#" onclick="modificaEmail({{inv.fattura.num}}, '{{inv.fattura.data|dt()}}', {{inv.id}}, '{{inv.fattura.ragsoc}}', '{{inv.email}}');" title="modifica" data-toggle="modal" data-target="#myModal">
+	    <td>{{inv.fattura.cliente.ragsoc}}</td>
+	    <td>{{inv.email}}&nbsp;&nbsp;&nbsp;<a href="#" onclick="modificaEmail({{inv.fattura.num}}, '{{inv.fattura.data|dt()}}', {{inv.id}}, '{{inv.fattura.cliente.ragsoc}}', '{{inv.email}}');" title="modifica" data-toggle="modal" data-target="#myModal">
 			<span class="glyphicon glyphicon-pencil"></span></a></td>
 	    <td>{{'%0.2f' % inv.fattura.totale()|float}}</td>
 	    <td><a onclick="return confirm('Sei sicuro di voler annullare l\'invio della fattura?');" 
