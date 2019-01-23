@@ -989,7 +989,8 @@ def contatori_per_anno(anno):
 		flash('Contatori aggiornati correttamente', 'success')
 		ultima_fattura_stampata = db.session.query(func.max(Fattura.num)).filter(and_(func.year(Fattura.data)==anno, Fattura.stampato==1)).scalar()
 	
-	return render_template('contatori_per_anno.html', anno=anno, ultima_fattura=int(ultima_fattura), ultima_fattura_stampata=int(ultima_fattura_stampata), current='contatori')
+	return render_template('contatori_per_anno.html', anno=anno, ultima_fattura=int(ultima_fattura) if ultima_fattura != None else 0,
+		ultima_fattura_stampata=int(ultima_fattura_stampata) if ultima_fattura_stampata != None else 0, current='contatori')
 
 @app.route('/anagrafica', methods=['GET', 'POST'])
 @login_required
