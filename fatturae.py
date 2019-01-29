@@ -290,13 +290,12 @@ def converti_fattura(ft, progr):
 	dt.append(IdTrasmittente("IT", ft.azienda.p_iva))
 	dt.append(NodoFPR("ProgressivoInvio", str(progr)))
 	dt.append(NodoFPR("FormatoTrasmissione", "FPR12"))
-	dt.append(NodoFPR("CodiceDestinatario", ft.cliente.cod_destinatario if ft.cliente.cod_destinatario != None else '0000000'))
-	# ContattiTrasmittente = NodoFPR("ContattiTrasmittente")
-	# ContattiTrasmittente.append(NodoFPR("Telefono", "066246891"))
-	# ContattiTrasmittente.append(NodoFPR("Email", ""))
-	# dt.append(ContattiTrasmittente)
-	if ft.cliente.pec != None and ft.cliente.pec.strip() != '':
+	if ft.cliente.cod_destinatario != None and ft.cliente.cod_destinatario != '':
+		dt.append(NodoFPR("CodiceDestinatario", ft.cliente.cod_destinatario))
+	elif ft.cliente.pec != None and ft.cliente.pec.strip() != '':
 		dt.append(NodoFPR("PECDestinatario", ft.cliente.pec))
+	else
+		dt.append(NodoFPR("CodiceDestinatario", '0000000'))
 	f.header.append(dt)
 
 	# 1.2 CedentePrestatore
