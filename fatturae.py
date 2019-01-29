@@ -294,7 +294,7 @@ def converti_fattura(ft, progr):
 		dt.append(NodoFPR("CodiceDestinatario", ft.cliente.cod_destinatario))
 	elif ft.cliente.pec != None and ft.cliente.pec.strip() != '':
 		dt.append(NodoFPR("PECDestinatario", ft.cliente.pec))
-	else
+	else:
 		dt.append(NodoFPR("CodiceDestinatario", '0000000'))
 	f.header.append(dt)
 
