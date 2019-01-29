@@ -13,7 +13,7 @@ class Config(object):
 
 
 class ProductionConfig(Config):
-	pass
+	SQLALCHEMY_DATABASE_URI = 'mysql://aldo:aldo.2017@localhost/macdonald'
 
 
 class DevelopmentConfig(Config):
