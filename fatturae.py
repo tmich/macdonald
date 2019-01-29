@@ -287,7 +287,7 @@ def converti_fattura(ft, progr):
 		
 	# 1.1 Dati Trasmissione
 	dt = DatiTrasmissione()
-	dt.append(IdTrasmittente("IT", ft.azienda.cod_fisc))
+	dt.append(IdTrasmittente("IT", ft.azienda.p_iva))
 	dt.append(NodoFPR("ProgressivoInvio", str(progr)))
 	dt.append(NodoFPR("FormatoTrasmissione", "FPR12"))
 	dt.append(NodoFPR("CodiceDestinatario", ft.cliente.cod_destinatario if ft.cliente.cod_destinatario != None else '0000000'))
@@ -295,7 +295,7 @@ def converti_fattura(ft, progr):
 	# ContattiTrasmittente.append(NodoFPR("Telefono", "066246891"))
 	# ContattiTrasmittente.append(NodoFPR("Email", ""))
 	# dt.append(ContattiTrasmittente)
-	if ft.cliente.pec != None:
+	if ft.cliente.pec != None and ft.cliente.pec.strip() != '':
 		dt.append(NodoFPR("PECDestinatario", ft.cliente.pec))
 	f.header.append(dt)
 
