@@ -8,16 +8,21 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_babel import Babel, format_datetime, format_date
 from decimal import Decimal
 from pdfs import create_pdf
-from models import db, Anagrafica, Cliente, Prodotto, Fattura, VoceFattura, InvioFattura, User, FatturaSequence, ObjFatt, ObjVoce, EmailConfig, Messaggio, ListaDistribuzione, MembroListaDistribuzione, get_azienda
+from models import db, Anagrafica, Cliente, Prodotto, Fattura, VoceFattura, InvioFattura, User, FatturaSequence, ObjFatt, ObjVoce, EmailConfig, Messaggio, ListaDistribuzione, MembroListaDistribuzione, get_azienda, InvioFatturaElettronica
 from forms import FormNuovaFattura, FormAggiungiVoce, FormNuovaFattura, FormCliente, FormProdotto, FormProfilo, FormDate, FormDateFatture
 import jsonpickle
 from smtplib import SMTPException, SMTPAuthenticationError, SMTPRecipientsRefused
 from sqlalchemy import and_, or_, func, distinct
 from threading import Thread
+from fatturae import converti_fattura
+import ftplib
+import base64
+import rpyc
 
 def create_app():
 	app = Flask(__name__)
-	app.config.from_object('config.DevelopmentConfig')
+	#app.config.from_object('config.DevelopmentConfig')
+	app.config.from_object(config.get_config_name())
 	app.static_folder = 'static' 
 	#mail_ext = Mail(app)
 	#db = SQLAlchemy(app)
@@ -156,6 +161,8 @@ def salva_cliente():
 			tel = str(f['telefono'])
 			email = str(f['email'])
 			id = f['id']
+			pec = f['pec']
+			cod_dest = f['cod_dest']
 			cli = Cliente.query.get(id)
 			cli.ragsoc = ragsoc
 			cli.indirizzo = ind
@@ -168,6 +175,8 @@ def salva_cliente():
 			cli.tel = tel
 			cli.fax = None
 			cli.email = email
+			cli.pec = pec
+			cli.cod_destinatario = cod_dest
 			
 			db.session.commit()
 			flash('Anagrafica cliente aggiornata', 'success')
@@ -183,8 +192,11 @@ def salva_cliente():
 			cfisc=form.cfisc
 			telefono=form.telefono
 			email=form.email
+			pec=form.pec
+			cod_dest=form.cod_dest
+			flash('Alcuni dati non sono validi, verificare', 'danger')
 		
-	return render_template('cliente.html',errors=errors,id=id,ragsoc=ragsoc,indirizzo=indirizzo,cap=cap,citta=citta,piva=piva,cfisc=cfisc,telefono=telefono,email=email)
+	return render_template('cliente.html',errors=errors,id=id,ragsoc=ragsoc,indirizzo=indirizzo,cap=cap,citta=citta,piva=piva,cfisc=cfisc,telefono=telefono,email=email,pec=pec,cod_dest=cod_dest)
 
 
 @app.route('/nuovo_cliente', methods=['GET', 'POST'])
@@ -246,7 +258,9 @@ def cliente(id):
 	cfisc=cli.cod_fisc
 	telefono=cli.tel
 	email=cli.email
-	return render_template('cliente.html',errors=[],id=id,ragsoc=ragsoc,indirizzo=indirizzo,cap=cap,citta=citta,piva=piva,cfisc=cfisc,telefono=telefono,email=email)
+	pec=cli.pec if cli.pec != None else ''
+	cod_dest=cli.cod_destinatario if cli.cod_destinatario != None else ''
+	return render_template('cliente.html',errors=[],id=id,ragsoc=ragsoc,indirizzo=indirizzo,cap=cap,citta=citta,piva=piva,cfisc=cfisc,telefono=telefono,email=email,pec=pec,cod_dest=cod_dest)
 
 @app.route('/prodotti', methods=['GET'])
 @login_required
@@ -653,7 +667,8 @@ def prepara_pdf(fatt):
 @login_required
 def vis_fattura(idfatt):
   fatt = db.session.query(Fattura).get(idfatt)
-  return render_template('vfattura.html',fattura=fatt)
+  fatt_elet = db.session.query(InvioFatturaElettronica).filter(InvioFatturaElettronica.fattura_id == idfatt).count()
+  return render_template('vfattura.html',fattura=fatt, fatt_elet=fatt_elet)
 
 @app.route('/nuova_fattura/<int:id_cliente>', methods=['GET','POST'])
 @login_required
@@ -1233,10 +1248,108 @@ def invio_comunicazione():
 	flash('Comunicazione inviata', 'success')
 	return redirect(url_for('main'))
 	
+@app.route('/invio_fattura_elettronica/<int:idfatt>', methods=['GET'])
+@login_required
+def invio_fattura_elettronica(idfatt):
+	fatt = db.session.query(Fattura).get(idfatt)
+	invio_fatt=InvioFatturaElettronica(fatt)
+	db.session.add(invio_fatt)
+	db.session.commit()
+	invio_fatt.xml = converti_fattura(fatt, invio_fatt.id)
+	db.session.commit()
+	flash('Trasmissione ad AGYO prenotata con successo', 'success')
+	return redirect(url_for('vis_fattura', idfatt=fatt.id))
+
+@login_required
+@app.route('/fatture_elettroniche_da_inviare', methods=['GET'])
+def fatture_elettroniche_da_inviare():
+	fatture_da_inviare=db.session.query(InvioFatturaElettronica).filter_by(data_invio=None).all()
+	return render_template('fatture_elettroniche_da_inviare.html', fatture_da_inviare=fatture_da_inviare, 
+		cnt=len(fatture_da_inviare), current='fatture_elettroniche_da_inviare')
+  
+@login_required
+@app.route('/fatture_elettroniche_inviate', methods=['GET'])
+def fatture_elettroniche_inviate():
+	fatture_inviate=db.session.query(InvioFatturaElettronica).filter(InvioFatturaElettronica.data_invio != None).all()
+	return render_template('fatture_elettroniche_inviate.html', fatture_inviate=fatture_inviate, 
+		cnt=len(fatture_inviate), current='fatture_elettroniche_inviate')
+
+@app.route('/annulla_invio_fattura_elettronica/<int:id>')
+@login_required
+def annulla_invio_fattura_elettronica(id):
+	invio = db.session.query(InvioFatturaElettronica).get(id)
+	db.session.delete(invio)
+	db.session.commit()
+	flash('Invio ad AGYO annullato', 'success')
+	return redirect(url_for('fatture_elettroniche_da_inviare'))
+	
+@app.route('/elimina_fatture_elettroniche_inviate', methods=['POST'])
+@login_required
+def elimina_fatture_elettroniche_inviate():
+	f=request.form
+	ids = f.getlist("da_eliminare")
+	for id in ids:
+		inv=db.session.query(InvioFatturaElettronica).get(id)
+		db.session.delete(inv)
+	db.session.commit()
+	flash("Invii ad AGYO eliminati", "success")
+	return redirect(request.args.get('next'));
+	
+@app.route('/trasmetti_fatture_elettroniche', methods=['POST'])
+@login_required	
+def trasmetti_fatture_elettroniche():
+	fatture_da_inviare=db.session.query(InvioFatturaElettronica).filter_by(data_invio=None).all()
+	errors = []
+	
+	# ftps = ftplib.FTP_TLS()
+	# ftps.connect('5.249.149.66', 2222)
+	# ftps.login('aldo', 'aldo.2019')
+	# ftps.prot_p()
+	# ftps.cwd('/test_upload')
+	# f = open('/home/tiziano/turni_dump_18072017.sql', 'rb')
+	# ftps.storbinary('STOR test03.xml', f)
+	# f.close()
+	# ftps.quit()
+	
+	# Parametri di configurazione
+	host = app.config['SERVIZIO_AGYO']
+	port = app.config['PORTA_AGYO']
+	test = app.config['DEVELOPMENT']
+	
+	print('Invio richiesta a ', host + ":" + port)
+	
+	for i in fatture_da_inviare:
+		cf = i.fattura.azienda.cod_fisc
+		nomefile = 'IT' + cf + '_' + str(i.id) + '.xml'
+		encoded = base64.b64encode(fatture_da_inviare[0].xml)
+		c = rpyc.connect(host, port)
+		risp = c.root.carica(encoded, nomefile, test)		# 0: 'File creato', -1: 'File esistente', -2: 'Unknown error'
+		print('Ricevuta risposta da ' + host + ': ' + str(risp))
+		if risp == 0:
+			i.data_invio = datetime.datetime.today()
+			i.esito = 1
+			db.session.commit()
+		else:
+			if risp == -1:
+				errors.append('Fattura ' + str(i.fattura.num) + ' gia\' trasmessa' )
+			else:
+				errors.append('Fattura ' + str(i.fattura.num) + ': errore generico' )
+		
+	if len(errors) == 0:
+		flash('Fatture trasmesse con successo', 'success')
+	else:
+		err = 'Alcune fatture non sono state trasmesse: '
+		for e in errors:
+			err = err + e + '  -  '
+		flash(err, 'warning')
+	
+	return redirect(url_for('fatture_elettroniche_da_inviare'))
+	
+	
 # https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xi-email-support
 def invia_email_async(app, mail, msg):
-    with app.app_context():
-        mail.send(msg)
+	with app.app_context():
+		mail.send(msg)
 	
 def invia_email(oggetto, profilo_id, destinatari, bcc, testo, html):
 	# leggo il profilo email selezionato dal db

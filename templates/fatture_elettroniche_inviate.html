@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+{% block actions %}
+    <div style="text-align: left;">
+        <a href="{{ url_for('main') }}" class="btn btn-default">&laquo; Esci</a>
+        &nbsp;&nbsp;&nbsp;&nbsp;Record trovati: <span class="badge">{{ cnt }}</span>
+		<a href="#" id="btnElimina" onclick="return submitForm();" class="btn btn-danger disabled pull-right">Elimina&nbsp;<span class="badge" id="selezionati">0</span></a>
+		<div class="input-group col-md-auto pull-right">
+			<a href="#" onclick="window.print(); return false;" class="btn btn-success">
+				<span class="glyphicon glyphicon-print"></span> Stampa</a>&nbsp;&nbsp;&nbsp;
+		</div>
+    </div>
+{% endblock %}
+{% block body %}
+  <h3 class="page-header">Fatture trasmesse ad AGYO</h3>
+  
+  {% if errors|length > 0 %}
+	  <div id="errors">
+		<ul>
+		{% for e in errors %}
+			<li>{{ e }}</li>
+		{% endfor %}
+		</ul>
+	  </div>
+  {% endif %}
+  
+  <div class="table-responsive hidden-print">
+    {% if cnt > 0 %}
+      <form id="form1" action="{{url_for('elimina_fatture_elettroniche_inviate', next=request.url_rule)}}" method="POST">
+		  <table class="table table-striped">
+			<tr>
+			  <th>Fatt. n</th>
+			  <th>Data Invio</th>
+			  <th>Cliente</th>
+			  <th>Importo</th>
+			  <th>Esito</th>
+			  <th><input type=checkbox id=chkall /></th>
+			</tr>
+			{% for inv in fatture_inviate %}
+			  <tr>
+				<td>{{inv.fattura.num}}</td>
+				<td>{{inv.data_invio|dt('%d/%m/%Y')}}</td>
+				<td>{{inv.fattura.cliente.ragsoc}}</td>
+				<td>{{'%0.2f' % inv.fattura.totale()|float}}</td>
+				<td><span class="glyphicon {{'glyphicon-ok' if inv.esito == '0' else 'glyphicon-remove'}}">&nbsp;</span></td>
+				<td><input type=checkbox name="da_eliminare" value="{{inv.id}}" class="da_eliminare" /></td>
+			  </tr>
+			{% endfor %}
+		  </table>
+	  </form>
+    {% else %}
+      <p>Nessuna fattura inviata ad AGYO</p>
+    {% endif %}
+  </div>
+  
+  <div class="visible-print-block" style="font-size: 7pt;">
+		<table border="0" style="border-collapse:collapse;">
+			<tr>
+				<th width="5%">Fatt. n</th>
+				<th width="10%">Data Invio</th>
+				<th width="40%">Cliente</th>
+				<th width="5%">Importo</th>
+				<th width="5%">&nbsp;</th>
+			</tr>
+			{% for inv in fatture_inviate %}
+			  <tr>
+				<td>{{inv.fattura.num}}</td>
+				<td>{{inv.data_invio|dt('%d/%m/%Y')}}</td>
+				<td>{{inv.fattura.cliente.ragsoc}}</td>
+				<td>{{'%0.2f' % inv.fattura.totale()|float}}</td>
+				<td><span class="glyphicon {{'glyphicon-ok' if inv.esito == '0' else 'glyphicon-remove'}}">&nbsp;</span></td>
+			  </tr>
+			{% endfor %}
+		</table>
+	</div>
+  
+  <script type="text/javascript">
+	function submitForm() {
+		if(confirm('Eliminare gli invii selezionati?')) {
+			$('#form1').submit();
+			return true;
+		}
+		return false;
+	}
+  
+	function aggiorna() {
+		var numberOfChecked = $('input:checkbox[name=da_eliminare]:checked').length;
+		$("#selezionati").text(numberOfChecked);
+		
+		if(numberOfChecked > 0){
+			$("#btnElimina").removeClass("disabled");
+		} else {
+			$("#btnElimina").addClass("disabled");
+		}
+	}
+	
+	$('input:checkbox[name=da_eliminare]').change(function(){
+		aggiorna();
+	});
+	
+	$("#chkall").on("click", function() {
+		var check = this.checked;
+		$("input:checkbox[name=da_eliminare]").each(function() {
+			this.checked = check;
+		});
+		
+		aggiorna();
+	});
+  </script>
+{% endblock %}

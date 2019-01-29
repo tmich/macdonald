@@ -110,6 +110,11 @@
 						<li class="{{ 'active' if current=='liste' else '' }}" style="margin-left: 30px; border-bottom: 1px solid #e7e7e7;"><a href="{{ url_for('liste_distribuzione') }}">Liste di distribuzione</a></li>
 						<li class="{{ 'active' if current=='nuova_comunicazione' else '' }}" style="margin-left: 30px; border-bottom: 1px solid #e7e7e7;"><a href="{{ url_for('nuova_comunicazione') }}">Nuova comunicazione</a></li>
 					</ul>
+					<li style="border-bottom: 1px solid #e7e7e7;"><a data-toggle="collapse" href="#collapse5"><span class="glyphicon glyphicon-euro"></span> Fattura elettronica<span class="caret"></span></a></li>
+					<ul id="collapse5" class="nav nav-sidebar panel-collapse collapse {{ 'in' if current in ['fatture_elettroniche_da_inviare', 'fatture_elettroniche_inviate', 'invio_fatture_elettroniche'] else '' }}">
+						<li class="{{ 'active' if current=='fatture_elettroniche_da_inviare' else '' }}" style="margin-left: 30px; border-bottom: 1px solid #e7e7e7;"><a href="{{ url_for('fatture_elettroniche_da_inviare') }}">Fatture da trasmettere ad AGYO</a></li>
+						<li class="{{ 'active' if current=='fatture_elettroniche_inviate' else '' }}" style="margin-left: 30px; border-bottom: 1px solid #e7e7e7;"><a href="{{ url_for('fatture_elettroniche_inviate') }}">Fatture trasmesse ad AGYO</a></li>
+					</ul>
 					<li style="border-bottom: 1px solid #e7e7e7;" class="{{ 'active' if current=='contatori' else '' }}"><a href="{{ url_for('contatori') }}"><span class="glyphicon glyphicon-list-alt"></span> Contatori</a></li>
 					<li style="border-bottom: 1px solid #e7e7e7;"><a data-toggle="collapse" href="#collapse3"><span class="glyphicon glyphicon-wrench"></span> Impostazioni  <span class="caret"></span></a></li>
 						<ul id="collapse3" class="nav nav-sidebar panel-collapse collapse {{ 'in' if current in ['anagrafica', 'profilo_email', 'utenti'] else '' }}">

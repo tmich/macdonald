@@ -1,6 +1,7 @@
 from models import db, Cliente, Prodotto, Fattura, VoceFattura, FatturaSequence, User
 from dateutil.parser import parse
 from datetime import datetime
+import re
 
 class Form(object):
   errors = None
@@ -241,6 +242,8 @@ class FormCliente(object):
 	cfisc=""
 	telefono=""
 	email=""
+	pec=""
+	cod_dest=""
 	
 	def __init__(self, f):    # f=request.form  
 		self.errors = dict()
@@ -253,6 +256,8 @@ class FormCliente(object):
 		self.cfisc = f.get('cod_fiscale')
 		self.telefono = f.get('telefono')
 		self.email = f.get('email')
+		self.pec = f.get('pec')
+		self.cod_dest = f.get('cod_dest')
 
 	def valido(self):
 		if(self.ragsoc == ''):
@@ -278,6 +283,14 @@ class FormCliente(object):
 
 		# if(self.email == ''):
 			# self.errors['email'] = "manca l'email"			
+
+		if self.cod_dest.strip() != '':
+			if len(self.cod_dest.strip()) != 7:
+				self.errors['cod_dest'] = "codice destinatario non valido"
+
+		if self.pec.strip() != '':
+			if not re.match(r"[^@]+@[^@]+\.[^@]+", self.pec):
+				self.errors['pec'] = "indirizzo pec non valido"
 
 		return len(self.errors.keys())==0
 		

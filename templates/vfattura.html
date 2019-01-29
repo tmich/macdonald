@@ -11,6 +11,10 @@
     <a href="{{url_for('modifica_fattura', id=fattura.id)}}#form" class="btn btn-primary btn-sm">
         <span class="glyphicon glyphicon-pencil"></span> Modifica
     </a>
+    <a href="{{url_for('invio_fattura_elettronica', idfatt=fattura.id, next=url_for('fatture_cliente',id=fattura.cliente.id,page=0))}}" 
+			class="pull-right btn btn-{{ 'default' if fatt_elet > 0 else 'info' }} btn-sm {{ 'disabled' if fatt_elet > 0 else '' }}" >
+        <span class="glyphicon glyphicon-euro"></span> {% if fatt_elet == 0%} Trasmetti ad AGYO {% else %} Trasmessa ad Agyo {% endif %}
+    </a>
     <!-- <a href="{{url_for('stampa_fattura', idfatt=fattura.id)}}" target="_blank" class="btn btn-default">Stampa</a> -->
     <!-- <a href="{{url_for('invia_fattura', idfatt=fattura.id, next=url_for('fatture_cliente',id=fattura.cliente.id,page=0))}}" class="btn btn-default">Invia</a> -->
     <!-- <a href="{{url_for('modifica_fattura', id=fattura.id)}}#form" class="btn btn-primary">Modifica</a> -->
@@ -35,6 +39,9 @@
             <label>Partita IVA</label> {{ fattura.cliente.p_iva }}
           </div>
           <div>
+            <label>Cod. destinatario</label> {{ fattura.cliente.cod_destinatario }}
+          </div>
+          <div>
             <label>Codice Fiscale</label> {{ fattura.cliente.cod_fisc }}
           </div>
           <div>
@@ -42,6 +49,9 @@
           </div>
           <div>
             <label>Email</label> {{ fattura.cliente.email }}
+          </div>
+          <div>
+            <label>PEC</label> {{ fattura.cliente.pec }}
           </div>
         </div>
       </div>
@@ -75,18 +85,18 @@
 	    <td>{{ v.codart }}</td>
 	    <td>{{ v.descr }}</td>
 		<td>{{ '%0.2f' % v.prezzo_unitario()|float }}</td>
-	    <td style="text-align:right;">{{ '%0.2f' % v.imponibile()|float }}</td>
+	    <td style="text-align:right;">{{ '%0.2f' % v.imponibile_nr()|float }}</td>
 	    <td style="text-align:center;">{{ v.aliq }}</td>
-	    <td style="text-align:right;">{{ '%0.2f' % v.iva()|float }}</td>
-	    <td style="text-align:right;">{{ '%0.2f' % v.totale()|float }}</td>
+	    <td style="text-align:right;">{{ '%0.2f' % v.iva_nr()|float }}</td>
+	    <td style="text-align:right;">{{ '%0.2f' % v.totale_nr()|float }}</td>
 	  </tr>
 	  {% endfor %}
 	  <tr>
 	    <th colspan="4">&nbsp;</th>
-	    <th style="text-align:right;">{{ '%0.2f' % fattura.imponibile()|float }}</th>
+	    <th style="text-align:right;">{{ '%0.2f' % fattura.imponibile_nr()|float }}</th>
 	    <th>&nbsp;</th>
-	    <th style="text-align:right;">{{ '%0.2f' % fattura.iva()|float }}</th>
-	    <th style="text-align:right;">{{ '%0.2f' % fattura.totale()|float }}</th>
+	    <th style="text-align:right;">{{ '%0.2f' % fattura.iva_nr()|float }}</th>
+	    <th style="text-align:right;">{{ '%0.2f' % fattura.totale_nr()|float }}</th>
 	  </tr>
 	</table>
         <!-- <div class="actions" style="text-align:center;"> -->

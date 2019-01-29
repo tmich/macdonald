@@ -2,10 +2,12 @@
 from __future__ import print_function
 from flask_sqlalchemy import SQLAlchemy
 import sys, datetime
-from decimal import Decimal
+from decimal import *
 from flask.json import jsonify
 
 db = SQLAlchemy()
+
+getcontext().prec = 6
 
 class Anagrafica(db.Model):
   id = db.Column(db.Integer, primary_key=True)
@@ -21,6 +23,8 @@ class Anagrafica(db.Model):
   mf = db.Column(db.String(20))
   fax = db.Column(db.String(20))
   email = db.Column(db.String(120))
+  cod_destinatario = db.Column(db.String(50))
+  regime_fiscale = db.Column(db.String(4))
   data_inizio = db.Column(db.Date)
   data_fine = db.Column(db.Date)
   
@@ -41,9 +45,11 @@ class Cliente(db.Model):
   citta = db.Column(db.String(120))
   cap = db.Column(db.String(10))
   prov = db.Column(db.String(2))
+  cod_destinatario = db.Column(db.String(50))
   tel = db.Column(db.String(50))
   fax = db.Column(db.String(20))
   email = db.Column(db.String(120))
+  pec = db.Column(db.String(120))
   canc = db.Column(db.Integer)
   
   def __init__(self):
@@ -113,12 +119,21 @@ class Fattura(db.Model):
 	
   def imponibile(self):
 	return sum([v.imponibile() for v in self.voci])
+	
+  def imponibile_nr(self):
+	return sum([v.imponibile_nr() for v in self.voci])
 
   def iva(self):
 	return sum([v.iva() for v in self.voci])
 
+  def iva_nr(self):
+	return sum([v.iva_nr() for v in self.voci])
+
   def totale(self):
 	return sum([v.totale() for v in self.voci])
+
+  def totale_nr(self):
+	return sum([v.totale_nr() for v in self.voci])
 
   def crea_voce(self, codart, descr, qta, prezzo, aliq):
 	return VoceFattura(codart, descr, qta, prezzo, aliq)
@@ -149,22 +164,54 @@ class VoceFattura(db.Model):
 	p = self.prezzo * self.qta
 	iva = Decimal(p) - Decimal(self.imponibile())
 	return round(iva, 2)
+	
+  def iva_nr(self):
+	p = self.prezzo * self.qta
+	iva = Decimal(p) - Decimal(self.imponibile_nr())
+	return iva
   
   def prezzo_unitario(self):
 	p = Decimal(self.prezzo)
 	return round(p, 2)
+	
+  def prezzo_unitario_nr(self):
+	p = Decimal(self.prezzo)
+	return p
+	
+  def imponibile_unitario(self):
+	p = self.prezzo
+	al = Decimal(round(self.aliq, 2))
+	cnv = Decimal(al/100)+1
+	imponibile = Decimal(p / cnv, 2)
+	return round(imponibile, 2)
+  
+  def imponibile_unitario_nr(self):
+	p = self.prezzo
+	al = Decimal(round(self.aliq, 2))
+	cnv = Decimal(al/100)+1
+	imponibile = Decimal(p / cnv, 2)
+	return imponibile
   
   def imponibile(self):
 	p = self.prezzo * self.qta
 	al = Decimal(round(self.aliq, 2))
 	cnv = Decimal(al/100)+1
 	imponibile = Decimal(p / cnv, 2)
-	#print("Imponibile: " ,file=sys.stderr)
-	#print(round(imponibile, 2),file=sys.stderr)
 	return round(imponibile, 2)
+	
+  def imponibile_nr(self):
+	p = self.prezzo * self.qta
+	al = Decimal(round(self.aliq, 2))
+	cnv = Decimal(al/100)+1
+	imponibile = Decimal(p / cnv, 2)
+	return imponibile
   
   def totale(self):
-	tot=self.iva()+self.imponibile()
+	tot = self.iva()+self.imponibile()
+	return tot
+	
+  def totale_nr(self):
+	tot = self.iva_nr()+self.imponibile_nr()
 	return tot
 
 class InvioFattura(db.Model):
@@ -339,3 +386,16 @@ def get_azienda(dt=None):
 		dt=datetime.date.today()
 	result = db.session.query(Anagrafica).filter(dt <= Anagrafica.data_fine).filter(dt >= Anagrafica.data_inizio).first()
 	return result	
+
+class InvioFatturaElettronica(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  fattura_id = db.Column(db.Integer, db.ForeignKey('fattura.id'))
+  data_invio=db.Column(db.Date)
+  xml=db.Column(db.Text)
+  esito=db.Column(db.String(2)) 	#'OK', 'KO'
+  errore=db.Column(db.String(200))
+  fattura = db.relationship('Fattura',
+			    backref = db.backref('invii_elettronici', lazy='dynamic'))
+  
+  def __init__ (self, fattura):
+	self.fattura_id=fattura.id

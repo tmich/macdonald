@@ -19,13 +19,19 @@
             <label>Partita IVA</label> {{ cliente.p_iva }}
           </div>
           <div>
-            <label>Codice Fiscale</label> {{ cliente.cod_fiscale }}
+            <label>Cod. destinatario</label> {{ cliente.cod_destinatario }}
+          </div>
+          <div>
+            <label>Codice Fiscale</label> {{ cliente.cod_fisc }}
           </div>
           <div>
             <label>Telefono</label> {{ cliente.telefono }}
           </div>
           <div>
             <label>Email</label> {{ cliente.email }}
+          </div>
+          <div>
+            <label>PEC</label> {{ cliente.pec }}
           </div>
         </div>
         <a href="{{url_for('cambia_cliente_fattura', idfatt=idfatt, idcli=0)}}"><span class="glyphicon glyphicon-search"></span> Cambia</a>
@@ -112,7 +118,7 @@
 	</div>
 	<div class="input-group col-xs-5 {{ 'has-error has-feedback' if 'descr' in errors else '' }}">
 	      <input id="descr" type="text" class="form-control" name="descr" value="{{descr}}"
-		placeholder="descrizione" data-provide="typeahead" />
+		placeholder="descrizione" data-provide="typeahead" data-placement="top" />
 	</div>
 	<div class="input-group col-xs-2 {{ 'has-error has-feedback' if 'prz' in errors else '' }}">
 	      <input id="prz" type="text" class="form-control" name="prz" min="0.0" step="0.01" placeholder="prezzo" 
@@ -146,7 +152,9 @@
     <!-- </div> -->
     </form>
   </div>
+  
   <script type="text/javascript">
+	
 	
 	/*$( document ).ready(function() {
 		$("#qta").focus();
@@ -182,7 +190,9 @@
 		}
       },
       items	: 12,
-      autoSelect: false
+      autoSelect: false,
+	  hint: true,
+	  highlight: true
     });
 	
     $input.change(function() {

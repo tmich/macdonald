@@ -113,9 +113,9 @@
 			<tbody>
 				{% for v in fattura.voci %}
 					{% set prz = '%0.2f' % v.prezzo|float %}
-					{% set tot_imp = '%0.2f' % v.imponibile()|float %}
-					{% set tot_iva = '%0.2f' % v.iva()|float %}
-					{% set tot = '%0.2f' % v.totale()|float %}
+					{% set tot_imp = '%0.2f' % v.imponibile_nr()|float %}
+					{% set tot_iva = '%0.2f' % v.iva_nr()|float %}
+					{% set tot = '%0.2f' % v.totale_nr()|float %}
 					<tr>
 					  <td style="text-align: left;">{{ v.descr }}</td>
 					  <td>{{ v.qta }}</td>
@@ -137,9 +137,9 @@
 						<td class="far">&nbsp;</td>
 					</tr>
 				{% endfor %}
-				{% set impf = '%0.2f' % fattura.imponibile()|float %}
-				{% set ivaf = '%0.2f' % fattura.iva()|float %}
-				{% set totf = '%0.2f' % fattura.totale()|float %}
+				{% set impf = '%0.2f' % fattura.imponibile_nr()|float %}
+				{% set ivaf = '%0.2f' % fattura.iva_nr()|float %}
+				{% set totf = '%0.2f' % fattura.totale_nr()|float %}
 			<tr>
 				<td class="btop" colspan="2">&nbsp;</td>
 				<td class="tot" colspan="2">Totale</td>
