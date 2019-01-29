@@ -1325,9 +1325,10 @@ def trasmetti_fatture_elettroniche():
 		c = rpyc.connect(host, port)
 		risp = c.root.carica(encoded, nomefile, test)		# 0: 'File creato', -1: 'File esistente', -2: 'Unknown error'
 		print('Ricevuta risposta da ' + host + ': ' + str(risp))
+		i.esito = risp
 		if risp == 0:
 			i.data_invio = datetime.datetime.today()
-			i.esito = 1
+			#i.esito = 1
 			db.session.commit()
 		else:
 			if risp == -1:
