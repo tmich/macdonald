@@ -292,10 +292,10 @@ def converti_fattura(ft, progr):
 	dt.append(NodoFPR("FormatoTrasmissione", "FPR12"))
 	if ft.cliente.cod_destinatario != None and ft.cliente.cod_destinatario != '':
 		dt.append(NodoFPR("CodiceDestinatario", ft.cliente.cod_destinatario))
-	elif ft.cliente.pec != None and ft.cliente.pec.strip() != '':
-		dt.append(NodoFPR("PECDestinatario", ft.cliente.pec))
 	else:
 		dt.append(NodoFPR("CodiceDestinatario", '0000000'))
+		if ft.cliente.pec != None and ft.cliente.pec.strip() != '':
+			dt.append(NodoFPR("PECDestinatario", ft.cliente.pec))
 	f.header.append(dt)
 
 	# 1.2 CedentePrestatore
