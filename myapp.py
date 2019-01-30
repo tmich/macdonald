@@ -667,8 +667,17 @@ def prepara_pdf(fatt):
 @login_required
 def vis_fattura(idfatt):
   fatt = db.session.query(Fattura).get(idfatt)
-  fatt_elet = db.session.query(InvioFatturaElettronica).filter(InvioFatturaElettronica.fattura_id == idfatt).count()
-  return render_template('vfattura.html',fattura=fatt, fatt_elet=fatt_elet)
+  trasmissibile = True
+  data_ultima_trasmissione = None
+  in_attesa = db.session.query(InvioFatturaElettronica).filter(InvioFatturaElettronica.fattura_id == idfatt).filter(InvioFatturaElettronica.data_invio == None).count()
+  trasmesse = db.session.query(InvioFatturaElettronica).filter(InvioFatturaElettronica.fattura_id == idfatt).filter(InvioFatturaElettronica.data_invio != None)
+  gia_trasmessa = trasmesse.count() > 0
+  if gia_trasmessa:
+	data_ultima_trasmissione = trasmesse.order_by(InvioFatturaElettronica.data_invio.desc()).first().data_invio
+  if in_attesa > 0:
+	trasmissibile = False
+	
+  return render_template('vfattura.html',fattura=fatt, trasmissibile=trasmissibile, gia_trasmessa=gia_trasmessa, data_ultima_trasmissione=data_ultima_trasmissione)
 
 @app.route('/nuova_fattura/<int:id_cliente>', methods=['GET','POST'])
 @login_required
@@ -1316,25 +1325,24 @@ def trasmetti_fatture_elettroniche():
 	port = app.config['PORTA_AGYO']
 	test = app.config['DEVELOPMENT']
 	
-	print('Invio richiesta a ', host + ":" + port)
-	
 	for i in fatture_da_inviare:
 		nomefile = 'IT' + i.fattura.azienda.p_iva + '_' + str(i.id) + '.xml'
 		encoded = base64.b64encode(fatture_da_inviare[0].xml)
+		print('Invio richiesta a ', host + ":" + port)
 		c = rpyc.connect(host, port)
 		risp = c.root.carica(encoded, nomefile, test)		# 0: 'File creato', -1: 'File esistente', -2: 'Unknown error'
 		print('Ricevuta risposta da ' + host + ': ' + str(risp))
 		i.esito = risp
 		if risp == 0:
 			i.data_invio = datetime.datetime.today()
-			#i.esito = 1
-			db.session.commit()
 		else:
 			if risp == -1:
 				errors.append('Fattura ' + str(i.fattura.num) + ' gia\' trasmessa' )
 			else:
 				errors.append('Fattura ' + str(i.fattura.num) + ': errore generico' )
-		
+	
+	db.session.commit()
+	
 	if len(errors) == 0:
 		flash('Fatture trasmesse con successo', 'success')
 	else:
