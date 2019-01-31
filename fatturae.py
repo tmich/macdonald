@@ -235,14 +235,14 @@ class UnitaMisura(NodoFPR):
 # 2.2.1.9
 class PrezzoUnitario(NodoFPR):
 	def __init__(self, prezzo_unitario):
-		super(PrezzoUnitario, self).__init__("PrezzoUnitario", '{:.2f}'.format(prezzo_unitario))
+		super(PrezzoUnitario, self).__init__("PrezzoUnitario", str(prezzo_unitario))
 
 
 
 # 2.2.1.11
 class PrezzoTotale(NodoFPR):
 	def __init__(self, prezzo_totale):
-		super(PrezzoTotale, self).__init__("PrezzoTotale", '{:.2f}'.format(prezzo_totale))
+		super(PrezzoTotale, self).__init__("PrezzoTotale", str(prezzo_totale))
   
 
 # 2.2.1.12

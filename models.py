@@ -189,7 +189,8 @@ class VoceFattura(db.Model):
 	p = self.prezzo
 	al = Decimal(round(self.aliq, 2))
 	cnv = Decimal(al/100)+1
-	imponibile = Decimal(p / cnv, 2)
+	imponibile = Decimal(p / cnv)
+	#print(imponibile)
 	return imponibile
   
   def imponibile(self):
