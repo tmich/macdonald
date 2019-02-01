@@ -464,6 +464,13 @@ def fatture_inviate():
   fatture_inviate=db.session.query(InvioFattura).filter(InvioFattura.data_invio != None).all()
   return render_template('fatture_inviate.html', fatture_inviate=fatture_inviate, cnt=len(fatture_inviate), current='fatture_inviate')
 
+@login_required
+@app.route('/xml_fattura/<int:id>', methods=['GET'])
+def xml_fattura(id):
+  #print("ID: " + str(id))
+  inv=db.session.query(InvioFatturaElettronica).get(id)
+  return inv.xml
+
 # @login_required
 # @app.route('/profili_email', methods=['GET'])
 # def profili_email():

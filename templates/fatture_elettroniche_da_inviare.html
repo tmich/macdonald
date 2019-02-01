@@ -26,12 +26,13 @@
     {% if cnt > 0 %}
       <table class="table table-striped">
 	<tr>
-	  <th>Fatt. n</th>
-	  <th>Data</th>
-	  <th>Scontrini</th>
-	  <th>Cliente</th>
-	  <th>Importo</th>
-	  <th>&nbsp;</th>
+	  <th style="width: 10%;">Fatt. n</th>
+	  <th style="width: 10%;">Data</th>
+	  <th style="width: 5%;">Scontr.</th>
+	  <th style="width: 50%;">Cliente</th>
+	  <th style="width: 15%;">Importo</th>
+	  <th style="width: 5%;">&nbsp;</th>
+	  <th style="width: 5%;">&nbsp;</th>
 	</tr>
 	{% for inv in fatture_da_inviare %}
 	  <tr>
@@ -40,7 +41,11 @@
 	    <td>{{inv.fattura.scontrini}}</td>
 	    <td>{{inv.fattura.cliente.ragsoc}}</td>
 	    <td>{{'%0.2f' % inv.fattura.totale()|float}}</td>
-	    <td><a onclick="return confirm('Sei sicuro di voler annullare l\'invio della fattura?');" 
+		<td><a href="#" id="btnxml-{{inv.id}}" class="btn btn-sm btn-default btn-xml" 
+			onclick="return visualizza_xml({{inv.id}});" title="Visualizza XML">
+			<span class="glyphicon glyphicon-eye-open"></span></a></td>
+	    <td style="text-align:right;"><a title="Annulla invio" onclick="return confirm('Sei sicuro di voler annullare l\'invio della fattura?');" 
+				class="btn btn-sm btn-danger"
 				href="{{url_for('annulla_invio_fattura_elettronica', id=inv.id)}}">Annulla</a></td>
 	  </tr>
 	{% endfor %}
@@ -52,30 +57,34 @@
   
  <!-- Modal -->
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog">
-	<div class="modal-dialog" role="document">
+	<div class="modal-dialog modal-lg" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-				<h4 class="modal-title">Modifica email di invio</h4>
+				<h4 class="modal-title">Visualizzazione XML</h4>
 			</div>
-			<form action="{{url_for('modifica_email_invio', next=request.url_rule)}}" method="POST">
-				<div class="modal-body">		
-					<p>Fattura n&deg; <span id="fattnum"></span> del <span id="fattdata"></span> intestata a <span id="ragione_sociale"></span></p>
-					<label for="email">Email di invio:</label>
-					<input class="form-control" id="txtEmail" type="email" name="email" />
-					<input type="hidden" id="txtId" name="id" />
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">Annulla</button>
-					<input type="submit" class="btn btn-success" value="Conferma" />
-				</div>
-		  </form>
+			<div class="modal-body">
+				<textarea readonly="readonly" id="modal-textarea" style="border:none;width: 100%; height: 400px;">
+				</textarea>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Chiudi</button>
+			</div>
 		</div><!-- /.modal-content -->
 	</div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
 
 <script type=text/javascript>
+
+$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+
+function visualizza_xml(id_invio) {
+	$.get( $SCRIPT_ROOT + "/xml_fattura/" + id_invio, function( data ) {
+		$( "#modal-textarea" ).val(data);
+		$("#myModal").modal();
+	});
+}
 
 function submitForm() {
 	if(confirm('Inviare le fatture ad AGYO?')) {
