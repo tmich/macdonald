@@ -37,7 +37,7 @@
 			</tr>
 			{% for inv in fatture_inviate %}
 			  <tr>
-				<td>{{inv.fattura.num}}</td>
+				<td><a href="{{url_for('vis_fattura', idfatt=inv.fattura.id)}}">{{inv.fattura.num}}</a></td>
 				<td>{{inv.data_invio|dt('%d/%m/%Y')}}</td>
 				<td>{{inv.fattura.cliente.ragsoc}}</td>
 				<td>{{'%0.2f' % inv.fattura.totale()|float}}</td>
