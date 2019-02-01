@@ -1327,7 +1327,7 @@ def trasmetti_fatture_elettroniche():
 	
 	for i in fatture_da_inviare:
 		nomefile = 'IT' + i.fattura.azienda.p_iva + '_' + str(i.id) + '.xml'
-		encoded = base64.b64encode(fatture_da_inviare[0].xml)
+		encoded = base64.b64encode(i.xml)
 		print('Invio richiesta a ', host + ":" + port)
 		c = rpyc.connect(host, port)
 		risp = c.root.carica(encoded, nomefile, test)		# 0: 'File creato', -1: 'File esistente', -2: 'Unknown error'
