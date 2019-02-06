@@ -242,7 +242,7 @@ class PrezzoUnitario(NodoFPR):
 # 2.2.1.11
 class PrezzoTotale(NodoFPR):
 	def __init__(self, prezzo_totale):
-		super(PrezzoTotale, self).__init__("PrezzoTotale", str(prezzo_totale))
+		super(PrezzoTotale, self).__init__("PrezzoTotale", '{:.4f}'.format(prezzo_totale))
   
 
 # 2.2.1.12
@@ -265,14 +265,14 @@ class DatiRiepilogo(NodoFPR):
 # 2.2.2.5
 class ImponibileImporto(NodoFPR):
 	def __init__(self, imponibile):
-		super(ImponibileImporto, self).__init__("ImponibileImporto", '{:.2f}'.format(imponibile)) 
+		super(ImponibileImporto, self).__init__("ImponibileImporto", '{:.4f}'.format(imponibile)) 
   
   
 
 # 2.2.2.5
 class Imposta(NodoFPR):
 	def __init__(self, imposta):
-		super(Imposta, self).__init__("Imposta", '{:.2f}'.format(imposta)) 
+		super(Imposta, self).__init__("Imposta", '{:.4f}'.format(imposta)) 
 		
 		
 # 2.2.2.7 
