@@ -272,7 +272,7 @@ class ImponibileImporto(NodoFPR):
 # 2.2.2.5
 class Imposta(NodoFPR):
 	def __init__(self, imposta):
-		super(Imposta, self).__init__("Imposta", '{:.4f}'.format(imposta)) 
+		super(Imposta, self).__init__("Imposta", '{:.2f}'.format(imposta)) 
 		
 		
 # 2.2.2.7 
