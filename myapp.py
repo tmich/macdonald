@@ -1286,7 +1286,7 @@ def fatture_elettroniche_da_inviare():
 @login_required
 @app.route('/fatture_elettroniche_inviate', methods=['GET'])
 def fatture_elettroniche_inviate():
-	fatture_inviate=db.session.query(InvioFatturaElettronica).filter(InvioFatturaElettronica.data_invio != None).all()
+	fatture_inviate=db.session.query(InvioFatturaElettronica).join(InvioFatturaElettronica.fattura).filter(InvioFatturaElettronica.data_invio != None).order_by(Fattura.num.desc()).all()
 	return render_template('fatture_elettroniche_inviate.html', fatture_inviate=fatture_inviate, 
 		cnt=len(fatture_inviate), current='fatture_elettroniche_inviate')
 

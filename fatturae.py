@@ -265,7 +265,7 @@ class DatiRiepilogo(NodoFPR):
 # 2.2.2.5
 class ImponibileImporto(NodoFPR):
 	def __init__(self, imponibile):
-		super(ImponibileImporto, self).__init__("ImponibileImporto", '{:.4f}'.format(imponibile)) 
+		super(ImponibileImporto, self).__init__("ImponibileImporto", '{:.2f}'.format(imponibile)) 
   
   
 
