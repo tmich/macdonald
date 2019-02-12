@@ -318,10 +318,14 @@ def converti_fattura(ft, progr):
 
 	# 1.4.1 DatiAnagrafici
 	danag = NodoFPR("DatiAnagrafici")
-	danag.append(IdFiscaleIVA("IT", ft.cliente.p_iva))
+	if ft.cliente.p_iva != None:
+		if ft.cliente.p_iva.strip() != '':
+			danag.append(IdFiscaleIVA("IT", ft.cliente.p_iva))
+		
 	if ft.cliente.cod_fisc != None:
 		if ft.cliente.cod_fisc.strip() != '':
 			danag.append(NodoFPR("CodiceFiscale", ft.cliente.cod_fisc))
+	
 	danag.append(Anagrafica(ft.cliente.ragsoc))
 	cc.append(danag)
 
