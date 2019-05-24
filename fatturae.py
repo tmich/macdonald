@@ -2,6 +2,7 @@ from xml.etree.ElementTree import Element, SubElement, Comment, tostring
 import lxml.etree as etree
 
 '''https://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Rappresentazione_tabellare_del_tracciato_FatturaPA_versione_1.2.pdf'''
+'''https://fatturazione-elettronica-pa.assocons.it/validazione-fattura-elettronica.html''' # validazione
 
 class NodoFPR(object):
 	def __init__(self, nome='', testo='', attrs=dict()):
@@ -155,6 +156,12 @@ class DatiRitenuta(NodoFPR):
 		self.aliquota = self.append(AliquotaRitenuta())
 		self.causale_pagamento = self.append(CausalePagamento())
 		
+
+# 2.1.1.9
+class ImportoTotaleDocumento(NodoFPR):
+	def __init__(self, importo_totale):
+		super(ImportoTotaleDocumento, self).__init__("ImportoTotaleDocumento",'{:.2f}'.format(importo_totale))
+
 
 # 2.1.1.5.1
 class TipoRitenuta(NodoFPR):
@@ -334,7 +341,9 @@ def converti_fattura(ft, progr):
 	f.header.append(cc)
 
 	# 2.1.1 Dati Generali Documento
-	f.body.dati_generali.append(DatiGeneraliDocumento("TD01", "EUR", ft.data.isoformat(), str(ft.data.year) + "/" + str(ft.num)))
+	dgd = DatiGeneraliDocumento("TD01", "EUR", ft.data.isoformat(), str(ft.data.year) + "/" + str(ft.num))
+	dgd.append(ImportoTotaleDocumento(float(ft.imponibile_nr()) + float(ft.iva_nr())))
+	f.body.dati_generali.append(dgd)
 
 	# 2.2.1 DettaglioLinee
 	n = 1
