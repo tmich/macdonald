@@ -39,8 +39,8 @@
 	  <label>N.ro Fattura</label> {{ numfatt }}<br />
 	  <label for="scontr1">N. scontrini: </label>&nbsp;
 	  <div class="input-group col-xs-1 { 'has-error has-feedback' if 'scontr1' in errors else '' }} ">
-	    <input type="number" min="1" id="scontr1" name="scontr1" class="form-control" placeholder="n. 1" 
-	      value="{{ n_scontr1 if n_scontr1 != 0 else ''}}" />
+	    <input type="number" id="scontr1" name="scontr1" class="form-control" placeholder="n. 1" 
+	      value="{{ n_scontr1 }}" />
 	  </div>
 	  <div class="input-group col-xs-1 { 'has-error has-feedback' if 'scontr2' in errors else '' }} ">
 	    <input type="number" min="1" id="scontr2" name="scontr2" class="form-control" placeholder="n. 2" 

@@ -54,15 +54,15 @@
 	  </div><br />
 	  <label for="scontr1">N. scontrini: </label><br />
 	  <div class="input-group col-xs-2 {{ 'has-error has-feedback' if 'scontr1' in errors else '' }} ">
-		<input type="number" min="1" id="scontr1" name="scontr1" class="form-control"
-		  value="{{ n_scontr1 if n_scontr1 != 0 else ''}}" />
+		<input type="number" id="scontr1" name="scontr1" class="form-control"
+		  value="{{ n_scontr1 }}" />
 	  </div>
 	  <div class="input-group col-xs-2 {{ 'has-error has-feedback' if 'scontr2' in errors else '' }} ">
-		<input type="number" min="0" id="scontr2" name="scontr2" class="form-control" 
+		<input type="number" min="1" id="scontr2" name="scontr2" class="form-control" 
 		  value="{{ n_scontr2 if n_scontr2 != 0 else ''}}" />
 	  </div>
 	  <div class="input-group col-xs-2 {{ 'has-error has-feedback' if 'scontr3' in errors else '' }} ">
-		<input type="number" min="0" id="scontr3" name="scontr3" class="form-control"
+		<input type="number" min="1" id="scontr3" name="scontr3" class="form-control"
 		  value="{{ n_scontr3 if n_scontr3 != 0 else ''}}" />
 	  </div><br /><br />
 	  <table class="table">

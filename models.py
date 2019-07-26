@@ -112,7 +112,9 @@ class Fattura(db.Model):
 
   def n_scontrini(self):
 	n=0
-	for x in [self.n_scontr1, self.n_scontr2, self.n_scontr3]:
+	if self.n_scontr1 != None:
+		n = n+1
+	for x in [self.n_scontr2, self.n_scontr3]:
 	  if x != 0:
 	    n=n+1
 	return n

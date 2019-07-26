@@ -1394,7 +1394,13 @@ def _jinja2_filter_date(date, fmt=None):
 	return format_date(date, 'medium')
 	
 if __name__ == "__main__":
-  app.run(host='93.186.254.106', port=80)
+  # SVILUPPO
+  #app.run(host='80.211.227.37', port=80) 
+  
+  # PRODUZIONE
+  #app.run(host='93.186.254.106', port=80)
+  
   #app.run(host='93.186.254.106', port=5000)
   #app.run(host='192.168.56.2', port=5000)
   #app.run()
+  pass

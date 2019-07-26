@@ -46,7 +46,7 @@
             <label>Partita IVA</label> {{ fattura.cliente.p_iva }}
           </div>
           <div>
-            <label>Cod. destinatario</label> {{ fattura.cliente.cod_destinatario }}
+            <label>Cod. destinatario</label> {{ fattura.cliente.cod_destinatario if fattura.cliente.cod_destinatario else '' }}
           </div>
           <div>
             <label>Codice Fiscale</label> {{ fattura.cliente.cod_fisc }}
@@ -58,7 +58,7 @@
             <label>Email</label> {{ fattura.cliente.email }}
           </div>
           <div>
-            <label>PEC</label> {{ fattura.cliente.pec }}
+            <label>PEC</label> {{ fattura.cliente.pec if fattura.cliente.pec != None else '' }}
           </div>
         </div>
       </div>
@@ -72,7 +72,7 @@
 	  <input type="hidden" id="GiaTrasmessa" value="{{gia_trasmessa}}" />
 	  <label>Data Fattura</label> {{ fattura.data|dt }}<br />
 	  <label>N.ro Fattura</label> {{ fattura.num }}<br />
-	  <label for="scontr1">N. scontrini: </label>&nbsp;{{ fattura.n_scontr1 if fattura.n_scontr1 != 0 else ''}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	  <label for="scontr1">N. scontrini: </label>&nbsp;{{ fattura.n_scontr1 if fattura.n_scontr1 != None else ''}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	  {{ fattura.n_scontr2 if fattura.n_scontr2 != 0 else ''}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	  {{ fattura.n_scontr3 if fattura.n_scontr3 != 0 else ''}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	</div>
